@@ -17,8 +17,7 @@ Current status:
 1. **Generate access token for your bot Twitch account** - described [below](#How-to-get-Twitch-account-with-bot-priviledges)
 2. **Clone this repository**
    ```bash
-   git clone https://github.com/TwojaNazwaUzytkownika/nazwa-repozytorium.git
-   cd nazwa-repozytorium
+   git clone https://github.com/barteknowak31l/TwitchChatAnalysis.git
    ```
 3. **Install dependencies with:**
     ```bash
