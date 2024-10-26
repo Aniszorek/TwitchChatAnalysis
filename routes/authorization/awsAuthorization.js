@@ -18,7 +18,7 @@ authRouter.get('/callback', async (req, res) => {
         // Po pomyślnym zalogowaniu wymień kod autoryzancyjny na access token
         const tokenResponse = await exchangeCodeForToken(code);
 
-        console.log('Uzyskano tokeny:', tokenResponse);
+        console.log('COGNITO: Uzyskano tokeny:', tokenResponse);
         res.send('Logowanie zakończone pomyślnie! Możesz zamknąć to okno.');
 
         // Uruchom WebSocket po autoryzacji

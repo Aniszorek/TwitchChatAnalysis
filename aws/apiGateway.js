@@ -2,7 +2,7 @@ import {ensureValidAccessToken, getAccessToken} from "./cognitoAuth.js";
 import axios from "axios";
 
 const API_GATEWAY_URL = 'https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test'
-const MESSAGES_PATH = `${API_GATEWAY_URL}/messages`
+const MESSAGES_PATH = `${API_GATEWAY_URL}/twitch-message`
 
 export async function sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText) {
     try {
@@ -26,6 +26,6 @@ export async function sendMessageToApiGateway(broadcasterUserLogin, chatterUserL
             console.error(`Failed to send message to API Gateway. Status: ${response.status}`);
         }
     } catch (error) {
-        console.error(`Error sending message to API Gateway: ${error.message}`);
+        console.error(`Error sending message to API Gateway: ${error}`);
     }
 }
