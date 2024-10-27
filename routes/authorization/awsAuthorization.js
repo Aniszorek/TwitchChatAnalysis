@@ -29,14 +29,6 @@ authRouter.get('/callback', async (req, res) => {
         // res.send('Logowanie zakończone pomyślnie! Możesz zamknąć to okno.');
         res.sendFile(path.join(__dirname, '../../public/html/twitch_form.html'));
 
-        // Połącz z Twitch EventSub
-        await validateTwitchAuth();
-        startWebSocketClient();
-
-
-        // Połącz z AWS Websocket API
-        connectAwsWebSocket()
-
     } catch (error) {
         console.error('Błąd podczas wymiany kodu:', error);
         res.status(500).send('Wystąpił błąd podczas uzyskiwania tokenu');
@@ -58,6 +50,10 @@ authRouter.post('/set-twitch-username', (req, res) => {
             .catch(error => console.error('Error:', error));
 
         startWebSocketClient(twitchUsername);
+
+        // Połącz z AWS Websocket API
+        connectAwsWebSocket(twitchUsername)
+
 
         res.send('WebSocket client started for user: ' + twitchUsername);
     } catch (error) {
