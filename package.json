@@ -1,10 +1,11 @@
 {
   "name": "twitch-mod-be",
   "version": "1.0.0",
-  "main": "entryPoint.mjs",
+  "main": "entryPoint.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx dotenvx run -- node entryPoint.js"
   },
   "author": "",
   "license": "ISC",

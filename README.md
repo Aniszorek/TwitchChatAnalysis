@@ -41,7 +41,7 @@ Current status:
    4. **Never commit `.env.keys` or decrypted `.env` files!** <br></br>
 5. **Run with** 
     ```bash
-   DOTENV_PRIVATE_KEY={DOTENV_PRIVATE_KEY} dotenvx run -- node entryPoint.mjs
+   DOTENV_PRIVATE_KEY={DOTENV_PRIVATE_KEY} dotenvx run -- node entryPoint.js
    ```
 
 ## How to get Twitch account with bot priviledges

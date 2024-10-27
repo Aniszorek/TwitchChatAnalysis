@@ -3,10 +3,10 @@ import WebSocket from "ws";
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
 
-const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
-const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
-const BOT_USER_ID = process.env["BOT_USER_ID"]; // This is the User ID of the chat bot - konto bota/moderatora
-const CHAT_CHANNEL_USER_ID = process.env["CHAT_CHANNEL_USER_ID"] // This is the User ID of the channel that the bot will join and listen to chat messages of
+export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
+export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
+export const BOT_USER_ID = process.env["BOT_USER_ID"]; // This is the User ID of the chat bot - konto bota/moderatora
+export const CHAT_CHANNEL_USER_ID = process.env["CHAT_CHANNEL_USER_ID"] // This is the User ID of the channel that the bot will join and listen to chat messages of
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscriptions'
@@ -14,8 +14,10 @@ const TWITCH_VALIDATE_AUTH_URL = 'https://id.twitch.tv/oauth2/validate';
 
 let websocketSessionID;
 
-export function startWebSocketClient() {
+export function startWebSocketClient(twitchUsername) {
     const websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
+
+    console.log('Starting WebSocket client for:', twitchUsername);
 
     websocketClient.on('error', console.error);
 

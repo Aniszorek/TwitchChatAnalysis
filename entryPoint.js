@@ -9,8 +9,14 @@ import {authRouter} from "./routes/authorization/awsAuthorization.js";
 const app = express();
 const port = 3000;
 
+
+// Middleware & static files
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
 // Declare routers here
 app.use("/", authRouter);
+
 
 // Run Express server
 app.listen(port, () => {
