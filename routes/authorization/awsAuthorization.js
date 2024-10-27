@@ -5,6 +5,8 @@ import {exchangeCodeForToken} from '../../aws/cognitoAuth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { fetchTwitchUserId } from '../../api_calls/twitchApiCalls.js';
+import {connectAwsWebSocket} from "../../aws/websocketApi.js";
+
 
 export const authRouter = express.Router();
 
@@ -23,10 +25,9 @@ authRouter.get('/callback', async (req, res) => {
         // Po pomyślnym zalogowaniu wymień kod autoryzancyjny na access token
         const tokenResponse = await exchangeCodeForToken(code);
 
-        console.log('Uzyskano tokeny:', tokenResponse);
+        console.log('COGNITO: Uzyskano tokeny:', tokenResponse);
         // res.send('Logowanie zakończone pomyślnie! Możesz zamknąć to okno.');
         res.sendFile(path.join(__dirname, '../../public/html/twitch_form.html'));
-
 
     } catch (error) {
         console.error('Błąd podczas wymiany kodu:', error);
@@ -35,7 +36,6 @@ authRouter.get('/callback', async (req, res) => {
 })
 
 
-// awsAuthorization.js
 authRouter.post('/set-twitch-username', (req, res) => {
     const twitchUsername = req.body.twitchUsername;
 
@@ -50,6 +50,10 @@ authRouter.post('/set-twitch-username', (req, res) => {
             .catch(error => console.error('Error:', error));
 
         startWebSocketClient(twitchUsername);
+
+        // Połącz z AWS Websocket API
+        connectAwsWebSocket(twitchUsername)
+
 
         res.send('WebSocket client started for user: ' + twitchUsername);
     } catch (error) {
