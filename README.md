@@ -5,7 +5,7 @@ todo
 
 ## Architecture
 Current status:
-![architecture](./images/archV0.1.png)
+![architecture](images/archV0.1.png)
 
 ## Requirements
  - NPM 10.9.0
@@ -21,6 +21,7 @@ Current status:
    ```
 3. **Install dependencies with:**
     ```bash
+   cd backend
    npm install
    ```
 4. **Configure environment variables with dotenvx**
@@ -41,10 +42,12 @@ Current status:
    4. **Never commit `.env.keys` or decrypted `.env` files!** <br></br>
 5. **Run with** 
     ```bash
+   npm start
+   or
    DOTENV_PRIVATE_KEY={DOTENV_PRIVATE_KEY} dotenvx run -- node entryPoint.js
    ```
 
-## How to get Twitch account with bot priviledges
+## How to get Twitch account with bot privileges
 You can use your own Twitch account or create a new one.
 1. Login to your Twitch account.
 2. Go to this [link](https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=y3s6y3r4sxt83e3qc53jz5uqmun47g&redirect_uri=http%3A%2F%2Flocalhost&scope=user%3Abot%20user%3Aread%3Achat%20user%3Awrite%3Achat) and authorize
