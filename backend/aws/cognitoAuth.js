@@ -1,19 +1,19 @@
 import axios from 'axios';
 import querystring from 'querystring';
 
+const LOG_PREFIX = `COGNITO_AUTH:`
+
 const COGNITO_CLIENT_ID = process.env["COGNITO_CLIENT_ID"];
 const COGNITO_DOMAIN = 'https://twitchchatanalytics.auth.eu-central-1.amazoncognito.com';
 const COGNITO_REDIRECT_URI = 'http://localhost:3000/callback';
 
-// Endpointy Cognito
 const COGNITO_AUTHORIZE_ENDPOINT = `${COGNITO_DOMAIN}/oauth2/authorize`;
 const COGNITO_TOKEN_ENDPOINT = `${COGNITO_DOMAIN}/oauth2/token`;
 
-export let accessToken;
+export let cognitoAccessToken;
 let refreshToken;
 let tokenExpiryTime;
 
-// Generuje URL do strony z logowaniem przez Cognito
 export function generateAuthUrl() {
     const queryParams = querystring.stringify({
         response_type: 'code', client_id: COGNITO_CLIENT_ID, redirect_uri: COGNITO_REDIRECT_URI,
@@ -21,7 +21,6 @@ export function generateAuthUrl() {
     return `${COGNITO_AUTHORIZE_ENDPOINT}?${queryParams}`;
 }
 
-// Wysyła kod autoryzacyjny i wymienia go na access token
 export async function exchangeCodeForToken(authCode) {
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
@@ -37,13 +36,13 @@ export async function exchangeCodeForToken(authCode) {
         });
 
         const data = await response.data;
-        accessToken = data.access_token;
+        cognitoAccessToken = data.access_token;
         refreshToken = data.refresh_token;
         tokenExpiryTime = Date.now() + data.expires_in * 1000;
         return data;
     } catch (error) {
-        console.error('Błąd podczas wymiany kodu na token:', error.response ? error.response.data : error.message);
-        throw new Error('Nie udało się uzyskać tokenu');
+        console.error(`${LOG_PREFIX} error exchanging code for token:`, error.response ? error.response.data : error.message);
+        throw new Error(`${LOG_PREFIX} Could not get access token`);
     }
 }
 
@@ -59,21 +58,27 @@ async function refreshAccessToken(refreshToken) {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-        return response.data;
+
+        const data = await response.data;
+        console.log(`${LOG_PREFIX} token refreshed:`, data);
+
+        return data;
     } catch (error) {
-        throw new Error('Nie udało się odswierzyc tokenu');
+        throw new Error(`${LOG_PREFIX} Could not refresh access token`);
     }
 }
 
 export async function ensureValidAccessToken() {
+
     if (Date.now() >= tokenExpiryTime) {
-        console.log('Token wygasł, odświeżam...');
+        console.log(`${LOG_PREFIX} Access token expired - refreshing`);
         const data = await refreshAccessToken(refreshToken);
-        accessToken = data.accessToken;
+        cognitoAccessToken = data.access_token;
         tokenExpiryTime = Date.now() + data.expires_in * 1000;
+
     }
 }
 
-export function getAccessToken() {
-    return accessToken;
+export function getCognitoAccessToken() {
+    return cognitoAccessToken;
 }

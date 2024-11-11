@@ -5,6 +5,7 @@ import cors from 'cors';
 import {generateAuthUrl} from './aws/cognitoAuth.js';
 import {authRouter} from "./routes/authorization/awsAuthorization.js";
 
+const LOG_PREFIX= `ENTRYPOINT:`
 
 // Express HTTP server
 const app = express();
@@ -22,18 +23,18 @@ app.use("/", authRouter);
 
 // Run Express server
 app.listen(port, () => {
-    console.log(`Serwer Express uruchomiony na porcie ${port}`);
+    console.log(`${LOG_PREFIX} Express server started on: ${port}`);
 });
 
 // Run Twitch Bot
 (async () => {
     try {
         const authUrl = generateAuthUrl();
-        console.log(`Otwieranie URL do autoryzacji: ${authUrl}`);
+        console.log(`${LOG_PREFIX} Cognito Auth URL: ${authUrl}`);
         await open(authUrl);
 
     } catch (error) {
-        console.error('Błąd podczas logowania:', error);
+        console.error(`${LOG_PREFIX} Login error:`, error);
         process.exit(1);
     }
 })();

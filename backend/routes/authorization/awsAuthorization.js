@@ -1,12 +1,19 @@
 import express from 'express';
 
-import {validateTwitchAuth, startWebSocketClient, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID} from '../../bot/bot.js';
+import {
+    startWebSocketClient,
+    TWITCH_BOT_OAUTH_TOKEN,
+    CLIENT_ID,
+    getTwitchUserId
+} from '../../bot/bot.js';
 import {exchangeCodeForToken} from '../../aws/cognitoAuth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { fetchTwitchUserId } from '../../api_calls/twitchApiCalls.js';
+import {fetchTwitchStreamId, fetchTwitchUserId, validateTwitchAuth} from '../../api_calls/twitchApiCalls.js';
 import {connectAwsWebSocket} from "../../aws/websocketApi.js";
 
+
+const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION:`;
 
 export const authRouter = express.Router();
 
@@ -22,21 +29,25 @@ authRouter.get('/callback', async (req, res) => {
     }
 
     try {
-        // Po pomyślnym zalogowaniu wymień kod autoryzancyjny na access token
+
+        // after successful login:
+
         const tokenResponse = await exchangeCodeForToken(code);
 
-        console.log('COGNITO: Uzyskano tokeny:', tokenResponse);
+        // console.log(`${LOG_PREFIX} Received tokens:`, tokenResponse);
+        console.log(`${LOG_PREFIX} Received tokens`);
+
         // res.send('Logowanie zakończone pomyślnie! Możesz zamknąć to okno.');
         res.sendFile(path.join(__dirname, '../../public/html/twitch_form.html'));
 
     } catch (error) {
-        console.error('Błąd podczas wymiany kodu:', error);
+        console.error(`${LOG_PREFIX} Error during code exchange:`, error);
         res.status(500).send('Wystąpił błąd podczas uzyskiwania tokenu');
     }
 })
 
 
-authRouter.post('/set-twitch-username', (req, res) => {
+authRouter.post('/set-twitch-username', async (req, res) => {
     const twitchUsername = req.body.twitchUsername;
 
     if (!twitchUsername) {
@@ -44,20 +55,16 @@ authRouter.post('/set-twitch-username', (req, res) => {
     }
 
     try {
-        validateTwitchAuth();
-        fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
-            .then(data => console.log('User Data:', data))
-            .catch(error => console.error('Error:', error));
-
+        await validateTwitchAuth();
+        await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
+        await fetchTwitchStreamId(getTwitchUserId(), TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
         startWebSocketClient(twitchUsername);
-
-        // Połącz z AWS Websocket API
         connectAwsWebSocket(twitchUsername)
 
 
         res.send('WebSocket client started for user: ' + twitchUsername);
     } catch (error) {
-        console.error('Error starting WebSocket client:', error);
+        console.error(`${LOG_PREFIX} starting WebSocket client:`, error);
         res.status(500).send('Błąd podczas uruchamiania klienta WebSocket');
     }
 });
