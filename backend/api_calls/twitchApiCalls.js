@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {setStreamId, setTwitchUserId, TWITCH_BOT_OAUTH_TOKEN} from "../bot/bot.js";
+import {setBroadcasterId, setStreamId, TWITCH_BOT_OAUTH_TOKEN} from "../bot/bot.js";
 
 
 const LOG_PREFIX = 'TWITCH API:'
@@ -23,7 +23,7 @@ export async function fetchTwitchUserId(nickname, accessToken, clientId) {
 
         const userId = response.data.data[0]?.id;
 
-        setTwitchUserId(userId);
+        setBroadcasterId(userId);
 
         if (!userId) {
             throw new Error(`${LOG_PREFIX} No user ID found in response`);

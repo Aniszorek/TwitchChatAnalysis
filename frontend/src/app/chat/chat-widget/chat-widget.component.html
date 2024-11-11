@@ -1,0 +1,6 @@
+<div *ngIf="messages.length > 0">
+  <h3>Chat Messages</h3>
+  <ul>
+    <li *ngFor="let message of messages">{{ message.messageTimestamp | date :'H:mm:ss'}} {{ message.chatUserName }}: {{ message.messageText }} </li>
+  </ul>
+</div>

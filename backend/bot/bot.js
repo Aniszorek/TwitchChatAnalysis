@@ -2,6 +2,8 @@ import WebSocket from "ws";
 
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
+import {fetchTwitchStreamId, fetchTwitchUserId} from "../api_calls/twitchApiCalls.js";
+import {broadcastMessageToFrontend} from "./wsServer.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -9,10 +11,9 @@ const LOG_PREFIX = 'TWITCH_WS:'
 export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
 export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
 export const BOT_USER_ID = process.env["BOT_USER_ID"]; // This is the User ID of the chat bot - konto bota/moderatora
-export const CHAT_CHANNEL_USER_ID = process.env["CHAT_CHANNEL_USER_ID"] // This is the User ID of the channel that the bot will join and listen to chat messages of
 let websocketSessionID;
 let streamId;
-let twitchUserId;
+let broadcasterId;
 //////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -21,7 +22,12 @@ const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscrip
 
 
 
-export function startWebSocketClient(twitchUsername) {
+export async function startWebSocketClient(twitchUsername) {
+    await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
+        .catch(error => console.error('[TWITCH] Error while fetching id for twitch username:', error));
+
+    await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
+
     const websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
     console.log(`${LOG_PREFIX} Starting WebSocket client for:`, twitchUsername);
@@ -48,13 +54,29 @@ function handleWebSocketMessage(data) {
         case 'notification':
             switch (data.metadata.subscription_type) {
                 case 'channel.chat.message':
+                    const broadcasterUserId = data.payload.event.broadcaster_user_id;
                     const broadcasterUserLogin = data.payload.event.broadcaster_user_login;
+                    const broadcasterUserName = data.payload.event.broadcaster_user_name;
+                    const chatterUserId = data.payload.event.chatter_user_id;
                     const chatterUserLogin = data.payload.event.chatter_user_login;
+                    const chatterUserName = data.payload.event.chatter_user_name;
                     const messageText = data.payload.event.message.text;
-
+                    const messageId = data.payload.event.message_id;
+                    const messageTimestamp = data.metadata.message_timestamp;
                     console.log(`MSG #${broadcasterUserLogin} <${chatterUserLogin}> ${messageText}`);
                     // TODO only streamer should send message to aws
                     sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText);
+                    broadcastMessageToFrontend({
+                        broadcasterUserId: broadcasterUserId,
+                        broadcasterUserLogin: broadcasterUserLogin,
+                        broadcasterUserName: broadcasterUserName,
+                        chatterUserId: chatterUserId,
+                        chatUserLogin: chatterUserLogin,
+                        chatUserName: chatterUserName,
+                        messageId: messageId,
+                        messageText: messageText,
+                        messageTimestamp: messageTimestamp
+                    });
                     break;
                 case 'stream.online':
                     const streamId = data.payload.event.id;
@@ -81,7 +103,7 @@ async function registerEventSubListeners() {
 
         const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'channel.chat.message', version: '1', condition: {
-                broadcaster_user_id: CHAT_CHANNEL_USER_ID, user_id: BOT_USER_ID
+                broadcaster_user_id: broadcasterId, user_id: BOT_USER_ID
             }, transport: {
                 method: 'websocket', session_id: websocketSessionID
             }
@@ -93,7 +115,7 @@ async function registerEventSubListeners() {
 
         const registerOnlineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'stream.online', version: '1', condition: {
-                broadcaster_user_id: CHAT_CHANNEL_USER_ID
+                broadcaster_user_id: broadcasterId
             }, transport: {
                 method: 'websocket', session_id: websocketSessionID
             }
@@ -105,7 +127,7 @@ async function registerEventSubListeners() {
 
         const registerOfflineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'stream.offline', version: '1', condition: {
-                broadcaster_user_id: CHAT_CHANNEL_USER_ID
+                broadcaster_user_id: broadcasterId
             }, transport: {
                 method: 'websocket', session_id: websocketSessionID
             }
@@ -132,11 +154,11 @@ function verifyRegisterResponse(response, registerType) {
     }
 }
 
-export function getTwitchUserId() {
-    return twitchUserId;
+export function getBroadcasterId() {
+    return broadcasterId;
 }
-export function setTwitchUserId(userId){
-    twitchUserId = userId
+export function setBroadcasterId(userId){
+    broadcasterId = userId
 }
 export function getStreamId() {
     return streamId;

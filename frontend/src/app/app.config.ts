@@ -11,3 +11,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient()
   ]
 };
+
+export const urls = {
+  backendUrl: 'http://localhost:3000'
+}

@@ -1,9 +1,9 @@
 import express from 'express';
-import open from 'open';
 import cors from 'cors';
 
-import {generateAuthUrl} from './aws/cognitoAuth.js';
 import {authRouter} from "./routes/authorization/awsAuthorization.js";
+import * as http from "node:http";
+import {initWebSocketServer} from "./bot/wsServer.js";
 
 const LOG_PREFIX= `ENTRYPOINT:`
 
@@ -14,27 +14,19 @@ const port = 3000;
 
 // Middleware & static files
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
-app.use(cors());  // Needed for testing on local setup (since both frontend and backend are running on localhost)
+app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:4200', // Angular app
+    credentials: true,
+}));  // Needed for testing on local setup (since both frontend and backend are running on localhost)
 
 // Declare routers here
 app.use("/", authRouter);
 
 
-// Run Express server
-app.listen(port, () => {
+const server = http.createServer(app);
+initWebSocketServer(server);
+
+server.listen(port, () => {
     console.log(`${LOG_PREFIX} Express server started on: ${port}`);
 });
-
-// Run Twitch Bot
-(async () => {
-    try {
-        const authUrl = generateAuthUrl();
-        console.log(`${LOG_PREFIX} Cognito Auth URL: ${authUrl}`);
-        await open(authUrl);
-
-    } catch (error) {
-        console.error(`${LOG_PREFIX} Login error:`, error);
-        process.exit(1);
-    }
-})();

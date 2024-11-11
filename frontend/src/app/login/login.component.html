@@ -1,21 +1,5 @@
-<h2>Login to AWS Cognito</h2>
-<form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-  <label for="email">Email</label>
-  <input
-    type="email"
-    id="email"
-    name="email"
-    required
-    [(ngModel)]="email"
-    email
-  />
-  <label for="password">Password</label>
-  <input
-    type="password"
-    id="password"
-    name="password"
-    required
-    [(ngModel)]="password"
-  />
-  <button type="submit" [disabled]="loginForm.invalid">Login</button>
-</form>
+<div class="login-container">
+  <h2>Login to AWS Cognito</h2>
+  <button (click)="initiateLogin()" class="login-button">Login with AWS Cognito</button>
+</div>
+

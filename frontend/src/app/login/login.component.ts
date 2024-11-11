@@ -13,10 +13,9 @@ import {FormsModule} from '@angular/forms';
 })
 export class LoginComponent {
   authService = inject(AuthService)
-  email = ''
-  password = ''
 
-  onSubmit() {
-
+  initiateLogin() {
+    this.authService.initiateLogin();
   }
+
 }

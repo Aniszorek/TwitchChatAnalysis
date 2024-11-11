@@ -1,8 +1,32 @@
-form {
-  display: block;
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-label, input {
-  display: block;
-  margin-bottom: 10px;
+.login-container h2 {
+  font-size: 24px;
+  color: var(--text-color);
+  margin-bottom: 20px;
+}
+
+.login-button {
+  font-size: 16px;
+  color: var(--text-color);
+  background-color: var(--primary-color);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-button:hover {
+  background-color: var(--primary-color-hover);
+}
+
+.login-button:active {
+  transform: scale(0.98);
 }

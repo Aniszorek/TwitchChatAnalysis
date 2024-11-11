@@ -1,16 +1,17 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
+import {urls} from "../app.config";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   http = inject(HttpClient)
-  private authUrl = 'http://localhost:3000'
+  backendUrl = urls.backendUrl
+  isLoggedIn = signal(false);
 
-
-  exchangeCodeForToken(code: string): Observable<any> {
-    return this.http.get<any>(`${this.authUrl}/callback?code=${code}`);
+  initiateLogin(){
+    window.location.href = this.backendUrl + '/auth-url';
   }
 }
