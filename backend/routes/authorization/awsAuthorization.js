@@ -52,12 +52,15 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         // Validate role for user
         await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchUsername, CLIENT_ID)
         // Połącz z Twitch Websocket API
-        await startWebSocketClient(twitchUsername);
+        const result = await startWebSocketClient(twitchUsername);
+        if (!result.success) {
+            return res.status(404).send({message: result.message});
+        }
         // Połącz z AWS Websocket API
         connectAwsWebSocket(twitchUsername)
 
 
-        res.send({message: 'twitchUsername received'});
+        res.send({message: 'Streamer found and WebSocket initialized'});
     } catch (error) {
         console.error(`${LOG_PREFIX} starting WebSocket client:`, error);
         res.status(500).send('Błąd podczas uruchamiania klienta WebSocket');

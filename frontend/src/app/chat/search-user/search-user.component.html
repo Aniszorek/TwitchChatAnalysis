@@ -2,3 +2,11 @@
   <input [(ngModel)]="username" placeholder="Enter username" class="search-input"/>
   <button (click)="searchUser()" class="search-button">Search</button>
 </div>
+
+<div *ngIf="successMessage" class="success-message">
+  {{ successMessage }}
+</div>
+
+<div *ngIf="errorMessage" class="error-message">
+  {{ errorMessage }}
+</div>
