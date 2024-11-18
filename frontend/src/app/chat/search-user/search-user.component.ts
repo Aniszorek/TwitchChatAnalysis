@@ -1,7 +1,7 @@
 import {Component, inject} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../../auth/auth.service';
-import {TwitchService} from '../../auth/twitch.service';
+import {TwitchService} from '../../twitch/twitch.service';
 import {NgIf} from '@angular/common';
 
 @Component({
@@ -36,7 +36,6 @@ export class SearchUserComponent {
     });
   }
 
-  // TODO: on search the previous connection should be cleared and new connection should be set up
   searchUser() {
     if (this.username) {
       this.twitchService.searchUser(this.username);

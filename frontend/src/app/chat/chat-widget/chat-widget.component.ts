@@ -1,5 +1,5 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {ChatMessage, TwitchService} from '../../auth/twitch.service';
+import {ChatMessage, TwitchService} from '../../twitch/twitch.service';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 
 @Component({

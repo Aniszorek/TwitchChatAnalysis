@@ -9,6 +9,18 @@ export interface SearchUserState {
   errorMessage?: string;
 }
 
+export interface ChatMessage {
+  broadcasterUserId: string,
+  broadcasterUserLogin: string,
+  broadcasterUserName: string,
+  chatterUserId: string,
+  chatUserLogin: string,
+  chatUserName: string,
+  messageId: string,
+  messageText: string,
+  messageTimestamp: string
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,16 +32,21 @@ export class TwitchService {
   private searchUserState = new BehaviorSubject<SearchUserState | null>(null);
   searchUserState$ = this.searchUserState.asObservable();
 
+  private websocket: WebSocket | null = null;
+
+
   searchUser(twitchUsername: string): void {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const payload = { twitchUsername };
+    const headers = new HttpHeaders({'Content-Type': 'application/json'});
+    const payload = {twitchUsername};
+
+    this.disconnectWebSocket();
 
     console.log('Sending Twitch username to /set-twitch-username endpoint');
     this.http
-      .post(`${this.backendUrl}/set-twitch-username`, payload, { headers })
+      .post(`${this.backendUrl}/set-twitch-username`, payload, {headers})
       .pipe(
         tap(() => {
-          this.searchUserState.next({ success: true, message: `Connected to ${twitchUsername}'s chat`});
+          this.searchUserState.next({success: true, message: `Connected to ${twitchUsername}'s chat`});
           this.connectToChatWebSocket();
         }),
         catchError((error) => {
@@ -46,9 +63,9 @@ export class TwitchService {
 
   private connectToChatWebSocket() {
     console.log('connecting to backend via websocket to receive messages from twitch')
-    const ws = new WebSocket(`${this.backendUrl.replace('http', 'ws')}/chat`);
+    this.websocket = new WebSocket(`${this.backendUrl.replace('http', 'ws')}/chat`)
 
-    ws.onmessage = (event) => {
+    this.websocket.onmessage = (event) => {
       const rawMessage = JSON.parse(event.data);
       const message: ChatMessage = {
         broadcasterUserId: rawMessage.broadcasterUserId,
@@ -64,19 +81,17 @@ export class TwitchService {
       this.chatMessages.next(message);
     };
 
-    ws.onerror = (err) => console.error('WebSocket error:', err);
+    this.websocket.onerror = (err) => console.error('WebSocket error:', err);
   }
-}
 
 
-export interface ChatMessage {
-  broadcasterUserId: string,
-  broadcasterUserLogin: string,
-  broadcasterUserName: string,
-  chatterUserId: string,
-  chatUserLogin: string,
-  chatUserName: string,
-  messageId: string,
-  messageText: string,
-  messageTimestamp: string
+  disconnectWebSocket(): void {
+    if (this.websocket) {
+      console.log('Disconnecting WebSocket');
+      this.websocket.close();
+      this.websocket = null;
+    }
+
+    this.chatMessages = new Subject<ChatMessage>();
+  }
 }
