@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 
 import {exchangeCodeForToken, generateAuthUrl} from '../../aws/cognitoAuth.js';
 import {
@@ -31,6 +32,12 @@ authRouter.get('/callback', async (req, res) => {
         // after successful login:
 
         const tokenResponse = await exchangeCodeForToken(code);
+
+        // for later use
+        // const idToken = tokenResponse.id_token;
+        // const decodedToken = jwt.decode(idToken);
+        // const username = decodedToken['cognito:username'];
+
         // console.log(`${LOG_PREFIX} Received tokens:`, tokenResponse);
         console.log(`${LOG_PREFIX} Received tokens`);
         res.redirect(`http://localhost:4200/auth-callback?successful=true`);

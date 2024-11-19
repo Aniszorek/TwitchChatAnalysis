@@ -83,3 +83,25 @@ export async function validateTwitchAuth() {
 
     console.log(`${LOG_PREFIX} Validated token.`);
 }
+
+export async function deleteTwitchSubscription(subscriptionId, accessToken, clientId) {
+    const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        "Client-Id": clientId,
+    };
+
+    try {
+        const url = `https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscriptionId}`;
+        const response = await axios.delete(url, { headers });
+        if (response.status === 204) {
+            console.log(`${LOG_PREFIX} Successfully unsubscribed from Twitch EventSub: ${subscriptionId}`);
+            return true;
+        } else {
+            console.warn(`${LOG_PREFIX} Unexpected response while unsubscribing:`, response.status);
+            return false;
+        }
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Error unsubscribing from Twitch EventSub:`, error.response?.data || error.message);
+        throw error;
+    }
+}
