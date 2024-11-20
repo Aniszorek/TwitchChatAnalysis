@@ -10,7 +10,7 @@ const COGNITO_REDIRECT_URI = 'http://localhost:3000/callback';
 const COGNITO_AUTHORIZE_ENDPOINT = `${COGNITO_DOMAIN}/oauth2/authorize`;
 const COGNITO_TOKEN_ENDPOINT = `${COGNITO_DOMAIN}/oauth2/token`;
 
-export let cognitoAccessToken;
+export let cognitoIdToken;
 let refreshToken;
 let tokenExpiryTime;
 
@@ -36,7 +36,7 @@ export async function exchangeCodeForToken(authCode) {
         });
 
         const data = await response.data;
-        cognitoAccessToken = data.access_token;
+        cognitoIdToken = data.id_token;
         refreshToken = data.refresh_token;
         tokenExpiryTime = Date.now() + data.expires_in * 1000;
         return data;
@@ -46,7 +46,7 @@ export async function exchangeCodeForToken(authCode) {
     }
 }
 
-async function refreshAccessToken(refreshToken) {
+async function refreshIdToken(refreshToken) {
     const params = new URLSearchParams();
     params.append('grant_type', 'refresh_token');
     params.append('client_id', COGNITO_CLIENT_ID);
@@ -68,17 +68,17 @@ async function refreshAccessToken(refreshToken) {
     }
 }
 
-export async function ensureValidAccessToken() {
+export async function ensureValidIdToken() {
 
     if (Date.now() >= tokenExpiryTime) {
         console.log(`${LOG_PREFIX} Access token expired - refreshing`);
-        const data = await refreshAccessToken(refreshToken);
-        cognitoAccessToken = data.access_token;
+        const data = await refreshIdToken(refreshToken);
+        cognitoIdToken = data.id_token;
         tokenExpiryTime = Date.now() + data.expires_in * 1000;
 
     }
 }
 
-export function getCognitoAccessToken() {
-    return cognitoAccessToken;
+export function getCognitoIdToken() {
+    return cognitoIdToken;
 }

@@ -2,10 +2,11 @@ import express from 'express';
 
 import {exchangeCodeForToken, generateAuthUrl} from '../../aws/cognitoAuth.js';
 import {
-    startWebSocketClient,
+    CLIENT_ID, startWebSocketClient, TWITCH_BOT_OAUTH_TOKEN
 } from '../../bot/bot.js';
 import {validateTwitchAuth,} from '../../api_calls/twitchApiCalls.js';
 import {connectAwsWebSocket} from "../../aws/websocketApi.js";
+import {validateUserRole} from "../../aws/apiGateway.js";
 
 
 const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION:`;
@@ -48,6 +49,8 @@ authRouter.post('/set-twitch-username', async (req, res) => {
 
     try {
         await validateTwitchAuth();
+        // Validate role for user
+        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchUsername, CLIENT_ID)
         // Połącz z Twitch Websocket API
         await startWebSocketClient(twitchUsername);
         // Połącz z AWS Websocket API

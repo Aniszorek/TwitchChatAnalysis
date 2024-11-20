@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import {getCognitoAccessToken} from "./cognitoAuth.js";
+import {getCognitoIdToken} from "./cognitoAuth.js";
 
 const LOG_PREFIX = `API_GATEWAY_WS:`
 
@@ -8,7 +8,7 @@ const PING_INTERVAL = 5 * 60 * 1000;
 
 export function connectAwsWebSocket(twitchUsername) {
     try {
-        const token = getCognitoAccessToken();
+        const token = getCognitoIdToken();
 
         const ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${token}`);
         ws.on('open', () => {
