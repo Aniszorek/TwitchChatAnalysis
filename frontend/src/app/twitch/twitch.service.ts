@@ -27,7 +27,7 @@ export interface ChatMessage {
 export class TwitchService {
   http = inject(HttpClient)
   backendUrl = urls.backendUrl
-  private chatMessages = new Subject<ChatMessage>();
+  private chatMessages = new Subject<ChatMessage | null>();
   chatMessages$ = this.chatMessages.asObservable();
   private searchUserState = new BehaviorSubject<SearchUserState | null>(null);
   searchUserState$ = this.searchUserState.asObservable();
@@ -91,7 +91,6 @@ export class TwitchService {
       this.websocket.close();
       this.websocket = null;
     }
-
-    this.chatMessages = new Subject<ChatMessage>();
+    this.chatMessages.next(null);
   }
 }
