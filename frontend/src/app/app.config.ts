@@ -13,5 +13,11 @@ export const appConfig: ApplicationConfig = {
 };
 
 export const urls = {
-  backendUrl: 'http://localhost:3000'
+  backendUrl: 'http://localhost:3000',
+  cognitoLogoutUrl: 'https://twitchchatanalytics.auth.eu-central-1.amazoncognito.com/logout',
+  cognitoLougoutRedirectUrl: 'http://localhost:4200/login'
+}
+
+export const config = {
+  cognitoClientId: '58efohuhjeprodco2fd27ai9pt'
 }

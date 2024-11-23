@@ -1,7 +1,6 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {urls} from "../app.config";
+import {config, urls} from "../app.config";
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +10,12 @@ export class AuthService {
   backendUrl = urls.backendUrl
   isLoggedIn = signal(false);
 
-  initiateLogin(){
+  cognitoLogoutUrl = urls.cognitoLogoutUrl;
+  clientId = config.cognitoClientId ;
+  redirectUri = urls.cognitoLougoutRedirectUrl;
+
+
+  initiateLogin() {
     window.location.href = this.backendUrl + '/auth-url';
   }
 
@@ -21,6 +25,20 @@ export class AuthService {
     this.isLoggedIn.set(true);
   }
 
+  private clearLocalSession(): void {
+    localStorage.removeItem('idToken');
+    localStorage.removeItem('refreshToken');
+    this.isLoggedIn.set(false);
+  }
+
+  logout(): void {
+    this.clearLocalSession();
+    const logoutUrl = `${this.cognitoLogoutUrl}?client_id=${this.clientId}&logout_uri=${encodeURIComponent(this.redirectUri)}`;
+    console.log(logoutUrl);
+
+    window.location.href = logoutUrl;
+  }
+
   getIdToken(): string | null {
     return localStorage.getItem('idToken');
   }
@@ -28,4 +46,5 @@ export class AuthService {
   getRefreshToken(): string | null {
     return localStorage.getItem('refreshToken');
   }
+
 }
