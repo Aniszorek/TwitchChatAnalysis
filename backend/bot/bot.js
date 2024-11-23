@@ -3,7 +3,7 @@ import WebSocket from "ws";
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
 import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
-import {broadcastMessageToFrontend} from "./wsServer.js";
+import {sendMessageToFrontendClient} from "./wsServer.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -21,7 +21,7 @@ const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscrip
 
 
 
-export async function startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) {
+export async function startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
     try{
         const fetchResponse = await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
 
@@ -43,7 +43,7 @@ export async function startWebSocketClient(twitchUsername, cognitoIdToken, cogni
         });
 
         websocketClient.on('message', (data) => {
-            handleWebSocketMessage(JSON.parse(data.toString()), cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime);
+            handleWebSocketMessage(JSON.parse(data.toString()), cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId);
         });
         return { success: true, message: 'Streamer found and connected to WebSocket' };
 
@@ -54,7 +54,7 @@ export async function startWebSocketClient(twitchUsername, cognitoIdToken, cogni
 
 }
 
-function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) {
+function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
     switch (data.metadata.message_type) {
         case 'session_welcome':
             websocketSessionID = data.payload.session.id;
@@ -75,7 +75,7 @@ function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cogni
                     console.log(`MSG #${broadcasterUserLogin} <${chatterUserLogin}> ${messageText}`);
                     // TODO only streamer should send message to aws
                     sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime);
-                    broadcastMessageToFrontend({
+                    sendMessageToFrontendClient(cognitoUserId,{
                         broadcasterUserId: broadcasterUserId,
                         broadcasterUserLogin: broadcasterUserLogin,
                         broadcasterUserName: broadcasterUserName,

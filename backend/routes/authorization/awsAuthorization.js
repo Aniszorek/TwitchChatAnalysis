@@ -50,6 +50,10 @@ authRouter.post('/set-twitch-username', async (req, res) => {
     const cognitoRefreshToken = req.body["cognitoRefreshToken"];
     const cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
 
+    // sub is a part of jwt, and it can be used as identifier for Cognito user
+    // we will use it to determine to which websocket connection messages should be forwarded
+    const cognitoUserId = (await verifyToken(cognitoIdToken)).sub
+
     const twitchUsername = req.body["twitchUsername"];
 
     if (!twitchUsername) {
@@ -61,7 +65,7 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         // Validate role for user
         await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchUsername, CLIENT_ID, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
         // Połącz z Twitch Websocket API
-        const result = await startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime);
+        const result = await startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime, cognitoUserId);
         if (!result.success) {
             return res.status(404).send({message: result.message});
         }

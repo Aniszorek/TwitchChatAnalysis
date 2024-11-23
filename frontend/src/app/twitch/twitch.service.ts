@@ -72,6 +72,15 @@ export class TwitchService {
     console.log('connecting to backend via websocket to receive messages from twitch')
     this.websocket = new WebSocket(`${this.backendUrl.replace('http', 'ws')}/chat`)
 
+    this.websocket.onopen = () => {
+      const cognitoIdToken = this.authService.getIdToken();
+      if (cognitoIdToken) {
+        this.websocket?.send(JSON.stringify({ type: 'auth', cognitoIdToken }));
+      } else {
+        console.error('No ID token available to authenticate WebSocket connection');
+      }
+    };
+
     this.websocket.onmessage = (event) => {
       const rawMessage = JSON.parse(event.data);
       const message: ChatMessage = {
