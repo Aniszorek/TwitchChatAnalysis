@@ -1,6 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {config, urls} from "../app.config";
+import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,11 @@ export class AuthService {
     localStorage.setItem('refreshToken', refreshToken);
     this.isLoggedIn.set(true);
   }
+
+  validateToken(idToken: string): Observable<{ valid: boolean }> {
+    return this.http.post<{ valid: boolean }>(`${this.backendUrl}/validate-token`, { idToken });
+  }
+
 
   private clearLocalSession(): void {
     localStorage.removeItem('idToken');
