@@ -3,7 +3,7 @@ import WebSocket from "ws";
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
 import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
-import {sendMessageToFrontendClient} from "./wsServer.js";
+import {sendMessageToFrontendClient, trackSubscription} from "./wsServer.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -58,7 +58,7 @@ function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cogni
     switch (data.metadata.message_type) {
         case 'session_welcome':
             websocketSessionID = data.payload.session.id;
-            registerEventSubListeners();
+            registerEventSubListeners(cognitoUserId);
             break;
         case 'notification':
             switch (data.metadata.subscription_type) {
@@ -101,7 +101,7 @@ function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cogni
     }
 }
 
-async function registerEventSubListeners() {
+async function registerEventSubListeners(cognitoUserId) {
     try {
 
         const headers = {
@@ -119,7 +119,7 @@ async function registerEventSubListeners() {
         }, {
             headers: headers
         });
-        verifyRegisterResponse(registerMessageResponse, 'channel.chat.message');
+        verifyRegisterResponse(registerMessageResponse, 'channel.chat.message', cognitoUserId);
 
 
         const registerOnlineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
@@ -131,7 +131,7 @@ async function registerEventSubListeners() {
         }, {
             headers: headers
         });
-        verifyRegisterResponse(registerOnlineResponse, 'stream.online');
+        verifyRegisterResponse(registerOnlineResponse, 'stream.online', cognitoUserId);
 
 
         const registerOfflineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
@@ -143,7 +143,7 @@ async function registerEventSubListeners() {
         }, {
             headers: headers
         });
-        verifyRegisterResponse(registerOfflineResponse, 'stream.offline');
+        verifyRegisterResponse(registerOfflineResponse, 'stream.offline', cognitoUserId);
 
     } catch (error) {
         console.error(`${LOG_PREFIX} Error during subscription:`, error.response ? error.response.data : error.message);
@@ -153,8 +153,10 @@ async function registerEventSubListeners() {
 
 }
 
-function verifyRegisterResponse(response, registerType) {
+function verifyRegisterResponse(response, registerType, userId) {
     if (response.status === 202) {
+        const subscriptionId = response.data.data[0].id;
+        trackSubscription(userId, subscriptionId);
         console.log(`${LOG_PREFIX} Subscribed to ${registerType} [${response.data.data[0].id}]`);
     } else {
         console.error(`${LOG_PREFIX} Failed to subscribe to ${registerType}. Status code ${response.status}`);
