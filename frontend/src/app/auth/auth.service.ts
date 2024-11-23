@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {config, urls} from "../app.config";
-import {Observable} from 'rxjs';
+import {catchError, map, Observable, of} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -26,9 +26,11 @@ export class AuthService {
     this.isLoggedIn.set(true);
   }
 
-  validateToken(idToken: string): Observable<{ valid: boolean }> {
-    return this.http.post<{ valid: boolean }>(`${this.backendUrl}/validate-token`, { idToken });
+  validateToken(idToken: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.backendUrl}/verify-cognito`, { idToken });
   }
+
+
 
 
   private clearLocalSession(): void {

@@ -23,27 +23,26 @@ export class AuthCallbackComponent implements OnInit {
         const refreshToken = params.get('refreshToken');
 
         if (idToken && refreshToken) {
-          // Verify if token is valid using backend endpoint
+          // Verify if the token is valid
           this.authService.validateToken(idToken).subscribe({
-              next: (response) => {
-                if (response.valid) {
-                  this.authService.saveTokens(idToken, refreshToken);
-                  this.authService.isLoggedIn.set(true);
-                  this.router.navigate(['/chat']);
-                } else {
-                  this.router.navigate(['/login']);
-                }
-              },
-              error: () => {
+            next: (response) => {
+              if (response.message === 'verified') {
+                // Token is valid, save tokens and navigate
+                this.authService.saveTokens(idToken, refreshToken);
+                this.authService.isLoggedIn.set(true);
+                console.log("Token verified. Redirecting to /chat");
+                this.router.navigate(['/chat']);
+              } else {
+                // Token verification failed
+                console.error("Invalid token");
                 this.router.navigate(['/login']);
               }
+            },
+            error: () => {
+              console.error("Token validation failed");
+              this.router.navigate(['/login']);
             }
-          )
-
-          // Save tokens and navigate to main app
-          this.authService.saveTokens(idToken, refreshToken);
-          console.log("Tokens saved. Redirecting to /chat");
-          this.router.navigate(['/chat']);
+          });
         } else {
           console.error("Tokens missing in callback");
           this.router.navigate(['/login']);
@@ -52,7 +51,7 @@ export class AuthCallbackComponent implements OnInit {
         console.error("Login failed");
         this.router.navigate(['/login']);
       }
-    })
-
+    });
   }
+
 }
