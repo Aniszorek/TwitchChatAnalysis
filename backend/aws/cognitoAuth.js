@@ -1,14 +1,23 @@
 import axios from 'axios';
 import querystring from 'querystring';
+import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
+
 
 const LOG_PREFIX = `COGNITO_AUTH:`
 
 const COGNITO_CLIENT_ID = process.env["COGNITO_CLIENT_ID"];
 const COGNITO_DOMAIN = 'https://twitchchatanalytics.auth.eu-central-1.amazoncognito.com';
+const COGNITO_ISSUER = `https://cognito-idp.eu-central-1.amazonaws.com/eu-central-1_IzUkrEEsr`
+const COGNITO_TOKEN_SIGNING_URL = `${COGNITO_ISSUER}/.well-known/jwks.json`
 const COGNITO_REDIRECT_URI = 'http://localhost:3000/callback';
 
 const COGNITO_AUTHORIZE_ENDPOINT = `${COGNITO_DOMAIN}/oauth2/authorize`;
 const COGNITO_TOKEN_ENDPOINT = `${COGNITO_DOMAIN}/oauth2/token`;
+
+const cognitoClient = jwksClient({
+    jwksUri: COGNITO_TOKEN_SIGNING_URL
+});
 
 export let cognitoIdToken;
 let refreshToken;
@@ -68,7 +77,7 @@ async function refreshIdToken(refreshToken) {
     }
 }
 
-export async function ensureValidIdToken() {
+export async function refreshIdTokenIfExpired() {
 
     if (Date.now() >= tokenExpiryTime) {
         console.log(`${LOG_PREFIX} Access token expired - refreshing`);
@@ -81,4 +90,23 @@ export async function ensureValidIdToken() {
 
 export function getCognitoIdToken() {
     return cognitoIdToken;
+}
+
+async function getSigningKey(kid) {
+    const key = await cognitoClient.getSigningKey(kid);
+    return key.getPublicKey();
+}
+
+export async function verifyToken(token) {
+    const decodedHeader = jwt.decode(token, { complete: true });
+    if (!decodedHeader || !decodedHeader.header) {
+        throw new Error('Invalid token structure');
+    }
+
+    const signingKey = await getSigningKey(decodedHeader.header.kid);
+
+    return jwt.verify(token, signingKey, {
+        algorithms: ['RS256'],
+        issuer: COGNITO_ISSUER,
+    });
 }

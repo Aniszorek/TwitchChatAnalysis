@@ -1,4 +1,4 @@
-import {ensureValidIdToken, getCognitoIdToken} from "./cognitoAuth.js";
+import {refreshIdTokenIfExpired, getCognitoIdToken} from "./cognitoAuth.js";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 
@@ -11,7 +11,7 @@ const LOG_PREFIX = `API_GATEWAY_REST:`
 export async function sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText) {
     try {
 
-        await ensureValidIdToken();
+        await refreshIdTokenIfExpired();
         const cognitoIdToken = getCognitoIdToken();
 
         const response = await axios.post(MESSAGES_PATH, {
@@ -37,7 +37,7 @@ export async function sendMessageToApiGateway(broadcasterUserLogin, chatterUserL
 
 export async function validateUserRole(twitch_oauth_token, broadcaster_user_login, client_id) {
     try {
-        await ensureValidIdToken();
+        await refreshIdTokenIfExpired();
         const accessToken = getCognitoIdToken();
 
         const decoded = jwt.decode(accessToken);
