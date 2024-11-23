@@ -54,29 +54,21 @@ function handleWebSocketMessage(data) {
         case 'notification':
             switch (data.metadata.subscription_type) {
                 case 'channel.chat.message':
-                    const broadcasterUserId = data.payload.event.broadcaster_user_id;
-                    const broadcasterUserLogin = data.payload.event.broadcaster_user_login;
-                    const broadcasterUserName = data.payload.event.broadcaster_user_name;
-                    const chatterUserId = data.payload.event.chatter_user_id;
-                    const chatterUserLogin = data.payload.event.chatter_user_login;
-                    const chatterUserName = data.payload.event.chatter_user_name;
-                    const messageText = data.payload.event.message.text;
-                    const messageId = data.payload.event.message_id;
-                    const messageTimestamp = data.metadata.message_timestamp;
-                    console.log(`MSG #${broadcasterUserLogin} <${chatterUserLogin}> ${messageText}`);
+                    const msg = {
+                       "broadcasterUserId":      data.payload.event.broadcaster_user_id,
+                       "broadcasterUserLogin":   data.payload.event.broadcaster_user_login,
+                       "broadcasterUserName":    data.payload.event.broadcaster_user_name,
+                       "chatterUserId":          data.payload.event.chatter_user_id,
+                       "chatterUserLogin":       data.payload.event.chatter_user_login,
+                       "chatterUserName":        data.payload.event.chatter_user_name,
+                       "messageText":            data.payload.event.message.text,
+                       "messageId":              data.payload.event.message_id,
+                       "messageTimestamp":       data.metadata.message_timestamp
+                    }
+                    console.log(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`);
                     // TODO only streamer should send message to aws
-                    sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText);
-                    broadcastMessageToFrontend({
-                        broadcasterUserId: broadcasterUserId,
-                        broadcasterUserLogin: broadcasterUserLogin,
-                        broadcasterUserName: broadcasterUserName,
-                        chatterUserId: chatterUserId,
-                        chatUserLogin: chatterUserLogin,
-                        chatUserName: chatterUserName,
-                        messageId: messageId,
-                        messageText: messageText,
-                        messageTimestamp: messageTimestamp
-                    });
+                    sendMessageToApiGateway(msg);
+                    broadcastMessageToFrontend(msg);
                     break;
                 case 'stream.online':
                     const streamId = data.payload.event.id;
