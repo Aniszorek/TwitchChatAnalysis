@@ -26,17 +26,18 @@ authRouter.get('/callback', async (req, res) => {
         return res.status(400).send('Brak kodu autoryzacyjnego');
     }
 
+    // after successful login:
     try {
-
-        // after successful login:
-
         const tokenResponse = await exchangeCodeForToken(code);
-        console.log(`${LOG_PREFIX} Received tokens:`, tokenResponse);
-        console.log(`${LOG_PREFIX} Received tokens`);
-        res.redirect(`http://localhost:4200/auth-callback?successful=true`);
+        const idToken = tokenResponse['id_token'];
+        const refreshToken = tokenResponse['refresh_token'];
+
+        const redirectUrl = `http://localhost:4200/auth-callback?successful=true&idToken=${idToken}&refreshToken=${refreshToken}`;
+        console.log(`${LOG_PREFIX} Redirecting with tokens`);
+        res.redirect(redirectUrl);
     } catch (error) {
-        console.error(`${LOG_PREFIX} Error during code exchange:`, error);
-        res.status(500).send('Wystąpił błąd podczas uzyskiwania tokenu');
+        console.error(`${LOG_PREFIX} Error during token exchange:`, error);
+        res.redirect('http://localhost:4200/auth-callback?successful=false');
     }
 })
 
@@ -52,12 +53,15 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         // Validate role for user
         await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchUsername, CLIENT_ID)
         // Połącz z Twitch Websocket API
-        await startWebSocketClient(twitchUsername);
+        const result = await startWebSocketClient(twitchUsername);
+        if (!result.success) {
+            return res.status(404).send({message: result.message});
+        }
         // Połącz z AWS Websocket API
         connectAwsWebSocket(twitchUsername)
 
 
-        res.send({message: 'twitchUsername received'});
+        res.send({message: 'Streamer found and WebSocket initialized'});
     } catch (error) {
         console.error(`${LOG_PREFIX} starting WebSocket client:`, error);
         res.status(500).send('Błąd podczas uruchamiania klienta WebSocket');

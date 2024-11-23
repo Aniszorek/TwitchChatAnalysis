@@ -32,3 +32,21 @@
 .search-button:hover {
   background-color: #0056b3;
 }
+
+.error-message {
+  margin-top: 16px;
+  color: red;
+  font-size: 14px;
+}
+
+.success-message {
+  color: green;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+  font-weight: bold;
+}

@@ -23,26 +23,36 @@ const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscrip
 
 
 export async function startWebSocketClient(twitchUsername) {
-    await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
-        .catch(error => console.error('[TWITCH] Error while fetching id for twitch username:', error));
+    try{
+        const fetchResponse = await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
 
-    await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
+        if (!fetchResponse.found) {
+            return { success: false, message: `Streamer with username: ${twitchUsername} not found` };
+        }
 
-    const websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
-    console.log(`${LOG_PREFIX} Starting WebSocket client for:`, twitchUsername);
+        await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
 
-    websocketClient.on('error', console.error);
+        const websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
-    websocketClient.on('open', () => {
-        console.log(`${LOG_PREFIX} WebSocket connection opened to ` + EVENTSUB_WEBSOCKET_URL);
-    });
+        console.log(`${LOG_PREFIX} Starting WebSocket client for:`, twitchUsername);
 
-    websocketClient.on('message', (data) => {
-        handleWebSocketMessage(JSON.parse(data.toString()));
-    });
+        websocketClient.on('error', console.error);
 
-    return websocketClient;
+        websocketClient.on('open', () => {
+            console.log(`${LOG_PREFIX} WebSocket connection opened to ` + EVENTSUB_WEBSOCKET_URL);
+        });
+
+        websocketClient.on('message', (data) => {
+            handleWebSocketMessage(JSON.parse(data.toString()));
+        });
+        return { success: true, message: 'Streamer found and connected to WebSocket' };
+
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Error while starting websocket clients for twitch/aws:`, error);
+        return { success: false, message: 'An error occurred while connecting to the WebSocket' };
+    }
+
 }
 
 function handleWebSocketMessage(data) {

@@ -20,18 +20,17 @@ export async function fetchTwitchUserId(nickname, accessToken, clientId) {
 
     try {
         const response = await axios.get(url, { headers });
-
         const userId = response.data.data[0]?.id;
 
-        setBroadcasterId(userId);
-
         if (!userId) {
-            throw new Error(`${LOG_PREFIX} No user ID found in response`);
+            // throw new Error('No user ID found in response');
+            return { found: false, userId: null };
         }
 
-        return userId;
+        setBroadcasterId(userId);
+        return { found: true, userId };
     } catch (error) {
-        console.error(`${LOG_PREFIX} Error fetching Twitch user ID:`, error);
+        console.error(`${LOG_PREFIX} Error while fetching Twitch user ID:`, error);
         throw error;
     }
 }
@@ -83,4 +82,26 @@ export async function validateTwitchAuth() {
     }
 
     console.log(`${LOG_PREFIX} Validated token.`);
+}
+
+export async function deleteTwitchSubscription(subscriptionId, accessToken, clientId) {
+    const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        "Client-Id": clientId,
+    };
+
+    try {
+        const url = `https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscriptionId}`;
+        const response = await axios.delete(url, { headers });
+        if (response.status === 204) {
+            console.log(`${LOG_PREFIX} Successfully unsubscribed from Twitch EventSub: ${subscriptionId}`);
+            return true;
+        } else {
+            console.warn(`${LOG_PREFIX} Unexpected response while unsubscribing:`, response.status);
+            return false;
+        }
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Error unsubscribing from Twitch EventSub:`, error.response?.data || error.message);
+        throw error;
+    }
 }
