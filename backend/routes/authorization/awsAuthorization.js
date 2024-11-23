@@ -1,7 +1,6 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 
-import {exchangeCodeForToken, generateAuthUrl} from '../../aws/cognitoAuth.js';
+import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth.js';
 import {
     CLIENT_ID, startWebSocketClient, TWITCH_BOT_OAUTH_TOKEN
 } from '../../bot/bot.js';
@@ -69,3 +68,24 @@ authRouter.post('/set-twitch-username', async (req, res) => {
     }
 });
 
+authRouter.post('/verify-cognito', async (req, res) => {
+
+    try{
+        const { idToken } = req.body;
+
+        if (!idToken) {
+            return res.status(400).send('idToken is required');
+        }
+
+        await verifyToken(idToken);
+
+        res.status(200).json({
+            message: "verified",
+            idToken
+        });
+    }
+    catch (e){
+        console.error(`${LOG_PREFIX} Error during verify idToken:`, e.message);
+        res.status(401).json({message: 'idToken not verified', error: e.message});
+    }
+})
