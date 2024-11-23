@@ -88,8 +88,8 @@ export class TwitchService {
         broadcasterUserLogin: rawMessage.broadcasterUserLogin,
         broadcasterUserName: rawMessage.broadcasterUserName,
         chatterUserId: rawMessage.chatterUserId,
-        chatUserLogin: rawMessage.chatUserLogin,
-        chatUserName: rawMessage.chatUserName,
+        chatUserLogin: rawMessage.chatterUserLogin,
+        chatUserName: rawMessage.chatterUserName,
         messageId: rawMessage.messageId,
         messageText: rawMessage.messageText,
         messageTimestamp: rawMessage.messageTimestamp

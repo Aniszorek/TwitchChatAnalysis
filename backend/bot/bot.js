@@ -77,17 +77,7 @@ function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cogni
                     console.log(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`);
                     // TODO only streamer should send message to aws
                     sendMessageToApiGateway(msg, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime);
-                    sendMessageToFrontendClient(cognitoUserId,{
-                        broadcasterUserId: broadcasterUserId,
-                        broadcasterUserLogin: broadcasterUserLogin,
-                        broadcasterUserName: broadcasterUserName,
-                        chatterUserId: chatterUserId,
-                        chatUserLogin: chatterUserLogin,
-                        chatUserName: chatterUserName,
-                        messageId: messageId,
-                        messageText: messageText,
-                        messageTimestamp: messageTimestamp
-                    });
+                    sendMessageToFrontendClient(cognitoUserId, msg);
                     break;
                 case 'stream.online':
                     const streamId = data.payload.event.id;
