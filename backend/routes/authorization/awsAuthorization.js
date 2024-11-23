@@ -27,23 +27,18 @@ authRouter.get('/callback', async (req, res) => {
         return res.status(400).send('Brak kodu autoryzacyjnego');
     }
 
+    // after successful login:
     try {
-
-        // after successful login:
-
         const tokenResponse = await exchangeCodeForToken(code);
+        const idToken = tokenResponse['id_token'];
+        const refreshToken = tokenResponse['refresh_token'];
 
-        // for later use
-        // const idToken = tokenResponse.id_token;
-        // const decodedToken = jwt.decode(idToken);
-        // const username = decodedToken['cognito:username'];
-
-        // console.log(`${LOG_PREFIX} Received tokens:`, tokenResponse);
-        console.log(`${LOG_PREFIX} Received tokens`);
-        res.redirect(`http://localhost:4200/auth-callback?successful=true`);
+        const redirectUrl = `http://localhost:4200/auth-callback?successful=true&idToken=${idToken}&refreshToken=${refreshToken}`;
+        console.log(`${LOG_PREFIX} Redirecting with tokens`);
+        res.redirect(redirectUrl);
     } catch (error) {
-        console.error(`${LOG_PREFIX} Error during code exchange:`, error);
-        res.status(500).send('Wystąpił błąd podczas uzyskiwania tokenu');
+        console.error(`${LOG_PREFIX} Error during token exchange:`, error);
+        res.redirect('http://localhost:4200/auth-callback?successful=false');
     }
 })
 

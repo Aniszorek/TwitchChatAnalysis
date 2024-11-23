@@ -14,4 +14,18 @@ export class AuthService {
   initiateLogin(){
     window.location.href = this.backendUrl + '/auth-url';
   }
+
+  saveTokens(idToken: string, refreshToken: string): void {
+    localStorage.setItem('idToken', idToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    this.isLoggedIn.set(true);
+  }
+
+  getIdToken(): string | null {
+    return localStorage.getItem('idToken');
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refreshToken');
+  }
 }
