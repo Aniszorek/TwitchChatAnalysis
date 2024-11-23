@@ -20,9 +20,10 @@ export class AuthService {
     window.location.href = this.backendUrl + '/auth-url';
   }
 
-  saveTokens(idToken: string, refreshToken: string): void {
+  saveTokens(idToken: string, refreshToken: string, expireTime: string): void {
     localStorage.setItem('idToken', idToken);
     localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('expireTime', expireTime)
     this.isLoggedIn.set(true);
   }
 
@@ -31,11 +32,10 @@ export class AuthService {
   }
 
 
-
-
   private clearLocalSession(): void {
     localStorage.removeItem('idToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('expireTime')
     this.isLoggedIn.set(false);
   }
 
@@ -53,6 +53,10 @@ export class AuthService {
 
   getRefreshToken(): string | null {
     return localStorage.getItem('refreshToken');
+  }
+
+  getExpiryDate(): string | null {
+    return localStorage.getItem('expireTime');
   }
 
 }

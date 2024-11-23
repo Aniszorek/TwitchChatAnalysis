@@ -19,9 +19,7 @@ const cognitoClient = jwksClient({
     jwksUri: COGNITO_TOKEN_SIGNING_URL
 });
 
-export let cognitoIdToken;
-let refreshToken;
-let tokenExpiryTime;
+
 
 export function generateAuthUrl() {
     const queryParams = querystring.stringify({
@@ -44,11 +42,7 @@ export async function exchangeCodeForToken(authCode) {
             }
         });
 
-        const data = await response.data;
-        cognitoIdToken = data.id_token;
-        refreshToken = data.refresh_token;
-        tokenExpiryTime = Date.now() + data.expires_in * 1000;
-        return data;
+        return await response.data;
     } catch (error) {
         console.error(`${LOG_PREFIX} error exchanging code for token:`, error.response ? error.response.data : error.message);
         throw new Error(`${LOG_PREFIX} Could not get access token`);
@@ -77,19 +71,15 @@ async function refreshIdToken(refreshToken) {
     }
 }
 
-export async function refreshIdTokenIfExpired() {
-
-    if (Date.now() >= tokenExpiryTime) {
+export async function refreshIdTokenIfExpired(cognitoRefreshToken, cognitoExpiryTime) {
+    if (Date.now() >= cognitoExpiryTime) {
         console.log(`${LOG_PREFIX} Access token expired - refreshing`);
-        const data = await refreshIdToken(refreshToken);
-        cognitoIdToken = data.id_token;
-        tokenExpiryTime = Date.now() + data.expires_in * 1000;
-
+        const data = await refreshIdToken(cognitoRefreshToken);
+        return data
+        // const data = await refreshIdToken(refreshToken);
+        // cognitoIdToken = data.id_token;
+        // tokenExpiryTime = Date.now() + data.expires_in * 1000;
     }
-}
-
-export function getCognitoIdToken() {
-    return cognitoIdToken;
 }
 
 async function getSigningKey(kid) {

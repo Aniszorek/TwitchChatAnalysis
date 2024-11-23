@@ -1,16 +1,13 @@
 import WebSocket from "ws";
-import {getCognitoIdToken} from "./cognitoAuth.js";
 
 const LOG_PREFIX = `API_GATEWAY_WS:`
 
 const WEBSOCKET_API_URL = 'wss://dh50useqij.execute-api.eu-central-1.amazonaws.com/test/';
 const PING_INTERVAL = 5 * 60 * 1000;
 
-export function connectAwsWebSocket(twitchUsername) {
+export function connectAwsWebSocket(twitchUsername, cognitoIdToken) {
     try {
-        const token = getCognitoIdToken();
-
-        const ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${token}`);
+        const ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${cognitoIdToken}`);
         ws.on('open', () => {
             console.log(`${LOG_PREFIX} Connected, creating connection for streamer name: ${twitchUsername}`);
             const message = JSON.stringify({

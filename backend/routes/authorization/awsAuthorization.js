@@ -19,6 +19,7 @@ authRouter.get('/auth-url', (req, res) => {
     res.redirect(authUrl);
 })
 
+
 authRouter.get('/callback', async (req, res) => {
     const {code} = req.query;
 
@@ -31,8 +32,9 @@ authRouter.get('/callback', async (req, res) => {
         const tokenResponse = await exchangeCodeForToken(code);
         const idToken = tokenResponse['id_token'];
         const refreshToken = tokenResponse['refresh_token'];
+        const expireTime = Date.now() + tokenResponse['expires_in'] * 1000
 
-        const redirectUrl = `http://localhost:4200/auth-callback?successful=true&idToken=${idToken}&refreshToken=${refreshToken}`;
+        const redirectUrl = `http://localhost:4200/auth-callback?successful=true&idToken=${idToken}&refreshToken=${refreshToken}&expireTime=${expireTime}`;
         console.log(`${LOG_PREFIX} Redirecting with tokens`);
         res.redirect(redirectUrl);
     } catch (error) {
@@ -43,7 +45,13 @@ authRouter.get('/callback', async (req, res) => {
 
 
 authRouter.post('/set-twitch-username', async (req, res) => {
-    const twitchUsername = req.body.twitchUsername;
+    // todo: dodać tutaj weryfikacje tokena cognito
+    const cognitoIdToken = req.body["cognitoIdToken"];
+    const cognitoRefreshToken = req.body["cognitoRefreshToken"];
+    const cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
+
+    const twitchUsername = req.body["twitchUsername"];
+
     if (!twitchUsername) {
         return res.status(400).send('Brak nazwy użytkownika Twitch');
     }
@@ -51,14 +59,14 @@ authRouter.post('/set-twitch-username', async (req, res) => {
     try {
         await validateTwitchAuth();
         // Validate role for user
-        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchUsername, CLIENT_ID)
+        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchUsername, CLIENT_ID, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
         // Połącz z Twitch Websocket API
-        const result = await startWebSocketClient(twitchUsername);
+        const result = await startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime);
         if (!result.success) {
             return res.status(404).send({message: result.message});
         }
         // Połącz z AWS Websocket API
-        connectAwsWebSocket(twitchUsername)
+        connectAwsWebSocket(twitchUsername, cognitoIdToken)
 
 
         res.send({message: 'Streamer found and WebSocket initialized'});
@@ -68,8 +76,8 @@ authRouter.post('/set-twitch-username', async (req, res) => {
     }
 });
 
-authRouter.post('/verify-cognito', async (req, res) => {
 
+authRouter.post('/verify-cognito', async (req, res) => {
     try{
         const { idToken } = req.body;
 

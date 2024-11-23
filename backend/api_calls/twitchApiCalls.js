@@ -7,7 +7,7 @@ const LOG_PREFIX = 'TWITCH API:'
 const TWITCH_API_URL_USERS = `https://api.twitch.tv/helix/users?login=`;
 const TWITCH_API_URL_STREAMS = `https://api.twitch.tv/helix/streams?user_id=`;
 const TWITCH_VALIDATE_AUTH_URL = 'https://id.twitch.tv/oauth2/validate';
-
+const TWITCH_API_URL_FETCH_USERNAME = 'https://api.twitch.tv/helix/users'
 
 
 export async function fetchTwitchUserId(nickname, accessToken, clientId) {
@@ -19,16 +19,16 @@ export async function fetchTwitchUserId(nickname, accessToken, clientId) {
     };
 
     try {
-        const response = await axios.get(url, { headers });
+        const response = await axios.get(url, {headers});
         const userId = response.data.data[0]?.id;
 
         if (!userId) {
             // throw new Error('No user ID found in response');
-            return { found: false, userId: null };
+            return {found: false, userId: null};
         }
 
         setBroadcasterId(userId);
-        return { found: true, userId };
+        return {found: true, userId};
     } catch (error) {
         console.error(`${LOG_PREFIX} Error while fetching Twitch user ID:`, error);
         throw error;
@@ -44,7 +44,7 @@ export async function fetchTwitchStreamId(userId, accessToken, clientId) {
             'Client-Id': clientId
         };
 
-        const response = await axios.get(url, { headers });
+        const response = await axios.get(url, {headers});
         const streamData = response.data.data[0];
 
         if (!streamData) {
@@ -92,7 +92,7 @@ export async function deleteTwitchSubscription(subscriptionId, accessToken, clie
 
     try {
         const url = `https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscriptionId}`;
-        const response = await axios.delete(url, { headers });
+        const response = await axios.delete(url, {headers});
         if (response.status === 204) {
             console.log(`${LOG_PREFIX} Successfully unsubscribed from Twitch EventSub: ${subscriptionId}`);
             return true;
@@ -102,6 +102,27 @@ export async function deleteTwitchSubscription(subscriptionId, accessToken, clie
         }
     } catch (error) {
         console.error(`${LOG_PREFIX} Error unsubscribing from Twitch EventSub:`, error.response?.data || error.message);
+        throw error;
+    }
+}
+
+export async function fetchTwitchUserIdFromOauthToken(accessToken, clientId) {
+    try {
+        const response = await axios.get(TWITCH_API_URL_FETCH_USERNAME, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Client-Id': clientId,
+            },
+        });
+
+        if (response.data && response.data.data && response.data.data.length > 0) {
+            const user = response.data.data[0];
+            return user['id']
+        } else {
+            throw new Error('No user data found in the response');
+        }
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Error fetching username for OAuth token:`, error.message);
         throw error;
     }
 }

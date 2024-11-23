@@ -2,7 +2,7 @@ import WebSocket from "ws";
 
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
-import {fetchTwitchStreamId, fetchTwitchUserId} from "../api_calls/twitchApiCalls.js";
+import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
 import {broadcastMessageToFrontend} from "./wsServer.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
@@ -10,7 +10,6 @@ const LOG_PREFIX = 'TWITCH_WS:'
 // GLOBAL VARIABLES - ensure global access by exporting these or writing getter/setter
 export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
 export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
-export const BOT_USER_ID = process.env["BOT_USER_ID"]; // This is the User ID of the chat bot - konto bota/moderatora
 let websocketSessionID;
 let streamId;
 let broadcasterId;
@@ -22,7 +21,7 @@ const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscrip
 
 
 
-export async function startWebSocketClient(twitchUsername) {
+export async function startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) {
     try{
         const fetchResponse = await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
 
@@ -44,7 +43,7 @@ export async function startWebSocketClient(twitchUsername) {
         });
 
         websocketClient.on('message', (data) => {
-            handleWebSocketMessage(JSON.parse(data.toString()));
+            handleWebSocketMessage(JSON.parse(data.toString()), cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime);
         });
         return { success: true, message: 'Streamer found and connected to WebSocket' };
 
@@ -55,7 +54,7 @@ export async function startWebSocketClient(twitchUsername) {
 
 }
 
-function handleWebSocketMessage(data) {
+function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) {
     switch (data.metadata.message_type) {
         case 'session_welcome':
             websocketSessionID = data.payload.session.id;
@@ -75,7 +74,7 @@ function handleWebSocketMessage(data) {
                     const messageTimestamp = data.metadata.message_timestamp;
                     console.log(`MSG #${broadcasterUserLogin} <${chatterUserLogin}> ${messageText}`);
                     // TODO only streamer should send message to aws
-                    sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText);
+                    sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime);
                     broadcastMessageToFrontend({
                         broadcasterUserId: broadcasterUserId,
                         broadcasterUserLogin: broadcasterUserLogin,
@@ -110,10 +109,10 @@ async function registerEventSubListeners() {
                 'Client-Id': CLIENT_ID,
                 'Content-Type': 'application/json'
         }
-
+        const viewerId = await fetchTwitchUserIdFromOauthToken(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
         const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'channel.chat.message', version: '1', condition: {
-                broadcaster_user_id: broadcasterId, user_id: BOT_USER_ID
+                broadcaster_user_id: broadcasterId, user_id: viewerId,
             }, transport: {
                 method: 'websocket', session_id: websocketSessionID
             }

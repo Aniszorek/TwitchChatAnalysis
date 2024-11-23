@@ -21,14 +21,15 @@ export class AuthCallbackComponent implements OnInit {
       if (successful) {
         const idToken = params.get('idToken');
         const refreshToken = params.get('refreshToken');
+        const expireTime = params.get('expireTime')
 
-        if (idToken && refreshToken) {
+        if (idToken && refreshToken && expireTime) {
           // Verify if the token is valid
           this.authService.validateToken(idToken).subscribe({
             next: (response) => {
               if (response.message === 'verified') {
                 // Token is valid, save tokens and navigate
-                this.authService.saveTokens(idToken, refreshToken);
+                this.authService.saveTokens(idToken, refreshToken, expireTime);
                 this.authService.isLoggedIn.set(true);
                 console.log("Token verified. Redirecting to /chat");
                 this.router.navigate(['/chat']);
@@ -44,7 +45,7 @@ export class AuthCallbackComponent implements OnInit {
             }
           });
         } else {
-          console.error("Tokens missing in callback");
+          console.error("Tokens or refresh time missing in callback");
           this.router.navigate(['/login']);
         }
       } else {

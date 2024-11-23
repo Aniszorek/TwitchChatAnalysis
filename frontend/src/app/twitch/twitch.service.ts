@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {urls} from '../app.config';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {BehaviorSubject, catchError, Subject, tap} from 'rxjs';
+import {AuthService} from "../auth/auth.service";
 
 export interface SearchUserState {
   success: boolean;
@@ -26,6 +27,7 @@ export interface ChatMessage {
 })
 export class TwitchService {
   http = inject(HttpClient)
+  authService = inject(AuthService);
   backendUrl = urls.backendUrl
   private chatMessages = new Subject<ChatMessage | null>();
   chatMessages$ = this.chatMessages.asObservable();
@@ -37,7 +39,12 @@ export class TwitchService {
 
   searchUser(twitchUsername: string): void {
     const headers = new HttpHeaders({'Content-Type': 'application/json'});
-    const payload = {twitchUsername};
+    const payload = {
+      twitchUsername: twitchUsername,
+      cognitoIdToken: this.authService.getIdToken(),
+      cognitoRefreshToken: this.authService.getRefreshToken(),
+      cognitoTokenExpiryTime: this.authService.getExpiryDate(),
+    };
 
     this.disconnectWebSocket();
 
