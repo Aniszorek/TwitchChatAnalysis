@@ -1,6 +1,7 @@
 import {refreshIdTokenIfExpired} from "./cognitoAuth.js";
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import {getStreamId} from "../bot/bot.js";
 
 const API_GATEWAY_URL = 'https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test'
 const MESSAGES_PATH = `${API_GATEWAY_URL}/twitch-message`
@@ -8,23 +9,25 @@ const UPDATE_USER_PATH = `${API_GATEWAY_URL}/twitchChatAnalytics-authorization`
 
 const LOG_PREFIX = `API_GATEWAY_REST:`
 
-export async function sendMessageToApiGateway(broadcasterUserLogin, chatterUserLogin, messageText, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) {
+export async function sendMessageToApiGateway(msg, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) {
     try {
         await refreshIdTokenIfExpired(cognitoRefreshToken, cognitoExpiryTime);
 
         const response = await axios.post(MESSAGES_PATH, {
-            chatter_user_login: chatterUserLogin,
-            message_text: messageText
+            chatter_user_login: msg.chatterUserLogin,
+            message_text: msg.messageText,
+            timestamp: msg.messageTimestamp,
+            stream_id: getStreamId(),
         }, {
             headers: {
                 'Authorization': `Bearer ${cognitoIdToken}`,
                 'Content-Type': 'application/json',
-                'BroadcasterUserLogin': broadcasterUserLogin
+                'BroadcasterUserLogin': msg.broadcasterUserLogin
             }
         });
 
         if (response.status === 200) {
-            console.log(`${LOG_PREFIX} Message sent to API Gateway: ${messageText}`);
+            console.log(`${LOG_PREFIX} Message sent to API Gateway: ${msg.messageText}`);
         } else {
             console.error(`${LOG_PREFIX} Failed to send message to API Gateway. Status: ${response.status}`);
         }
