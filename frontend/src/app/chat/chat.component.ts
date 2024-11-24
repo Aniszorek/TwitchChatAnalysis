@@ -14,8 +14,4 @@ import {AuthService} from '../auth/auth.service';
   styleUrl: './chat.component.css'
 })
 export class ChatComponent {
-  authService = inject(AuthService);
-  logout() {
-    this.authService.logout();
-  }
 }
