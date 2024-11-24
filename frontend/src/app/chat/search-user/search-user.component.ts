@@ -16,6 +16,7 @@ import {NgIf} from '@angular/common';
 })
 export class SearchUserComponent {
   twitchService = inject(TwitchService);
+  previous_username = '';
   username = 'bartes2002';
   successMessage: string | null = null;
   errorMessage: string | null = null;
@@ -43,6 +44,7 @@ export class SearchUserComponent {
 
   searchUser() {
     if (this.username) {
+      this.previous_username = this.username;
       this.loading = true;
       this.twitchService.searchUser(this.username);
     }
