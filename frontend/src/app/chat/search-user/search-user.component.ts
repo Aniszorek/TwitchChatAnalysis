@@ -19,6 +19,7 @@ export class SearchUserComponent {
   username = 'bartes2002';
   successMessage: string | null = null;
   errorMessage: string | null = null;
+  loading = false;
 
 
 
@@ -34,10 +35,15 @@ export class SearchUserComponent {
         }
       }
     });
+
+    this.twitchService.loadingState$.subscribe((loadingState) => {
+      this.loading = loadingState;
+    });
   }
 
   searchUser() {
     if (this.username) {
+      this.loading = true;
       this.twitchService.searchUser(this.username);
     }
   }

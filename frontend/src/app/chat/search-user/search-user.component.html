@@ -3,10 +3,15 @@
   <button (click)="searchUser()" class="search-button">Search</button>
 </div>
 
-<div *ngIf="successMessage" class="success-message">
+<div *ngIf="loading" class="loading-message">
+  <div class="spinner"></div>
+  Connecting...
+</div>
+
+<div *ngIf="successMessage && !loading" class="success-message">
   {{ successMessage }}
 </div>
 
-<div *ngIf="errorMessage" class="error-message">
+<div *ngIf="errorMessage  && !loading" class="error-message">
   {{ errorMessage }}
 </div>

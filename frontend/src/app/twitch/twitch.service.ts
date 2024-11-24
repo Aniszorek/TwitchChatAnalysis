@@ -33,6 +33,8 @@ export class TwitchService {
   chatMessages$ = this.chatMessages.asObservable();
   private searchUserState = new BehaviorSubject<SearchUserState | null>(null);
   searchUserState$ = this.searchUserState.asObservable();
+  private loadingState = new BehaviorSubject<boolean>(false);
+  loadingState$ = this.loadingState.asObservable();
 
   private websocket: WebSocket | null = null;
 
@@ -49,6 +51,8 @@ export class TwitchService {
     this.disconnectWebSocket();
 
     console.log('Sending Twitch username to /set-twitch-username endpoint');
+    this.loadingState.next(true);
+
     this.http
       .post(`${this.backendUrl}/set-twitch-username`, payload, {headers})
       .pipe(
@@ -62,6 +66,7 @@ export class TwitchService {
             success: false,
             errorMessage: 'Streamer not found. Please check the username and try again.',
           });
+          this.loadingState.next(false);
           throw error;
         })
       )
@@ -79,6 +84,7 @@ export class TwitchService {
       } else {
         console.error('No ID token available to authenticate WebSocket connection');
       }
+      this.loadingState.next(false);
     };
 
     this.websocket.onmessage = (event) => {
@@ -108,5 +114,6 @@ export class TwitchService {
       this.websocket = null;
     }
     this.chatMessages.next(null);
+    this.loadingState.next(false);
   }
 }
