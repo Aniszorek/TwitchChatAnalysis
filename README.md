@@ -32,8 +32,6 @@ Current status:
       npx dotenvx decrypt
       ```
       - set `TWITCH_BOT_OAUTH_TOKEN` to the access token you generated for bot account
-      - set `BOT_USER_ID` to Channel Id of the account you generated access token for
-      - both ids can be obtained [here](https://www.streamweasels.com/tools/convert-twitch-username-%20to-user-id/)
       - Encrypt again after making changes
       ```bash
       npx dotenvx encrypt

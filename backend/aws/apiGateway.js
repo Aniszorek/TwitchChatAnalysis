@@ -1,4 +1,4 @@
-import {ensureValidIdToken, getCognitoIdToken} from "./cognitoAuth.js";
+import {refreshIdTokenIfExpired} from "./cognitoAuth.js";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import {getStreamId} from "../bot/bot.js";
@@ -9,11 +9,9 @@ const UPDATE_USER_PATH = `${API_GATEWAY_URL}/twitchChatAnalytics-authorization`
 
 const LOG_PREFIX = `API_GATEWAY_REST:`
 
-export async function sendMessageToApiGateway(msg) {
+export async function sendMessageToApiGateway(msg, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) {
     try {
-
-        await ensureValidIdToken();
-        const cognitoIdToken = getCognitoIdToken();
+        await refreshIdTokenIfExpired(cognitoRefreshToken, cognitoExpiryTime);
 
         const response = await axios.post(MESSAGES_PATH, {
             chatter_user_login: msg.chatterUserLogin,
@@ -38,12 +36,10 @@ export async function sendMessageToApiGateway(msg) {
     }
 }
 
-export async function validateUserRole(twitch_oauth_token, broadcaster_user_login, client_id) {
+export async function validateUserRole(twitch_oauth_token, broadcaster_user_login, client_id, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime) {
     try {
-        await ensureValidIdToken();
-        const accessToken = getCognitoIdToken();
-
-        const decoded = jwt.decode(accessToken);
+        await refreshIdTokenIfExpired(cognitoRefreshToken, cognitoTokenExpiryTime);
+        const decoded = jwt.decode(cognitoIdToken);
         const username = decoded["cognito:username"];
 
         const response = await axios.post(UPDATE_USER_PATH, {
@@ -53,7 +49,7 @@ export async function validateUserRole(twitch_oauth_token, broadcaster_user_logi
             client_id: client_id
         }, {
             headers: {
-                'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json'
+                'Authorization': `Bearer ${cognitoIdToken}`, 'Content-Type': 'application/json'
             }
         });
 

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {SearchUserComponent} from "./search-user/search-user.component";
 import {ChatWidgetComponent} from "./chat-widget/chat-widget.component";
+import {AuthService} from '../auth/auth.service';
 
 @Component({
   selector: 'app-chat',
@@ -13,5 +14,4 @@ import {ChatWidgetComponent} from "./chat-widget/chat-widget.component";
   styleUrl: './chat.component.css'
 })
 export class ChatComponent {
-
 }

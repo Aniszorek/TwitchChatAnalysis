@@ -22,17 +22,17 @@ menu {
   align-items: center;
 }
 
-menu a {
-  color: var(--primary-color);
-  font-weight: bold;
-  margin-left: 1rem;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  transition: background-color 0.3s;
+menu button {
+  padding: 10px 20px;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s;
 }
 
-menu a:hover {
-  background-color: var(--primary-color);
-  color: var(--text-color);
+menu button:hover {
+  background-color: #0056b3;
 }

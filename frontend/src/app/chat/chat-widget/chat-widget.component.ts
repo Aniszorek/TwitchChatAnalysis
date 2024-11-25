@@ -1,5 +1,5 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {ChatMessage, TwitchService} from '../../auth/twitch.service';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChatMessage, TwitchService} from '../../twitch/twitch.service';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 
 @Component({
@@ -15,11 +15,21 @@ import {DatePipe, NgForOf, NgIf} from '@angular/common';
 })
 export class ChatWidgetComponent implements OnInit {
   private twitchService = inject(TwitchService);
+  private destroyRef = inject(DestroyRef)
   messages: ChatMessage[] = [];
 
   ngOnInit() {
-    this.twitchService.chatMessages$.subscribe((message) => {
-      this.messages.push(message);
-    });
+
+    const sub = this.twitchService.chatMessages$.subscribe((message) => {
+        if (message) {
+          this.messages.push(message);
+        } else {
+          this.messages = [];
+        }
+      }
+    );
+
+    this.destroyRef.onDestroy(sub.unsubscribe)
   }
+
 }

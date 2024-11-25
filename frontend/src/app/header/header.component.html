@@ -1,6 +1,11 @@
 <header>
   <img Src="twitch_icon.png" href="App logo">
   <menu>
-    <a>Login</a>
+    @if (!this.authService.isLoggedIn()) {
+      <button (click)="login()"> Login</button>
+    } @else {
+      <button (click)="logout()"> Logout</button>
+    }
+
   </menu>
 </header>

@@ -2,15 +2,14 @@ import WebSocket from "ws";
 
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
-import {fetchTwitchStreamId, fetchTwitchUserId} from "../api_calls/twitchApiCalls.js";
-import {broadcastMessageToFrontend} from "./wsServer.js";
+import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
+import {sendMessageToFrontendClient, trackSubscription} from "./wsServer.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
 // GLOBAL VARIABLES - ensure global access by exporting these or writing getter/setter
 export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
 export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
-export const BOT_USER_ID = process.env["BOT_USER_ID"]; // This is the User ID of the chat bot - konto bota/moderatora
 let websocketSessionID;
 let streamId;
 let broadcasterId;
@@ -22,34 +21,44 @@ const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscrip
 
 
 
-export async function startWebSocketClient(twitchUsername) {
-    await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
-        .catch(error => console.error('[TWITCH] Error while fetching id for twitch username:', error));
+export async function startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
+    try{
+        const fetchResponse = await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
 
-    await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
+        if (!fetchResponse.found) {
+            return { success: false, message: `Streamer with username: ${twitchUsername} not found` };
+        }
 
-    const websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
-    console.log(`${LOG_PREFIX} Starting WebSocket client for:`, twitchUsername);
+        await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
 
-    websocketClient.on('error', console.error);
+        const websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
-    websocketClient.on('open', () => {
-        console.log(`${LOG_PREFIX} WebSocket connection opened to ` + EVENTSUB_WEBSOCKET_URL);
-    });
+        console.log(`${LOG_PREFIX} Starting WebSocket client for:`, twitchUsername);
 
-    websocketClient.on('message', (data) => {
-        handleWebSocketMessage(JSON.parse(data.toString()));
-    });
+        websocketClient.on('error', console.error);
 
-    return websocketClient;
+        websocketClient.on('open', () => {
+            console.log(`${LOG_PREFIX} WebSocket connection opened to ` + EVENTSUB_WEBSOCKET_URL);
+        });
+
+        websocketClient.on('message', (data) => {
+            handleWebSocketMessage(JSON.parse(data.toString()), cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId);
+        });
+        return { success: true, message: 'Streamer found and connected to WebSocket' };
+
+    } catch (error) {
+        console.error(`${LOG_PREFIX} Error while starting websocket clients for twitch/aws: `, error.message);
+        return { success: false, message: 'An error occurred while connecting to the WebSocket' };
+    }
+
 }
 
-function handleWebSocketMessage(data) {
+function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
     switch (data.metadata.message_type) {
         case 'session_welcome':
             websocketSessionID = data.payload.session.id;
-            registerEventSubListeners();
+            registerEventSubListeners(cognitoUserId);
             break;
         case 'notification':
             switch (data.metadata.subscription_type) {
@@ -67,8 +76,8 @@ function handleWebSocketMessage(data) {
                     }
                     console.log(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`);
                     // TODO only streamer should send message to aws
-                    sendMessageToApiGateway(msg);
-                    broadcastMessageToFrontend(msg);
+                    sendMessageToApiGateway(msg, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime);
+                    sendMessageToFrontendClient(cognitoUserId, msg);
                     break;
                 case 'stream.online':
                     const streamId = data.payload.event.id;
@@ -84,7 +93,7 @@ function handleWebSocketMessage(data) {
     }
 }
 
-async function registerEventSubListeners() {
+async function registerEventSubListeners(cognitoUserId) {
     try {
 
         const headers = {
@@ -92,17 +101,17 @@ async function registerEventSubListeners() {
                 'Client-Id': CLIENT_ID,
                 'Content-Type': 'application/json'
         }
-
+        const viewerId = await fetchTwitchUserIdFromOauthToken(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
         const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'channel.chat.message', version: '1', condition: {
-                broadcaster_user_id: broadcasterId, user_id: BOT_USER_ID
+                broadcaster_user_id: broadcasterId, user_id: viewerId,
             }, transport: {
                 method: 'websocket', session_id: websocketSessionID
             }
         }, {
             headers: headers
         });
-        verifyRegisterResponse(registerMessageResponse, 'channel.chat.message');
+        verifyRegisterResponse(registerMessageResponse, 'channel.chat.message', cognitoUserId);
 
 
         const registerOnlineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
@@ -114,7 +123,7 @@ async function registerEventSubListeners() {
         }, {
             headers: headers
         });
-        verifyRegisterResponse(registerOnlineResponse, 'stream.online');
+        verifyRegisterResponse(registerOnlineResponse, 'stream.online', cognitoUserId);
 
 
         const registerOfflineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
@@ -126,7 +135,7 @@ async function registerEventSubListeners() {
         }, {
             headers: headers
         });
-        verifyRegisterResponse(registerOfflineResponse, 'stream.offline');
+        verifyRegisterResponse(registerOfflineResponse, 'stream.offline', cognitoUserId);
 
     } catch (error) {
         console.error(`${LOG_PREFIX} Error during subscription:`, error.response ? error.response.data : error.message);
@@ -136,8 +145,10 @@ async function registerEventSubListeners() {
 
 }
 
-function verifyRegisterResponse(response, registerType) {
+function verifyRegisterResponse(response, registerType, userId) {
     if (response.status === 202) {
+        const subscriptionId = response.data.data[0].id;
+        trackSubscription(userId, subscriptionId);
         console.log(`${LOG_PREFIX} Subscribed to ${registerType} [${response.data.data[0].id}]`);
     } else {
         console.error(`${LOG_PREFIX} Failed to subscribe to ${registerType}. Status code ${response.status}`);
