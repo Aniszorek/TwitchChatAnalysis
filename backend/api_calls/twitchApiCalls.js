@@ -30,7 +30,7 @@ export async function fetchTwitchUserId(nickname, accessToken, clientId) {
         setBroadcasterId(userId);
         return {found: true, userId};
     } catch (error) {
-        console.error(`${LOG_PREFIX} Error while fetching Twitch user ID:`, error);
+        console.error(`${LOG_PREFIX} Error while fetching Twitch user ID`, error.message);
         throw error;
     }
 }

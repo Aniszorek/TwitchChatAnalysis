@@ -48,7 +48,7 @@ export async function startWebSocketClient(twitchUsername, cognitoIdToken, cogni
         return { success: true, message: 'Streamer found and connected to WebSocket' };
 
     } catch (error) {
-        console.error(`${LOG_PREFIX} Error while starting websocket clients for twitch/aws:`, error);
+        console.error(`${LOG_PREFIX} Error while starting websocket clients for twitch/aws: `, error.message);
         return { success: false, message: 'An error occurred while connecting to the WebSocket' };
     }
 
