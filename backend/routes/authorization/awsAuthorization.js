@@ -2,11 +2,12 @@ import express from 'express';
 
 import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth.js';
 import {
-    CLIENT_ID, startWebSocketClient, TWITCH_BOT_OAUTH_TOKEN
+    CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN, verifyTwitchUsernameAndStreamStatus
 } from '../../bot/bot.js';
 import {validateTwitchAuth,} from '../../api_calls/twitchApiCalls.js';
 import {connectAwsWebSocket} from "../../aws/websocketApi.js";
 import {validateUserRole} from "../../aws/apiGateway.js";
+import {pendingWebSocketInitializations} from "../../bot/wsServer.js";
 
 
 const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION:`;
@@ -49,34 +50,36 @@ authRouter.post('/set-twitch-username', async (req, res) => {
     const cognitoIdToken = req.body["cognitoIdToken"];
     const cognitoRefreshToken = req.body["cognitoRefreshToken"];
     const cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
+    const twitchBroadcasterUsername = req.body["twitchUsername"];
 
-    // sub is a part of jwt, and it can be used as identifier for Cognito user
-    // we will use it to determine to which websocket connection messages should be forwarded
-    const cognitoUserId = (await verifyToken(cognitoIdToken)).sub
-
-    const twitchUsername = req.body["twitchUsername"];
-
-    if (!twitchUsername) {
-        return res.status(400).send('Brak nazwy użytkownika Twitch');
+    if (!twitchBroadcasterUsername) {
+        return res.status(400).send('Twitch username is missing');
     }
 
     try {
+        // sub is a part of jwt, and it can be used as identifier for Cognito user
+        // we will use it to determine to which websocket connection messages should be forwarded
+        const cognitoUserId = (await verifyToken(cognitoIdToken)).sub
         await validateTwitchAuth();
+
         // Validate role for user
-        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchUsername, CLIENT_ID, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
+        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
+
         // Połącz z Twitch Websocket API
-        const result = await startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime, cognitoUserId);
+        const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
         if (!result.success) {
             return res.status(404).send({message: result.message});
         }
-        // Połącz z AWS Websocket API
-        connectAwsWebSocket(twitchUsername, cognitoIdToken)
 
+        pendingWebSocketInitializations.set(cognitoUserId, {
+            twitchParams: { twitchBroadcasterUsername, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime },
+            awsParams: { twitchBroadcasterUsername, cognitoIdToken},
+        });
 
-        res.send({message: 'Streamer found and WebSocket initialized'});
+        res.send({ message: 'Streamer found and WebSocket connections can now be initialized' });
     } catch (error) {
-        console.error(`${LOG_PREFIX} starting WebSocket client:`, error);
-        res.status(500).send('Błąd podczas uruchamiania klienta WebSocket');
+        console.error(`${LOG_PREFIX}  Error during Twitch/AWS setup:`, error);
+        res.status(500).send('Error validating Twitch user and credentials');
     }
 });
 
