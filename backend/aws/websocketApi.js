@@ -47,12 +47,10 @@ export function connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserI
             console.error(`${LOG_PREFIX} error:`, error);
         });
 
-        const userData = frontendClients.get(cognitoUserId);
-        userData.awsWs = awsWebSocket;
-
         return awsWebSocket;
 
     } catch (error) {
         console.error(`${LOG_PREFIX} Failed to connect to AWS WebSocket:`, error);
+        return null;
     }
 }

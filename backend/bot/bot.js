@@ -48,15 +48,12 @@ export async function startTwitchWebSocket(twitchUsername, cognitoIdToken, cogni
             handleWebSocketMessage(JSON.parse(data.toString()), cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId);
         });
 
-        const userData = frontendClients.get(cognitoUserId);
-        userData.twitchWs = twitchWebsocket;
 
-
-        return { success: true, message: 'Connected to Twitch WebSocket' };
+        return twitchWebsocket;
 
     } catch (error) {
         console.error(`${LOG_PREFIX} Error while starting websocket clients for twitch/aws: `, error.message);
-        return { success: false, message: 'Failed to connect to Twitch WebSocket' };
+        return null;
     }
 
 }

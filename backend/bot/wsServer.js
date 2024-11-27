@@ -41,12 +41,19 @@ export const initWebSocketServer = (server) => {
                             twitchParams.cognitoTokenExpiryTime,
                             userId
                         );
-
-                        if (!twitchResult.success) {
-                            console.error(`${LOG_PREFIX} Failed to start Twitch WebSocket for user ID: ${userId}`);
+                        if (twitchResult != null) {
+                            frontendClients.get(userId).twitchWs = twitchResult;
+                        } else {
+                            console.error(`${LOG_PREFIX} Twitch websocket not connected for ${userId}`);
                         }
 
-                        connectAwsWebSocket(awsParams.twitchBroadcasterUsername, awsParams.cognitoIdToken, userId);
+                        const awsResult = connectAwsWebSocket(awsParams.twitchBroadcasterUsername, awsParams.cognitoIdToken, userId);
+                        if (awsResult != null) {
+                            frontendClients.get(userId).awsWs = awsResult;
+                        } else {
+                            console.error(`${LOG_PREFIX} AWS websocket not connected for ${userId}`);
+                        }
+
                         pendingWebSocketInitializations.delete(userId);
 
                     }
