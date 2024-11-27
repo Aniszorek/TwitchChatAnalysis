@@ -5,7 +5,6 @@ import {
     CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN, verifyTwitchUsernameAndStreamStatus
 } from '../../bot/bot.js';
 import {validateTwitchAuth,} from '../../api_calls/twitchApiCalls.js';
-import {connectAwsWebSocket} from "../../aws/websocketApi.js";
 import {validateUserRole} from "../../aws/apiGateway.js";
 import {pendingWebSocketInitializations} from "../../bot/wsServer.js";
 
