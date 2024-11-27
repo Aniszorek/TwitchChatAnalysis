@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import {sendMessageToFrontendClient} from "../bot/wsServer.js";
 
 const LOG_PREFIX = `API_GATEWAY_WS:`
 
@@ -38,6 +39,7 @@ export function connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserI
                 if(data.type && data.data && data.type === NLP_MESSAGE_WEBSOCKET_TYPE){
                     //TODO poprawnie odczytywać przetworzoną wiadomość na FE
                     sendMessageToFrontendClient(cognitoUserId, data.data)
+                    console.log(`message sent: ${data.data}`)
                 }
 
             } catch (error) {
