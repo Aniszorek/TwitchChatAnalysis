@@ -1,9 +1,11 @@
 import {WebSocket, WebSocketServer} from 'ws';
 import {verifyToken} from "../aws/cognitoAuth.js";
 import {deleteTwitchSubscription} from "../api_calls/twitchApiCalls.js";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "./bot.js";
+import {CLIENT_ID, startTwitchWebSocket, TWITCH_BOT_OAUTH_TOKEN} from "./bot.js";
+import {connectAwsWebSocket} from "../aws/websocketApi.js";
 
-const frontendClients = new Map();
+export const frontendClients = new Map();
+export const pendingWebSocketInitializations = new Map();
 const LOG_PREFIX = 'BACKEND WS:'
 
 export const initWebSocketServer = (server) => {
@@ -18,9 +20,43 @@ export const initWebSocketServer = (server) => {
                 const parsedMessage = JSON.parse(message);
 
                 if (parsedMessage.type === 'auth' && parsedMessage["cognitoIdToken"]) {
+                    // todo: co jeśli token nie jest poprawny?
                     const decodedToken = await verifyToken(parsedMessage["cognitoIdToken"]);
                     userId = decodedToken.sub;
-                    frontendClients.set(userId, {ws, subscriptions: new Set()});
+
+                    frontendClients.set(userId, {
+                        ws,
+                        twitchWs: null,
+                        awsWs: null,
+                        subscriptions: new Set(),
+                    });
+
+                    if (pendingWebSocketInitializations.has(userId)) {
+                        const {twitchParams, awsParams} = pendingWebSocketInitializations.get(userId);
+
+                        const twitchResult = await startTwitchWebSocket(
+                            twitchParams.twitchBroadcasterUsername,
+                            twitchParams.cognitoIdToken,
+                            twitchParams.cognitoRefreshToken,
+                            twitchParams.cognitoTokenExpiryTime,
+                            userId
+                        );
+                        if (twitchResult != null) {
+                            frontendClients.get(userId).twitchWs = twitchResult;
+                        } else {
+                            console.error(`${LOG_PREFIX} Twitch websocket not connected for ${userId}`);
+                        }
+
+                        const awsResult = connectAwsWebSocket(awsParams.twitchBroadcasterUsername, awsParams.cognitoIdToken, userId);
+                        if (awsResult != null) {
+                            frontendClients.get(userId).awsWs = awsResult;
+                        } else {
+                            console.error(`${LOG_PREFIX} AWS websocket not connected for ${userId}`);
+                        }
+
+                        pendingWebSocketInitializations.delete(userId);
+
+                    }
                     console.log(`${LOG_PREFIX} WebSocket authenticated for user ID: ${userId}`);
                 }
             } catch (err) {
@@ -32,7 +68,7 @@ export const initWebSocketServer = (server) => {
         ws.on('close', async () => {
             console.log(`${LOG_PREFIX} Frontend client disconnected`);
             if (userId) {
-                await cleanupSubscriptions(userId, frontendClients.get(userId).subscriptions);
+                await cleanupUserConnections(userId, frontendClients.get(userId).subscriptions);
                 frontendClients.delete(userId);
             }
         });
@@ -40,6 +76,27 @@ export const initWebSocketServer = (server) => {
 
     return wss;
 };
+
+async function cleanupUserConnections(userId) {
+    const userData = frontendClients.get(userId);
+
+    if (userData.twitchWs && userData.twitchWs.readyState === WebSocket.OPEN) {
+        userData.twitchWs.close();
+        console.log(`${LOG_PREFIX} Closed Twitch WebSocket for user ID: ${userId}`);
+    }
+
+    if (userData.awsWs && userData.awsWs.readyState === WebSocket.OPEN) {
+        userData.awsWs.close();
+        console.log(`${LOG_PREFIX} Closed AWS WebSocket for user ID: ${userId}`);
+    }
+
+    await cleanupSubscriptions(userId, userData.subscriptions);
+
+    if (userData.ws && userData.ws.readyState === WebSocket.OPEN) {
+        userData.ws.close();
+        console.log(`${LOG_PREFIX} Closed frontend WebSocket for user ID: ${userId}`);
+    }
+}
 
 
 async function cleanupSubscriptions(userId, subscriptions) {
