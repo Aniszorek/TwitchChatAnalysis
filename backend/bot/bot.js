@@ -3,7 +3,7 @@ import WebSocket from "ws";
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
 import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
-import {sendMessageToFrontendClient, trackSubscription} from "./wsServer.js";
+import {frontendClients, sendMessageToFrontendClient, trackSubscription} from "./wsServer.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -21,35 +21,39 @@ const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscrip
 
 
 
-export async function startWebSocketClient(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
+export async function verifyTwitchUsernameAndStreamStatus(twitchUsername){
+    const fetchResponse = await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
+
+    if (!fetchResponse.found) {
+        return { success: false, message: `Streamer with username: ${twitchUsername} not found` };
+    }
+
+    const streamStatus = await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
+    return { success: true, message: 'Twitch username validated and authorized' };
+}
+
+export async function startTwitchWebSocket(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
     try{
-        const fetchResponse = await fetchTwitchUserId(twitchUsername, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
-
-        if (!fetchResponse.found) {
-            return { success: false, message: `Streamer with username: ${twitchUsername} not found` };
-        }
-
-
-        await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
-
-        const websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
+        const twitchWebsocket = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
         console.log(`${LOG_PREFIX} Starting WebSocket client for:`, twitchUsername);
 
-        websocketClient.on('error', console.error);
+        twitchWebsocket.on('error', console.error);
 
-        websocketClient.on('open', () => {
-            console.log(`${LOG_PREFIX} WebSocket connection opened to ` + EVENTSUB_WEBSOCKET_URL);
+        twitchWebsocket.on('open', () => {
+            console.log(`${LOG_PREFIX} Twitch WebSocket connection opened for user ID: ${cognitoUserId}`);
         });
 
-        websocketClient.on('message', (data) => {
+        twitchWebsocket.on('message', (data) => {
             handleWebSocketMessage(JSON.parse(data.toString()), cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId);
         });
-        return { success: true, message: 'Streamer found and connected to WebSocket' };
+
+
+        return twitchWebsocket;
 
     } catch (error) {
         console.error(`${LOG_PREFIX} Error while starting websocket clients for twitch/aws: `, error.message);
-        return { success: false, message: 'An error occurred while connecting to the WebSocket' };
+        return null;
     }
 
 }

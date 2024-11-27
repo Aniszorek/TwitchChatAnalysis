@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {config, urls} from "../app.config";
-import {catchError, map, Observable, of} from 'rxjs';
+import {catchError, map, Observable, of, Subject} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +10,9 @@ export class AuthService {
   http = inject(HttpClient)
   backendUrl = urls.backendUrl
   isLoggedIn = signal(false);
+
+  private logoutSubject = new Subject<void>();
+  logout$ = this.logoutSubject.asObservable();
 
   cognitoLogoutUrl = urls.cognitoLogoutUrl;
   clientId = config.cognitoClientId ;
@@ -41,6 +44,7 @@ export class AuthService {
 
   logout(): void {
     this.clearLocalSession();
+    this.logoutSubject.next();
     const logoutUrl = `${this.cognitoLogoutUrl}?client_id=${this.clientId}&logout_uri=${encodeURIComponent(this.redirectUri)}`;
     console.log(logoutUrl);
 

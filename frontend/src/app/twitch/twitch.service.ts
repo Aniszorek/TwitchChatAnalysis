@@ -39,6 +39,12 @@ export class TwitchService {
   private websocket: WebSocket | null = null;
 
 
+  constructor() {
+    inject(AuthService).logout$.subscribe(() => {
+      this.disconnectWebSocket();
+    });
+  }
+
   searchUser(twitchUsername: string): void {
     const headers = new HttpHeaders({'Content-Type': 'application/json'});
     const payload = {
