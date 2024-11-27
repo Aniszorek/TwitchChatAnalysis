@@ -70,7 +70,7 @@ authRouter.post('/set-twitch-username', async (req, res) => {
             return res.status(404).send({message: result.message});
         }
         // Połącz z AWS Websocket API
-        connectAwsWebSocket(twitchUsername, cognitoIdToken)
+        connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserId)
 
 
         res.send({message: 'Streamer found and WebSocket initialized'});
