@@ -33,10 +33,12 @@ export const initWebSocketServer = (server) => {
                             cognitoIdToken: null,
                             cognitoRefreshToken: null,
                             cognitoExpiryTime: null,
+                            cognitoUsername: null,
                         },
                         twitchData: {
                             twitchBroadcasterUsername: null,
                             twitchBroadcasterUserId: null,
+                            twitchRole: null,
                             streamId: null
                         }
                     });
@@ -44,13 +46,15 @@ export const initWebSocketServer = (server) => {
                     if (pendingWebSocketInitializations.has(userId)) {
                         const { twitchBroadcasterUsername,
                             twitchBroadcasterUserId,
+                            twitchRole,
                             streamId,
+                            cognitoUsername,
                             cognitoIdToken,
                             cognitoRefreshToken,
                             cognitoTokenExpiryTime } = pendingWebSocketInitializations.get(userId);
 
-                        setFrontendClientCognitoData(userId, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
-                        setFrontendClientTwitchData(userId,twitchBroadcasterUsername, twitchBroadcasterUserId, streamId)
+                        setFrontendClientCognitoData(userId, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime, cognitoUsername)
+                        setFrontendClientTwitchData(userId,twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId)
 
                         console.log(`${LOG_PREFIX} ${twitchBroadcasterUserId}`)
 
@@ -151,7 +155,7 @@ export const sendMessageToFrontendClient = (userId, message) => {
     }
 };
 
-export const setFrontendClientCognitoData = (cognitoUserId, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) => {
+export const setFrontendClientCognitoData = (cognitoUserId, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUsername) => {
 
     if(cognitoIdToken)
         frontendClients.get(cognitoUserId).cognito.cognitoIdToken = cognitoIdToken
@@ -159,15 +163,18 @@ export const setFrontendClientCognitoData = (cognitoUserId, cognitoIdToken, cogn
         frontendClients.get(cognitoUserId).cognito.cognitoRefreshToken = cognitoRefreshToken
     if(cognitoExpiryTime)
         frontendClients.get(cognitoUserId).cognito.cognitoExpiryTime = cognitoExpiryTime
+    if(cognitoUsername)
+        frontendClients.get(cognitoUserId).cognito.cognitoUsername = cognitoUsername
+
 }
 
-export const setFrontendClientTwitchData = (cognitoUserId, twitchBroadcasterUsername, twitchBroadcasterUserId, streamId) => {
+export const setFrontendClientTwitchData = (cognitoUserId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId) => {
     frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUsername = twitchBroadcasterUsername
     frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUserId = twitchBroadcasterUserId
+    frontendClients.get(cognitoUserId).twitchData.twitchRole = twitchRole
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
 }
 
 export const setFrontendClientTwitchDataStreamId = (cognitoUserId, streamId) => {
     frontendClients.get(cognitoUserId).twitchData.streamId = streamId
 }
-

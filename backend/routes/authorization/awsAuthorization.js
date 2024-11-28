@@ -61,23 +61,30 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         const cognitoUserId = (await verifyToken(cognitoIdToken)).sub
         await validateTwitchAuth();
 
-        // Validate role for user
-        // todo TCA-48 ta rola powinna być zapisywana w tym pendingWS i potem uwzględniana przy decydowaniu czy przesyłamy wiadomości do AWS'a
-        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken)
-
         // Połącz z Twitch Websocket API
         const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
         if (!result.success) {
             return res.status(404).send({message: result.message});
         }
 
+        // Validate role for user
+        const roleResponse = await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken)
+
+        if(!roleResponse) {
+            return res.status(500).send({message: 'Could not resolve role for this twitch account'});
+        }
+
         const streamId = result.streamStatus.stream_id
         const twitchBroadcasterUserId = result.userId
+        const twitchRole = roleResponse.role
+        const cognitoUsername = roleResponse.cognitoUsername
 
         pendingWebSocketInitializations.set(cognitoUserId, {
             twitchBroadcasterUsername,
             twitchBroadcasterUserId,
+            twitchRole,
             streamId,
+            cognitoUsername,
             cognitoIdToken,
             cognitoRefreshToken,
             cognitoTokenExpiryTime

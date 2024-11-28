@@ -9,6 +9,7 @@ import {
     setFrontendClientTwitchDataStreamId,
     trackSubscription
 } from "./wsServer.js";
+import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -85,8 +86,11 @@ function handleWebSocketMessage(data, cognitoUserId) {
                        "messageTimestamp":       data.metadata.message_timestamp
                     }
                     console.log(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`);
-                    // TODO only streamer should send message to aws
-                    sendMessageToApiGateway(msg, cognitoUserId);
+                    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws"))
+                    {
+                        sendMessageToApiGateway(msg, cognitoUserId);
+                    }
+
                     sendMessageToFrontendClient(cognitoUserId, msg);
                     break;
                 case 'stream.online':
@@ -114,7 +118,7 @@ async function registerEventSubListeners(cognitoUserId, websocketSessionID) {
         const viewerId = await fetchTwitchUserIdFromOauthToken(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
         const broadcasterId = frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUserId
 
-        console.log(broadcasterId)
+        // console.log(broadcasterId)
 
         const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'channel.chat.message', version: '1', condition: {

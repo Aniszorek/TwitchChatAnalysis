@@ -2,6 +2,7 @@ import {refreshIdTokenIfExpired} from "./cognitoAuth.js";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import {frontendClients} from "../bot/wsServer.js";
+import {isCognitoRoleValid} from "../cognitoRoles.js";
 
 const API_GATEWAY_URL = 'https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test'
 const MESSAGES_PATH = `${API_GATEWAY_URL}/twitch-message`
@@ -54,10 +55,19 @@ export async function validateUserRole(twitch_oauth_token, broadcaster_user_logi
             }
         });
 
+        const role = response.data.body.role
+        if(!isCognitoRoleValid(role))
+        {
+            console.error(`${LOG_PREFIX} [ValidateUserRole] Unknown role: ${role} - Status: ${JSON.stringify(response.data.body)}`);
+            return undefined
+        }
+
         if (response.data.statusCode === 200) {
-            console.log(`${LOG_PREFIX} [ValidateUserRole] Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${response.data.body}`);
+            console.log(`${LOG_PREFIX} [ValidateUserRole] Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${JSON.stringify(response.data.body)}`);
+            return {'role': role, 'cognitoUsername': username};
         } else {
-            console.error(`${LOG_PREFIX} [ValidateUserRole] Failed authorization. Status: ${response.data.body}`);
+            console.error(`${LOG_PREFIX} [ValidateUserRole] Failed authorization. Status: ${JSON.stringify(response.data.body)}`);
+            return undefined
         }
 
     } catch (error) {
