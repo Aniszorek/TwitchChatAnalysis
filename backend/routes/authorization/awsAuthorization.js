@@ -45,7 +45,7 @@ authRouter.get('/callback', async (req, res) => {
 
 
 authRouter.post('/set-twitch-username', async (req, res) => {
-    // todo: dodać tutaj weryfikacje tokena cognito
+    // todo: add cognito token verification
     const cognitoIdToken = req.body["cognitoIdToken"];
     const cognitoRefreshToken = req.body["cognitoRefreshToken"];
     const cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
@@ -61,7 +61,7 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         const cognitoUserId = (await verifyToken(cognitoIdToken)).sub
         await validateTwitchAuth();
 
-        // Połącz z Twitch Websocket API
+        // Connect to Twitch Websocket API
         const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
         if (!result.success) {
             return res.status(404).send({message: result.message});

@@ -14,9 +14,9 @@ import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles.js";
 const LOG_PREFIX = 'TWITCH_WS:'
 
 // GLOBAL VARIABLES - ensure global access by exporting these or writing getter/setter
-// todo ten token powinen przychodzic z FE
+// todo this token should be delivered from FE
 export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
-// todo przeniesc do entrypoint ?
+// todo move to entrypoint.js ?
 export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
 //////////////////////////////////////////////////////////////////////////////////////
 

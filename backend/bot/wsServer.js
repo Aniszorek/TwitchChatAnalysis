@@ -20,7 +20,8 @@ export const initWebSocketServer = (server) => {
                 const parsedMessage = JSON.parse(message);
 
                 if (parsedMessage.type === 'auth' && parsedMessage["cognitoIdToken"]) {
-                    // todo: co jeśli token nie jest poprawny?
+
+                    // todo: figure out what if token is not valid (do we care?)
                     const decodedToken = await verifyToken(parsedMessage["cognitoIdToken"]);
                     userId = decodedToken.sub;
 
