@@ -42,7 +42,7 @@ export function connectAwsWebSocket(twitchUsername, cognitoUserId) {
                 if(data.type && data.data && data.type === NLP_MESSAGE_WEBSOCKET_TYPE){
                     //TODO poprawnie odczytywać przetworzoną wiadomość na FE
                     sendMessageToFrontendClient(cognitoUserId, data.data)
-                    console.log(`message sent: ${data.data}`)
+                    console.log(`${LOG_PREFIX} message sent to FE`)
                 }
 
             } catch (error) {

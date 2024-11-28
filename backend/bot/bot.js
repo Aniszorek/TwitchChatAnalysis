@@ -17,8 +17,6 @@ const LOG_PREFIX = 'TWITCH_WS:'
 export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
 // todo przeniesc do entrypoint ?
 export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
-// todo
-let websocketSessionID;
 //////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -69,8 +67,8 @@ export async function startTwitchWebSocket(twitchUsername, cognitoUserId) {
 function handleWebSocketMessage(data, cognitoUserId) {
     switch (data.metadata.message_type) {
         case 'session_welcome':
-            websocketSessionID = data.payload.session.id;
-            registerEventSubListeners(cognitoUserId);
+            const websocketSessionID = data.payload.session.id;
+            registerEventSubListeners(cognitoUserId, websocketSessionID);
             break;
         case 'notification':
             switch (data.metadata.subscription_type) {
@@ -105,7 +103,7 @@ function handleWebSocketMessage(data, cognitoUserId) {
     }
 }
 
-async function registerEventSubListeners(cognitoUserId) {
+async function registerEventSubListeners(cognitoUserId, websocketSessionID) {
     try {
 
         const headers = {
