@@ -1,6 +1,11 @@
 import express from 'express';
 
-import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth.js';
+import {
+    exchangeCodeForToken,
+    generateAuthUrl,
+    refreshIdTokenIfExpiredAndNotConnectedToFE,
+    verifyToken
+} from '../../aws/cognitoAuth.js';
 import {
     CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN, verifyTwitchUsernameAndStreamStatus
 } from '../../bot/bot.js';
@@ -46,9 +51,9 @@ authRouter.get('/callback', async (req, res) => {
 
 authRouter.post('/set-twitch-username', async (req, res) => {
     // todo: add cognito token verification
-    const cognitoIdToken = req.body["cognitoIdToken"];
+    let cognitoIdToken = req.body["cognitoIdToken"];
     const cognitoRefreshToken = req.body["cognitoRefreshToken"];
-    const cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
+    let cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
     const twitchBroadcasterUsername = req.body["twitchUsername"];
 
     if (!twitchBroadcasterUsername) {
@@ -65,6 +70,15 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
         if (!result.success) {
             return res.status(404).send({message: result.message});
+        }
+
+        // cannot use refreshIdTokenIfExpired, because that function assumes that this client exists in frontendClients
+        // which is not in this case
+        const {newIdToken, newExpiryTime} = await refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken, cognitoTokenExpiryTime, twitchBroadcasterUsername);
+
+        if(newIdToken && newExpiryTime) {
+            cognitoIdToken = newIdToken
+            cognitoTokenExpiryTime = newExpiryTime
         }
 
         // Validate role for user

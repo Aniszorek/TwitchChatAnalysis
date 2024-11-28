@@ -41,6 +41,7 @@ export async function sendMessageToApiGateway(msg, cognitoUserId) {
 
 export async function validateUserRole(twitch_oauth_token, broadcaster_user_login, client_id, cognitoIdToken) {
     try {
+
         const decoded = jwt.decode(cognitoIdToken);
         const username = decoded["cognito:username"];
 

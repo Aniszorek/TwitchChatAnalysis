@@ -118,8 +118,6 @@ async function registerEventSubListeners(cognitoUserId, websocketSessionID) {
         const viewerId = await fetchTwitchUserIdFromOauthToken(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
         const broadcasterId = frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUserId
 
-        // console.log(broadcasterId)
-
         const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'channel.chat.message', version: '1', condition: {
                 broadcaster_user_id: broadcasterId, user_id: viewerId,

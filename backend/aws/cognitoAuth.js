@@ -87,6 +87,15 @@ export async function refreshIdTokenIfExpired(cognitoUserId) {
     }
 }
 
+export async function refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken, cognitoTokenExpiryTime, twitchBroadcasterUsername) {
+    if (Date.now() >= cognitoTokenExpiryTime) {
+        console.log(`${LOG_PREFIX} (new connection for ${twitchBroadcasterUsername}) Access token expired - refreshing`);
+        const data = await refreshIdToken(cognitoRefreshToken);
+        return {newIdToken: data.id_token, newExpiryTime: data.expiry_time}
+    }
+    return {newIdToken: undefined, newExpiryTime: undefined}
+}
+
 async function getSigningKey(kid) {
     const key = await cognitoClient.getSigningKey(kid);
     return key.getPublicKey();
