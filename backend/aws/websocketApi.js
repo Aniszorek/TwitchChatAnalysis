@@ -21,7 +21,6 @@ export function connectAwsWebSocket(twitchUsername, cognitoUserId) {
                 streamer_name: twitchUsername,
             });
             awsWebSocket.send(message);
-1
             // regularly send ping message to maintain connection with AWS
             const interval = setInterval(() => {
                 if (awsWebSocket.readyState === WebSocket.OPEN) {
