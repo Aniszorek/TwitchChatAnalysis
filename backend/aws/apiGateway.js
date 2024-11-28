@@ -14,7 +14,7 @@ export async function sendMessageToApiGateway(msg, cognitoUserId) {
     try {
         // refresh before getting token
         await refreshIdTokenIfExpired(cognitoUserId);
-        const { cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime } = frontendClients.get(cognitoUserId).cognito
+        const { cognitoIdToken} = frontendClients.get(cognitoUserId).cognito
 
         const response = await axios.post(MESSAGES_PATH, {
             chatter_user_login: msg.chatterUserLogin,

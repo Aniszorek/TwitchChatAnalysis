@@ -74,7 +74,7 @@ async function refreshIdToken(refreshToken) {
 
 export async function refreshIdTokenIfExpired(cognitoUserId) {
 
-    const { cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime } = frontendClients.get(cognitoUserId).cognito
+    const {cognitoRefreshToken, cognitoExpiryTime } = frontendClients.get(cognitoUserId).cognito
 
     if (Date.now() >= cognitoExpiryTime) {
         console.log(`${LOG_PREFIX} ${cognitoUserId} Access token expired - refreshing`);
