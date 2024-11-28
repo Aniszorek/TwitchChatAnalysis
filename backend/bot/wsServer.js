@@ -36,19 +36,23 @@ export const initWebSocketServer = (server) => {
                         },
                         twitchData: {
                             twitchBroadcasterUsername: null,
+                            twitchBroadcasterUserId: null,
                             streamId: null
                         }
                     });
 
                     if (pendingWebSocketInitializations.has(userId)) {
                         const { twitchBroadcasterUsername,
+                            twitchBroadcasterUserId,
                             streamId,
                             cognitoIdToken,
                             cognitoRefreshToken,
                             cognitoTokenExpiryTime } = pendingWebSocketInitializations.get(userId);
 
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
-                        setFrontendClientTwitchData(userId,twitchBroadcasterUsername, streamId)
+                        setFrontendClientTwitchData(userId,twitchBroadcasterUsername, twitchBroadcasterUserId, streamId)
+
+                        console.log(`${LOG_PREFIX} ${twitchBroadcasterUserId}`)
 
                         const twitchResult = await startTwitchWebSocket(
                             twitchBroadcasterUsername,
@@ -157,8 +161,9 @@ export const setFrontendClientCognitoData = (cognitoUserId, cognitoIdToken, cogn
         frontendClients.get(cognitoUserId).cognito.cognitoExpiryTime = cognitoExpiryTime
 }
 
-export const setFrontendClientTwitchData = (cognitoUserId, twitchBroadcasterUsername, streamId) => {
+export const setFrontendClientTwitchData = (cognitoUserId, twitchBroadcasterUsername, twitchBroadcasterUserId, streamId) => {
     frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUsername = twitchBroadcasterUsername
+    frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUserId = twitchBroadcasterUserId
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
 }
 

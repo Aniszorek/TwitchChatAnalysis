@@ -72,9 +72,11 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         }
 
         const streamId = result.streamStatus.stream_id
+        const twitchBroadcasterUserId = result.userId
 
         pendingWebSocketInitializations.set(cognitoUserId, {
             twitchBroadcasterUsername,
+            twitchBroadcasterUserId,
             streamId,
             cognitoIdToken,
             cognitoRefreshToken,

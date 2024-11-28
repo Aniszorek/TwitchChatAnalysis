@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {setBroadcasterId, TWITCH_BOT_OAUTH_TOKEN} from "../bot/bot.js";
+import { TWITCH_BOT_OAUTH_TOKEN} from "../bot/bot.js";
 
 
 const LOG_PREFIX = 'TWITCH API:'
@@ -27,7 +27,6 @@ export async function fetchTwitchUserId(nickname, accessToken, clientId) {
             return {found: false, userId: null};
         }
 
-        setBroadcasterId(userId);
         return {found: true, userId};
     } catch (error) {
         console.error(`${LOG_PREFIX} Error while fetching Twitch user ID`, error.message);

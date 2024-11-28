@@ -4,6 +4,7 @@ import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
 import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
 import {
+    frontendClients,
     sendMessageToFrontendClient,
     setFrontendClientTwitchDataStreamId,
     trackSubscription
@@ -12,10 +13,12 @@ import {
 const LOG_PREFIX = 'TWITCH_WS:'
 
 // GLOBAL VARIABLES - ensure global access by exporting these or writing getter/setter
+// todo ten token powinen przychodzic z FE
 export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
+// todo przeniesc do entrypoint ?
 export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
+// todo
 let websocketSessionID;
-let broadcasterId;
 //////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -31,8 +34,10 @@ export async function verifyTwitchUsernameAndStreamStatus(twitchUsername){
         return { success: false, message: `Streamer with username: ${twitchUsername} not found` };
     }
 
+    const broadcasterId = fetchResponse.userId
+
     const streamStatus = await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
-    return { success: true, message: 'Twitch username validated and authorized', streamStatus: streamStatus };
+    return { success: true, message: 'Twitch username validated and authorized', streamStatus: streamStatus, userId: broadcasterId };
 }
 
 export async function startTwitchWebSocket(twitchUsername, cognitoUserId) {
@@ -109,6 +114,10 @@ async function registerEventSubListeners(cognitoUserId) {
                 'Content-Type': 'application/json'
         }
         const viewerId = await fetchTwitchUserIdFromOauthToken(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
+        const broadcasterId = frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUserId
+
+        console.log(broadcasterId)
+
         const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'channel.chat.message', version: '1', condition: {
                 broadcaster_user_id: broadcasterId, user_id: viewerId,
@@ -162,11 +171,4 @@ function verifyRegisterResponse(response, registerType, userId) {
         console.error(response.data);
         process.exit(1);
     }
-}
-
-export function getBroadcasterId() {
-    return broadcasterId;
-}
-export function setBroadcasterId(userId){
-    broadcasterId = userId
 }
