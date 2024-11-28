@@ -62,7 +62,7 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         await validateTwitchAuth();
 
         // Validate role for user
-        // todo ta rola powinna być zapisywana w tym pendingWS i potem uwzględniana przy decydowaniu czy przesyłamy wiadomości do AWS'a
+        // todo TCA-48 ta rola powinna być zapisywana w tym pendingWS i potem uwzględniana przy decydowaniu czy przesyłamy wiadomości do AWS'a
         await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken)
 
         // Połącz z Twitch Websocket API
