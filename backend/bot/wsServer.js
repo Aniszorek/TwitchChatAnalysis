@@ -29,16 +29,29 @@ export const initWebSocketServer = (server) => {
                         twitchWs: null,
                         awsWs: null,
                         subscriptions: new Set(),
+                        cognito: {
+                            cognitoIdToken: null,
+                            cognitoRefreshToken: null,
+                            cognitoExpiryTime: null,
+                        },
+                        twitchData: {
+                            twitchBroadcasterUsername: null,
+                            streamId: null
+                        }
                     });
 
                     if (pendingWebSocketInitializations.has(userId)) {
-                        const {twitchParams, awsParams} = pendingWebSocketInitializations.get(userId);
+                        const { twitchBroadcasterUsername,
+                            streamId,
+                            cognitoIdToken,
+                            cognitoRefreshToken,
+                            cognitoTokenExpiryTime } = pendingWebSocketInitializations.get(userId);
+
+                        setFrontendClientCognitoData(userId, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
+                        setFrontendClientTwitchData(userId,twitchBroadcasterUsername, streamId)
 
                         const twitchResult = await startTwitchWebSocket(
-                            twitchParams.twitchBroadcasterUsername,
-                            twitchParams.cognitoIdToken,
-                            twitchParams.cognitoRefreshToken,
-                            twitchParams.cognitoTokenExpiryTime,
+                            twitchBroadcasterUsername,
                             userId
                         );
                         if (twitchResult != null) {
@@ -47,7 +60,7 @@ export const initWebSocketServer = (server) => {
                             console.error(`${LOG_PREFIX} Twitch websocket not connected for ${userId}`);
                         }
 
-                        const awsResult = connectAwsWebSocket(awsParams.twitchBroadcasterUsername, awsParams.cognitoIdToken, userId);
+                        const awsResult = connectAwsWebSocket(twitchBroadcasterUsername, userId);
                         if (awsResult != null) {
                             frontendClients.get(userId).awsWs = awsResult;
                         } else {
@@ -133,3 +146,23 @@ export const sendMessageToFrontendClient = (userId, message) => {
         console.log(`${LOG_PREFIX} WebSocket for user ID ${userId} is not available`);
     }
 };
+
+export const setFrontendClientCognitoData = (cognitoUserId, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime) => {
+
+    if(cognitoIdToken)
+        frontendClients.get(cognitoUserId).cognito.cognitoIdToken = cognitoIdToken
+    if(cognitoRefreshToken)
+        frontendClients.get(cognitoUserId).cognito.cognitoRefreshToken = cognitoRefreshToken
+    if(cognitoExpiryTime)
+        frontendClients.get(cognitoUserId).cognito.cognitoExpiryTime = cognitoExpiryTime
+}
+
+export const setFrontendClientTwitchData = (cognitoUserId, twitchBroadcasterUsername, streamId) => {
+    frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUsername = twitchBroadcasterUsername
+    setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
+}
+
+export const setFrontendClientTwitchDataStreamId = (cognitoUserId, streamId) => {
+    frontendClients.get(cognitoUserId).twitchData.streamId = streamId
+}
+

@@ -63,7 +63,7 @@ authRouter.post('/set-twitch-username', async (req, res) => {
 
         // Validate role for user
         // todo ta rola powinna być zapisywana w tym pendingWS i potem uwzględniana przy decydowaniu czy przesyłamy wiadomości do AWS'a
-        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
+        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken)
 
         // Połącz z Twitch Websocket API
         const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
@@ -71,9 +71,14 @@ authRouter.post('/set-twitch-username', async (req, res) => {
             return res.status(404).send({message: result.message});
         }
 
+        const streamId = result.streamStatus.stream_id
+
         pendingWebSocketInitializations.set(cognitoUserId, {
-            twitchParams: { twitchBroadcasterUsername, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime },
-            awsParams: { twitchBroadcasterUsername, cognitoIdToken},
+            twitchBroadcasterUsername,
+            streamId,
+            cognitoIdToken,
+            cognitoRefreshToken,
+            cognitoTokenExpiryTime
         });
 
         res.send({ message: 'Streamer found and WebSocket connections can now be initialized' });

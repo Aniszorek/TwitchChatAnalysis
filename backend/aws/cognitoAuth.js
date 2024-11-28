@@ -2,6 +2,7 @@ import axios from 'axios';
 import querystring from 'querystring';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import {frontendClients, setFrontendClientCognitoData} from "../bot/wsServer.js";
 
 
 const LOG_PREFIX = `COGNITO_AUTH:`
@@ -67,14 +68,18 @@ async function refreshIdToken(refreshToken) {
 
         return data;
     } catch (error) {
-        throw new Error(`${LOG_PREFIX} Could not refresh access token`);
+        throw new Error(`${LOG_PREFIX} Could not refresh access token ${error.message}`);
     }
 }
 
-export async function refreshIdTokenIfExpired(cognitoRefreshToken, cognitoExpiryTime) {
+export async function refreshIdTokenIfExpired(cognitoUserId) {
+
+    const { cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime } = frontendClients.get(cognitoUserId).cognito
+
     if (Date.now() >= cognitoExpiryTime) {
-        console.log(`${LOG_PREFIX} Access token expired - refreshing`);
+        console.log(`${LOG_PREFIX} ${cognitoUserId} Access token expired - refreshing`);
         const data = await refreshIdToken(cognitoRefreshToken);
+        setFrontendClientCognitoData(cognitoUserId, data.id_token, null , data.expiry_time)
         return data
         // const data = await refreshIdToken(refreshToken);
         // cognitoIdToken = data.id_token;
