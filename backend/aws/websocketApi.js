@@ -1,10 +1,12 @@
 import WebSocket from "ws";
-import {frontendClients} from "../bot/wsServer.js";
+import {sendMessageToFrontendClient} from "../bot/wsServer.js";
 
 const LOG_PREFIX = `API_GATEWAY_WS:`
 
 const WEBSOCKET_API_URL = 'wss://dh50useqij.execute-api.eu-central-1.amazonaws.com/test/';
 const PING_INTERVAL = 5 * 60 * 1000;
+
+const NLP_MESSAGE_WEBSOCKET_TYPE = "nlp_processed_message"
 
 export function connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserId) {
     try {
@@ -33,6 +35,12 @@ export function connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserI
             try {
                 data = JSON.parse(message.toString());
                 console.log(`${LOG_PREFIX} Received message:`, data);
+
+                if(data.type && data.data && data.type === NLP_MESSAGE_WEBSOCKET_TYPE){
+                    //TODO handle processed messages on FE
+                    sendMessageToFrontendClient(cognitoUserId, data.data)
+                    console.log(`message sent: ${data.data}`)
+                }
 
             } catch (error) {
                 console.log(`${LOG_PREFIX} Received message:`, message.toString());

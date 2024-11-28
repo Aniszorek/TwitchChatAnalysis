@@ -3,7 +3,7 @@ import WebSocket from "ws";
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
 import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
-import {frontendClients, sendMessageToFrontendClient, trackSubscription} from "./wsServer.js";
+import { sendMessageToFrontendClient, trackSubscription} from "./wsServer.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
