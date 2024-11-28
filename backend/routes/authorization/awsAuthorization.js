@@ -54,7 +54,7 @@ authRouter.post('/set-twitch-username', async (req, res) => {
     let cognitoIdToken = req.body["cognitoIdToken"];
     const cognitoRefreshToken = req.body["cognitoRefreshToken"];
     let cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
-    const twitchBroadcasterUsername = req.body["twitchUsername"];
+    const twitchBroadcasterUsername = req.body["twitchUsername"].toLowerCase();
 
     if (!twitchBroadcasterUsername) {
         return res.status(400).send('Twitch username is missing');
