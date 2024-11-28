@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {setBroadcasterId, setStreamId, TWITCH_BOT_OAUTH_TOKEN} from "../bot/bot.js";
+import { TWITCH_BOT_OAUTH_TOKEN} from "../bot/bot.js";
 
 
 const LOG_PREFIX = 'TWITCH API:'
@@ -27,7 +27,6 @@ export async function fetchTwitchUserId(nickname, accessToken, clientId) {
             return {found: false, userId: null};
         }
 
-        setBroadcasterId(userId);
         return {found: true, userId};
     } catch (error) {
         console.error(`${LOG_PREFIX} Error while fetching Twitch user ID`, error.message);
@@ -49,11 +48,10 @@ export async function fetchTwitchStreamId(userId, accessToken, clientId) {
 
         if (!streamData) {
             console.log(`${LOG_PREFIX} Streamer is currently offline`);
-            return null;
+            return {stream_id: undefined};
         }
 
         console.log(`${LOG_PREFIX} streamonline: ${streamData.title}`);
-        setStreamId(streamData.id);
 
         return {
             stream_id: streamData.id,

@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import {sendMessageToFrontendClient} from "../bot/wsServer.js";
+import {frontendClients, sendMessageToFrontendClient} from "../bot/wsServer.js";
 
 const LOG_PREFIX = `API_GATEWAY_WS:`
 
@@ -8,8 +8,11 @@ const PING_INTERVAL = 5 * 60 * 1000;
 
 const NLP_MESSAGE_WEBSOCKET_TYPE = "nlp_processed_message"
 
-export function connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserId) {
+export function connectAwsWebSocket(twitchUsername, cognitoUserId) {
     try {
+
+        const cognitoIdToken = frontendClients.get(cognitoUserId).cognito.cognitoIdToken
+
         const awsWebSocket = new WebSocket(`${WEBSOCKET_API_URL}?token=${cognitoIdToken}`);
         awsWebSocket.on('open', () => {
             console.log(`${LOG_PREFIX} Connected, creating connection for streamer name: ${twitchUsername}`);
@@ -18,7 +21,6 @@ export function connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserI
                 streamer_name: twitchUsername,
             });
             awsWebSocket.send(message);
-
             // regularly send ping message to maintain connection with AWS
             const interval = setInterval(() => {
                 if (awsWebSocket.readyState === WebSocket.OPEN) {
@@ -39,7 +41,7 @@ export function connectAwsWebSocket(twitchUsername, cognitoIdToken, cognitoUserI
                 if(data.type && data.data && data.type === NLP_MESSAGE_WEBSOCKET_TYPE){
                     //TODO handle processed messages on FE
                     sendMessageToFrontendClient(cognitoUserId, data.data)
-                    console.log(`message sent: ${data.data}`)
+                    console.log(`${LOG_PREFIX} message sent to FE`)
                 }
 
             } catch (error) {

@@ -22,19 +22,19 @@ def handler(event, context):
 
         # Validate inputs
         if not all([token, cognito_username, broadcaster_user_login, client_id]):
-            return {'statusCode': 400, 'body': 'Missing required parameters'}
+            return {'statusCode': 400, 'body': {'message': 'Missing required parameters'}}
 
         # Verify OAuth token
         twitch_data = verify_oauth_token(token, client_id)
 
         if twitch_data is None:
-            return {'statusCode': 400, 'body': 'Invalid OAuth token'}
+            return {'statusCode': 400, 'body': {'message': 'Invalid OAuth token'}}
         user_id = twitch_data['id']
 
         # Get broadcaster data
         broadcaster_data = get_broadcaster_data(token, broadcaster_user_login, client_id)
         if not broadcaster_data:
-            return {'statusCode': 404, 'body': 'Broadcaster not found'}
+            return {'statusCode': 404, 'body':{ 'message': 'Broadcaster not found' }}
 
         broadcaster_id = broadcaster_data['id']
         broadcaster_login = broadcaster_data['login']
@@ -49,13 +49,16 @@ def handler(event, context):
         add_user_result = add_user_info_to_db(cognito_username, broadcaster_login, role)
 
         if add_user_result:
-            return {'statusCode': 200, 'body': f'User successfully added to {role} group'}
+            return {'statusCode': 200,
+                    'body': {'message': f'User successfully added to {role} group',
+                             'role': role}
+                    }
         else:
-            return {'statusCode': 500, 'body': 'Failed to update user group'}
+            return {'statusCode': 500, 'body': { 'message': 'Failed to update user group'}}
 
     except Exception as e:
         print(f"Error in handler: {str(e)}")
-        return {'statusCode': 500, 'body': f'Internal server error: {str(e)}'}
+        return {'statusCode': 500, 'body': { 'message': f'Internal server error: {str(e)}'}}
 
 def add_user_info_to_db(cognito_username, broadcaster_login, role):
     """

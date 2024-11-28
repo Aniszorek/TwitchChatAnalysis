@@ -3,16 +3,21 @@ import WebSocket from "ws";
 import {sendMessageToApiGateway} from "../aws/apiGateway.js";
 import axios from "axios";
 import {fetchTwitchStreamId, fetchTwitchUserId, fetchTwitchUserIdFromOauthToken} from "../api_calls/twitchApiCalls.js";
-import { sendMessageToFrontendClient, trackSubscription} from "./wsServer.js";
+import {
+    frontendClients,
+    sendMessageToFrontendClient,
+    setFrontendClientTwitchDataStreamId,
+    trackSubscription
+} from "./wsServer.js";
+import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles.js";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
 // GLOBAL VARIABLES - ensure global access by exporting these or writing getter/setter
+// todo this token should be delivered from FE
 export const TWITCH_BOT_OAUTH_TOKEN = process.env["TWITCH_BOT_OAUTH_TOKEN"]; // Needs scopes user:bot, user:read:chat, user:write:chat - konto bota/moderatora
+// todo move to entrypoint.js ?
 export const CLIENT_ID = process.env["TWITCH_APP_CLIENT_ID"]; // id aplikacji
-let websocketSessionID;
-let streamId;
-let broadcasterId;
 //////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -28,11 +33,13 @@ export async function verifyTwitchUsernameAndStreamStatus(twitchUsername){
         return { success: false, message: `Streamer with username: ${twitchUsername} not found` };
     }
 
+    const broadcasterId = fetchResponse.userId
+
     const streamStatus = await fetchTwitchStreamId(broadcasterId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
-    return { success: true, message: 'Twitch username validated and authorized' };
+    return { success: true, message: 'Twitch username validated and authorized', streamStatus: streamStatus, userId: broadcasterId };
 }
 
-export async function startTwitchWebSocket(twitchUsername, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
+export async function startTwitchWebSocket(twitchUsername, cognitoUserId) {
     try{
         const twitchWebsocket = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
@@ -45,7 +52,7 @@ export async function startTwitchWebSocket(twitchUsername, cognitoIdToken, cogni
         });
 
         twitchWebsocket.on('message', (data) => {
-            handleWebSocketMessage(JSON.parse(data.toString()), cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId);
+            handleWebSocketMessage(JSON.parse(data.toString()), cognitoUserId);
         });
 
 
@@ -58,11 +65,11 @@ export async function startTwitchWebSocket(twitchUsername, cognitoIdToken, cogni
 
 }
 
-function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime, cognitoUserId) {
+function handleWebSocketMessage(data, cognitoUserId) {
     switch (data.metadata.message_type) {
         case 'session_welcome':
-            websocketSessionID = data.payload.session.id;
-            registerEventSubListeners(cognitoUserId);
+            const websocketSessionID = data.payload.session.id;
+            registerEventSubListeners(cognitoUserId, websocketSessionID);
             break;
         case 'notification':
             switch (data.metadata.subscription_type) {
@@ -79,25 +86,28 @@ function handleWebSocketMessage(data, cognitoIdToken, cognitoRefreshToken, cogni
                        "messageTimestamp":       data.metadata.message_timestamp
                     }
                     console.log(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`);
-                    // TODO only streamer should send message to aws
-                    sendMessageToApiGateway(msg, cognitoIdToken, cognitoRefreshToken, cognitoExpiryTime);
+                    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws"))
+                    {
+                        sendMessageToApiGateway(msg, cognitoUserId);
+                    }
+
                     sendMessageToFrontendClient(cognitoUserId, msg);
                     break;
                 case 'stream.online':
                     const streamId = data.payload.event.id;
                     console.log(`${LOG_PREFIX} Stream online. Stream ID: ${streamId}`);
-                    setStreamId(streamId);
+                    setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
                     break;
                 case 'stream.offline':
                     console.log(`${LOG_PREFIX} Stream offline.`);
-                    setStreamId(undefined);
+                    setFrontendClientTwitchDataStreamId(cognitoUserId, undefined)
                     break;
             }
             break;
     }
 }
 
-async function registerEventSubListeners(cognitoUserId) {
+async function registerEventSubListeners(cognitoUserId, websocketSessionID) {
     try {
 
         const headers = {
@@ -106,6 +116,8 @@ async function registerEventSubListeners(cognitoUserId) {
                 'Content-Type': 'application/json'
         }
         const viewerId = await fetchTwitchUserIdFromOauthToken(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
+        const broadcasterId = frontendClients.get(cognitoUserId).twitchData.twitchBroadcasterUserId
+
         const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
             type: 'channel.chat.message', version: '1', condition: {
                 broadcaster_user_id: broadcasterId, user_id: viewerId,
@@ -159,17 +171,4 @@ function verifyRegisterResponse(response, registerType, userId) {
         console.error(response.data);
         process.exit(1);
     }
-}
-
-export function getBroadcasterId() {
-    return broadcasterId;
-}
-export function setBroadcasterId(userId){
-    broadcasterId = userId
-}
-export function getStreamId() {
-    return streamId;
-}
-export function setStreamId(_streamId){
-    streamId = _streamId
 }

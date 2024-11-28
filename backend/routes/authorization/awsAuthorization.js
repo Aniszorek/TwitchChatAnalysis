@@ -1,6 +1,11 @@
 import express from 'express';
 
-import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth.js';
+import {
+    exchangeCodeForToken,
+    generateAuthUrl,
+    refreshIdTokenIfExpiredAndNotConnectedToFE,
+    verifyToken
+} from '../../aws/cognitoAuth.js';
 import {
     CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN, verifyTwitchUsernameAndStreamStatus
 } from '../../bot/bot.js';
@@ -45,13 +50,11 @@ authRouter.get('/callback', async (req, res) => {
 
 
 authRouter.post('/set-twitch-username', async (req, res) => {
-    // todo: dodać tutaj weryfikacje tokena cognito
-    const cognitoIdToken = req.body["cognitoIdToken"];
+    // todo: add cognito token verification
+    let cognitoIdToken = req.body["cognitoIdToken"];
     const cognitoRefreshToken = req.body["cognitoRefreshToken"];
-    const cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
+    let cognitoTokenExpiryTime = req.body["cognitoTokenExpiryTime"];
     const twitchBroadcasterUsername = req.body["twitchUsername"].toLowerCase();
-
-
 
     if (!twitchBroadcasterUsername) {
         return res.status(400).send('Twitch username is missing');
@@ -63,19 +66,42 @@ authRouter.post('/set-twitch-username', async (req, res) => {
         const cognitoUserId = (await verifyToken(cognitoIdToken)).sub
         await validateTwitchAuth();
 
-        // Validate role for user
-        // todo ta rola powinna być zapisywana w tym pendingWS i potem uwzględniana przy decydowaniu czy przesyłamy wiadomości do AWS'a
-        await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime)
-
-        // Połącz z Twitch Websocket API
+        // Connect to Twitch Websocket API
         const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
         if (!result.success) {
             return res.status(404).send({message: result.message});
         }
 
+        // cannot use refreshIdTokenIfExpired, because that function assumes that this client exists in frontendClients
+        // which is not in this case
+        const {newIdToken, newExpiryTime} = await refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken, cognitoTokenExpiryTime, twitchBroadcasterUsername);
+
+        if(newIdToken && newExpiryTime) {
+            cognitoIdToken = newIdToken
+            cognitoTokenExpiryTime = newExpiryTime
+        }
+
+        // Validate role for user
+        const roleResponse = await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername, CLIENT_ID, cognitoIdToken)
+
+        if(!roleResponse) {
+            return res.status(500).send({message: 'Could not resolve role for this twitch account'});
+        }
+
+        const streamId = result.streamStatus.stream_id
+        const twitchBroadcasterUserId = result.userId
+        const twitchRole = roleResponse.role
+        const cognitoUsername = roleResponse.cognitoUsername
+
         pendingWebSocketInitializations.set(cognitoUserId, {
-            twitchParams: { twitchBroadcasterUsername, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime },
-            awsParams: { twitchBroadcasterUsername, cognitoIdToken},
+            twitchBroadcasterUsername,
+            twitchBroadcasterUserId,
+            twitchRole,
+            streamId,
+            cognitoUsername,
+            cognitoIdToken,
+            cognitoRefreshToken,
+            cognitoTokenExpiryTime
         });
 
         res.send({ message: 'Streamer found and WebSocket connections can now be initialized' });
