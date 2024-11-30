@@ -1,4 +1,3 @@
-import {refreshIdTokenIfExpired} from "./cognitoAuth";
 import axios, {AxiosResponse} from "axios";
 import jwt from "jsonwebtoken";
 import {frontendClients} from "../bot/wsServer";
@@ -38,8 +37,6 @@ interface ValidateUserRoleResponse {
  */
 export async function sendMessageToApiGateway(msg: TwitchMessage, cognitoUserId: string) {
     try {
-        // refresh before getting token
-        await refreshIdTokenIfExpired(cognitoUserId);
         const cognitoIdToken = frontendClients.get(cognitoUserId)?.cognito?.cognitoIdToken;
 
         if (!cognitoIdToken) {
@@ -96,7 +93,7 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
             }
         });
 
-        const { statusCode, body } = response.data;
+        const {statusCode, body} = response.data;
 
 
         if (!isCognitoRoleValid(body.role)) {
@@ -108,7 +105,7 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
             console.log(
                 `${LOG_PREFIX} Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${JSON.stringify(body)}`
             );
-            return { role: body.role, cognitoUsername: username };
+            return {role: body.role, cognitoUsername: username};
         } else {
             console.error(`${LOG_PREFIX} Failed authorization. Status: ${JSON.stringify(body)}`);
             return undefined;

@@ -96,22 +96,22 @@ async function refreshIdToken(refreshToken: string): Promise<CognitoTokenRespons
     }
 }
 
-
-export async function refreshIdTokenIfExpired(cognitoUserId: string): Promise<CognitoTokenResponse | undefined> {
-    const {cognitoRefreshToken, cognitoExpiryTime} = frontendClients.get(cognitoUserId)?.cognito || {};
-
-    if (!cognitoRefreshToken || !cognitoExpiryTime) {
-        console.error(`${LOG_PREFIX} Missing Cognito data for user: ${cognitoUserId}`);
-        return undefined;
-    }
-
-    if (Date.now() >= cognitoExpiryTime) {
-        console.log(`${LOG_PREFIX} ${cognitoUserId} Access token expired - refreshing`);
-        const data: CognitoTokenResponse = await refreshIdToken(cognitoRefreshToken);
-        setFrontendClientCognitoData(cognitoUserId, data.id_token, null, data.expires_in * 1000 + Date.now(), null);
-        return data;
-    }
-}
+// todo trzeba przebudować to w taki sposób, aby przekazywany był request i tokeny były brane z requesta, a nie z tej struktury, bo już ich w tej strukturze nie ma
+// export async function refreshIdTokenIfExpired(cognitoUserId: string): Promise<CognitoTokenResponse | undefined> {
+//     const {cognitoRefreshToken, cognitoExpiryTime} = frontendClients.get(cognitoUserId)?.cognito || {};
+//
+//     if (!cognitoRefreshToken || !cognitoExpiryTime) {
+//         console.error(`${LOG_PREFIX} Missing Cognito data for user: ${cognitoUserId}`);
+//         return undefined;
+//     }
+//
+//     if (Date.now() >= cognitoExpiryTime) {
+//         console.log(`${LOG_PREFIX} ${cognitoUserId} Access token expired - refreshing`);
+//         const data: CognitoTokenResponse = await refreshIdToken(cognitoRefreshToken);
+//         setFrontendClientCognitoData(cognitoUserId, data.id_token, null, data.expires_in * 1000 + Date.now(), null);
+//         return data;
+//     }
+// }
 
 
 export async function refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken: string, cognitoTokenExpiryTime: number, twitchBroadcasterUsername: string): Promise<RefreshTokenResult> {
