@@ -48,7 +48,7 @@ export class TwitchService {
   searchUser(twitchUsername: string): void {
     const headers = new HttpHeaders({'Content-Type': 'application/json'});
     const payload = {
-      twitchUsername: twitchUsername,
+      twitchBroadcasterUsername: twitchUsername,
       cognitoIdToken: this.authService.getIdToken(),
       cognitoRefreshToken: this.authService.getRefreshToken(),
       cognitoTokenExpiryTime: this.authService.getExpiryDate(),
