@@ -1,8 +1,9 @@
 import {WebSocket, WebSocketServer} from 'ws';
 import {verifyToken} from "../aws/cognitoAuth";
-import {deleteTwitchSubscription} from "../api_calls/twitchApiCalls";
-import {CLIENT_ID, startTwitchWebSocket, TWITCH_BOT_OAUTH_TOKEN} from "./bot";
+import { startTwitchWebSocket } from "./bot";
 import {connectAwsWebSocket} from "../aws/websocketApi";
+import {deleteTwitchSubscription} from "../twitch_calls/twitchAuth";
+import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 
 
 const LOG_PREFIX = 'BACKEND WS:'

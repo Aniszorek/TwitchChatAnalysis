@@ -76,7 +76,7 @@ export async function sendMessageToApiGateway(msg: TwitchMessage, cognitoUserId:
 export async function validateUserRole(twitch_oauth_token: string, broadcaster_user_login: string, client_id: string, cognitoIdToken: string) {
     try {
         const decoded: CognitoIdTokenData | null = jwt.decode(cognitoIdToken) as CognitoIdTokenData | null;
-        if (!decoded || !decoded["cognito:username"]) {
+        if (!decoded?.["cognito:username"]) {
             console.error(`${LOG_PREFIX} Invalid Cognito token`);
             return undefined;
         }

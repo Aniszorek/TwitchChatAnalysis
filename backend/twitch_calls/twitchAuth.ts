@@ -1,12 +1,9 @@
 import axios, {AxiosResponse} from 'axios';
-import {TWITCH_BOT_OAUTH_TOKEN} from "../bot/bot";
+import {twitchApiClient} from "./twitchApiConfig";
+import {TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 
-const LOG_PREFIX = 'TWITCH API:';
-
-const TWITCH_API_URL_USERS = `https://api.twitch.tv/helix/users?login=`;
-const TWITCH_API_URL_STREAMS = `https://api.twitch.tv/helix/streams?user_id=`;
+const LOG_PREFIX = 'TWITCH API AUTH:';
 const TWITCH_VALIDATE_AUTH_URL = 'https://id.twitch.tv/oauth2/validate';
-const TWITCH_API_URL_FETCH_USERNAME = 'https://api.twitch.tv/helix/users';
 
 interface TwitchUserIdResponse {
     found: boolean;
@@ -24,15 +21,11 @@ export interface TwitchStreamData {
 /**
  * Fetches the Twitch User ID based on the user's nickname
  */
-export async function fetchTwitchUserId(nickname: string, accessToken: string, clientId: string): Promise<TwitchUserIdResponse> {
-    const url = `${TWITCH_API_URL_USERS}${nickname}`;
-    const headers = {
-        Authorization: `Bearer ${accessToken}`,
-        'Client-Id': clientId,
-    };
-
+export async function fetchTwitchUserId(nickname: string): Promise<TwitchUserIdResponse> {
     try {
-        const response: AxiosResponse = await axios.get(url, {headers});
+        const response = await twitchApiClient.get('/users', {
+            params: { login: nickname },
+        });
         const userId = response.data.data[0]?.id;
 
         if (!userId) {
@@ -51,15 +44,12 @@ export async function fetchTwitchUserId(nickname: string, accessToken: string, c
 /**
  * Fetches Twitch stream data for a specific user ID
  */
-export async function fetchTwitchStreamId(userId: string, accessToken: string, clientId: string): Promise<TwitchStreamData> {
+export async function fetchTwitchStreamId(userId: string): Promise<TwitchStreamData> {
     try {
-        const url = `${TWITCH_API_URL_STREAMS}${userId}`;
-        const headers = {
-            Authorization: `Bearer ${accessToken}`,
-            'Client-Id': clientId,
-        };
+        const response = await twitchApiClient.get('/streams', {
+            params: { user_id: userId },
+        });
 
-        const response: AxiosResponse = await axios.get(url, {headers});
         const streamData = response.data.data[0];
 
         if (!streamData) {
@@ -111,15 +101,12 @@ export async function validateTwitchAuth() {
 /**
  * Deletes a Twitch EventSub subscription by its ID.
  */
-export async function deleteTwitchSubscription(subscriptionId: string, accessToken: string, clientId: string): Promise<Boolean> {
-    const headers = {
-        Authorization: `Bearer ${accessToken}`,
-        "Client-Id": clientId,
-    };
-    const url = `https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscriptionId}`;
-
+export async function deleteTwitchSubscription(subscriptionId: string, accessToken: string, clientId: string): Promise<boolean> {
     try {
-        const response: AxiosResponse = await axios.delete(url, {headers});
+        const response = await twitchApiClient.delete('/eventsub/subscriptions', {
+            params: { id: subscriptionId },
+        });
+
         if (response.status === 204) {
             console.log(`${LOG_PREFIX} Successfully unsubscribed from Twitch EventSub: ${subscriptionId}`);
             return true;
@@ -137,14 +124,9 @@ export async function deleteTwitchSubscription(subscriptionId: string, accessTok
 /**
  * Fetches the Twitch User ID using an OAuth token.
  */
-export async function fetchTwitchUserIdFromOauthToken(accessToken: string, clientId: string): Promise<string> {
+export async function fetchTwitchUserIdFromOauthToken(): Promise<string> {
     try {
-        const response: AxiosResponse = await axios.get(TWITCH_API_URL_FETCH_USERNAME, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Client-Id': clientId,
-            },
-        });
+        const response = await twitchApiClient.get('/users');
 
         const user = response.data.data[0];
         if (!user) {
