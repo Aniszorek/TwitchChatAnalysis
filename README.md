@@ -41,7 +41,7 @@ Current status:
     ```bash
    npm start
    or
-   DOTENV_PRIVATE_KEY={DOTENV_PRIVATE_KEY} dotenvx run -- node entryPoint.js
+   DOTENV_PRIVATE_KEY={DOTENV_PRIVATE_KEY} dotenvx run -- node entryPoint.ts
    ```
 
 ## How to get Twitch account with bot privileges
