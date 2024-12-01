@@ -1,7 +1,14 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {config, urls} from "../app.config";
-import {catchError, map, Observable, of, Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
+
+interface AuthTokens {
+  'idToken': string;
+  'refreshToken': string;
+  'expiryTime': string;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +22,7 @@ export class AuthService {
   logout$ = this.logoutSubject.asObservable();
 
   cognitoLogoutUrl = urls.cognitoLogoutUrl;
-  clientId = config.cognitoClientId ;
+  clientId = config.cognitoClientId;
   redirectUri = urls.cognitoLougoutRedirectUrl;
 
 
@@ -31,7 +38,7 @@ export class AuthService {
   }
 
   validateToken(idToken: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.backendUrl}/verify-cognito`, { idToken });
+    return this.http.post<{ message: string }>(`${this.backendUrl}/verify-cognito`, {idToken});
   }
 
 
@@ -61,6 +68,14 @@ export class AuthService {
 
   getExpiryDate(): string | null {
     return localStorage.getItem('expireTime');
+  }
+
+  getAuthTokens(): AuthTokens {
+    return {
+      'idToken': this.getIdToken()!,
+      'refreshToken': this.getRefreshToken()!,
+      'expiryTime': this.getExpiryDate()!,
+    };
   }
 
 }

@@ -34,13 +34,14 @@ export class AuthCallbackComponent implements OnInit {
                 console.log("Token verified. Redirecting to /chat");
                 this.router.navigate(['/chat']);
               } else {
+                console.error(response.message);
                 // Token verification failed
                 console.error("Invalid token");
                 this.router.navigate(['/login']);
               }
             },
-            error: () => {
-              console.error("Token validation failed");
+            error: (e) => {
+              console.error("Token validation failed", e);
               this.router.navigate(['/login']);
             }
           });

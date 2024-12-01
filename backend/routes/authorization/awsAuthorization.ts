@@ -1,11 +1,6 @@
-import express from 'express';
+import express, {Request, Response, NextFunction} from 'express';
 
-import {
-    exchangeCodeForToken,
-    generateAuthUrl,
-    refreshIdTokenIfExpiredAndNotConnectedToFE,
-    verifyToken
-} from '../../aws/cognitoAuth';
+import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth';
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN, verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
 import {validateTwitchAuth,} from '../../api_calls/twitchApiCalls';
 import {validateUserRole} from "../../aws/apiGateway";
@@ -16,12 +11,27 @@ const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION:`;
 
 interface SetTwitchUsernameRequestBody {
     cognitoIdToken: string;
-    cognitoRefreshToken: string;
-    cognitoTokenExpiryTime: number;
     twitchBroadcasterUsername: string;
 }
 
+export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction) {
+    const cognitoIdToken = req.headers["x-cognito-id-token"] as string | undefined;
 
+    if (!cognitoIdToken) {
+        return res.status(404).send({message: 'Token is missing or invalid'});
+    }
+
+    try {
+        await verifyToken(cognitoIdToken);
+        next();
+    } catch (error: any) {
+        console.error(`${LOG_PREFIX} Token verification failed: ${error}`);
+        res.status(401).json({message: 'Token verification failed', error: error.message});
+
+    }
+}
+
+// todo: powinniśmy rozdzielić te endpointy na różne pliki, bo nie każdy służy do autoryzacji
 export const authRouter = express.Router();
 
 authRouter.get('/auth-url', (req, res) => {
@@ -55,14 +65,13 @@ authRouter.get('/callback', async (req, res) => {
 })
 
 
-authRouter.post('/set-twitch-username', async (req, res) => {
-    // todo: add cognito token verification
+authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) => {
+    const cognitoIdToken = <string>req.headers["x-cognito-id-token"];
+
     let {
-        cognitoIdToken,
-        cognitoRefreshToken,
-        cognitoTokenExpiryTime,
         twitchBroadcasterUsername
     }: SetTwitchUsernameRequestBody = req.body;
+
 
     if (!twitchBroadcasterUsername) {
         return res.status(400).send('Twitch username is missing');
@@ -80,18 +89,6 @@ authRouter.post('/set-twitch-username', async (req, res) => {
             return res.status(404).send({message: result.message});
         }
 
-        // cannot use refreshIdTokenIfExpired, because that function assumes that this client exists in frontendClients
-        // which is not in this case
-        const {
-            newIdToken,
-            newExpiryTime
-        } = await refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken, cognitoTokenExpiryTime, twitchBroadcasterUsername);
-
-
-        if (newIdToken && newExpiryTime) {
-            cognitoIdToken = newIdToken;
-            cognitoTokenExpiryTime = newExpiryTime;
-        }
 
         // Validate role for user
         const roleResponse = await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
@@ -112,8 +109,6 @@ authRouter.post('/set-twitch-username', async (req, res) => {
             streamId,
             cognitoUsername,
             cognitoIdToken,
-            cognitoRefreshToken,
-            cognitoTokenExpiryTime
         });
 
         res.send({message: 'Streamer found and WebSocket connections can now be initialized'});
@@ -127,7 +122,6 @@ authRouter.post('/set-twitch-username', async (req, res) => {
 authRouter.post('/verify-cognito', async (req, res) => {
     try {
         const {idToken} = req.body;
-
         if (!idToken) {
             return res.status(400).send('idToken is required');
         }

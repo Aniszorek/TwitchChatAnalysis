@@ -9,8 +9,6 @@ const LOG_PREFIX = 'BACKEND WS:'
 
 interface CognitoData {
     cognitoIdToken: string | null;
-    cognitoRefreshToken: string | null;
-    cognitoExpiryTime: number | null;
     cognitoUsername: string | null;
 }
 
@@ -38,8 +36,6 @@ export const pendingWebSocketInitializations = new Map<string, {
     streamId: string;
     cognitoUsername: string;
     cognitoIdToken: string;
-    cognitoRefreshToken: string;
-    cognitoTokenExpiryTime: number;
 }>();
 
 
@@ -66,8 +62,6 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                         subscriptions: new Set(),
                         cognito: {
                             cognitoIdToken: null,
-                            cognitoRefreshToken: null,
-                            cognitoExpiryTime: null,
                             cognitoUsername: null,
                         },
                         twitchData: {
@@ -86,14 +80,10 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             streamId,
                             cognitoUsername,
                             cognitoIdToken,
-                            cognitoRefreshToken,
-                            cognitoTokenExpiryTime
                         } = pendingWebSocketInitializations.get(userId)!;
 
-                        setFrontendClientCognitoData(userId, cognitoIdToken, cognitoRefreshToken, cognitoTokenExpiryTime, cognitoUsername);
+                        setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
                         setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
-
-                        console.log(`${LOG_PREFIX} ${twitchBroadcasterUserId}`)
 
                         const twitchResult = await startTwitchWebSocket(twitchBroadcasterUsername, userId);
                         if (twitchResult != null) {
@@ -194,16 +184,12 @@ export const sendMessageToFrontendClient = (userId: string, message: any) => {
 export const setFrontendClientCognitoData = (
     cognitoUserId: string,
     cognitoIdToken: string | null,
-    cognitoRefreshToken: string | null,
-    cognitoExpiryTime: number | null,
     cognitoUsername: string | null
 ) => {
     const userData = frontendClients.get(cognitoUserId);
     if (!userData) return;
 
     if (cognitoIdToken) userData.cognito.cognitoIdToken = cognitoIdToken;
-    if (cognitoRefreshToken) userData.cognito.cognitoRefreshToken = cognitoRefreshToken;
-    if (cognitoExpiryTime) userData.cognito.cognitoExpiryTime = cognitoExpiryTime;
     if (cognitoUsername) userData.cognito.cognitoUsername = cognitoUsername;
 
 }
