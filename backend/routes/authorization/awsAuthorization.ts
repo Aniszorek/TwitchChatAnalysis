@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Request, Response, NextFunction} from 'express';
 
 import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth';
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN, verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
@@ -14,7 +14,24 @@ interface SetTwitchUsernameRequestBody {
     twitchBroadcasterUsername: string;
 }
 
+export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction) {
+    const cognitoIdToken = req.headers["x-cognito-id-token"] as string | undefined;
 
+    if (!cognitoIdToken) {
+        return res.status(404).send({message: 'Token is missing or invalid'});
+    }
+
+    try {
+        await verifyToken(cognitoIdToken);
+        next();
+    } catch (error: any) {
+        console.error(`${LOG_PREFIX} Token verification failed: ${error}`);
+        res.status(401).json({message: 'Token verification failed', error: error.message});
+
+    }
+}
+
+// todo: powinniśmy rozdzielić te endpointy na różne pliki, bo nie każdy służy do autoryzacji
 export const authRouter = express.Router();
 
 authRouter.get('/auth-url', (req, res) => {
@@ -48,8 +65,7 @@ authRouter.get('/callback', async (req, res) => {
 })
 
 
-authRouter.post('/set-twitch-username', async (req, res) => {
-    // todo: add cognito token verification
+authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) => {
     const cognitoIdToken = <string>req.headers["x-cognito-id-token"];
 
     let {
@@ -104,10 +120,8 @@ authRouter.post('/set-twitch-username', async (req, res) => {
 
 
 authRouter.post('/verify-cognito', async (req, res) => {
-    console.log('test')
     try {
         const {idToken} = req.body;
-        console.log(idToken)
         if (!idToken) {
             return res.status(400).send('idToken is required');
         }

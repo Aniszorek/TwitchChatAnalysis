@@ -85,8 +85,6 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
                         setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
 
-                        console.log(`${LOG_PREFIX} ${twitchBroadcasterUserId}`)
-
                         const twitchResult = await startTwitchWebSocket(twitchBroadcasterUsername, userId);
                         if (twitchResult != null) {
                             frontendClients.get(userId)!.twitchWs = twitchResult;
