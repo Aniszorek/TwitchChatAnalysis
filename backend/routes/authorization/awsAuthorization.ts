@@ -1,10 +1,11 @@
 import express, {Request, Response, NextFunction} from 'express';
 
 import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth';
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN, verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
-import {validateTwitchAuth,} from '../../api_calls/twitchApiCalls';
+import {verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
 import {validateUserRole} from "../../aws/apiGateway";
 import {pendingWebSocketInitializations} from "../../bot/wsServer";
+import {validateTwitchAuth} from "../../twitch_calls/twitchAuth";
+import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../envConfig";
 
 
 const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION:`;
