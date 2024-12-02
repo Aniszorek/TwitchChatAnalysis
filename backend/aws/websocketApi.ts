@@ -1,5 +1,6 @@
 import WebSocket from "ws";
-import {frontendClients, sendMessageToFrontendClient} from "../bot/wsServer";
+import {frontendClients} from "../bot/frontendClients";
+import {sendMessageToFrontendClient} from "../bot/wsServer";
 
 const LOG_PREFIX = `API_GATEWAY_WS:`
 

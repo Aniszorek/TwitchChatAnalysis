@@ -1,7 +1,7 @@
 import axios, {AxiosResponse} from "axios";
 import jwt from "jsonwebtoken";
-import {frontendClients} from "../bot/wsServer";
 import {isCognitoRoleValid} from "../cognitoRoles";
+import {frontendClients} from "../bot/frontendClients";
 
 const API_GATEWAY_URL = "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test";
 const MESSAGES_PATH = `${API_GATEWAY_URL}/twitch-message`;
