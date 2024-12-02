@@ -36,6 +36,13 @@ export interface UserConnections {
     twitchData: TwitchData;
 }
 
+// TODO TCA-83 might be moved somewhere more related to sentiment analysis and AWS
+export enum SentimentLabel {
+    POSITIVE,
+    NEGATIVE,
+    NEUTRAL
+}
+
 export const frontendClients = new Map<string, UserConnections>();
 
 
@@ -106,4 +113,42 @@ export const incrementMessageCount = (cognitoUserId: string)=> {
         else
             client.twitchData.streamMetadata.messageCount = 1
     }
+}
+
+export const incrementSentimentMessageCount = (cognitoUserId: string, label: SentimentLabel)=> {
+    const client = frontendClients.get(cognitoUserId)
+    if(client){
+        switch (label) {
+            case SentimentLabel.POSITIVE:
+                incrementPositiveCount(client)
+                break
+            case SentimentLabel.NEGATIVE:
+                incrementNegativeCount(client)
+                break
+            case SentimentLabel.NEUTRAL:
+                incrementNeutralCount(client)
+                break
+        }
+    }
+}
+
+const incrementPositiveCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.positiveMessageCount)
+        client.twitchData.streamMetadata.positiveMessageCount += 1
+    else
+        client.twitchData.streamMetadata.positiveMessageCount = 1
+}
+
+const incrementNegativeCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.negativeMessageCount)
+        client.twitchData.streamMetadata.negativeMessageCount += 1
+    else
+        client.twitchData.streamMetadata.negativeMessageCount = 1
+}
+
+const incrementNeutralCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.neutralMessageCount)
+        client.twitchData.streamMetadata.neutralMessageCount += 1
+    else
+        client.twitchData.streamMetadata.neutralMessageCount = 1
 }

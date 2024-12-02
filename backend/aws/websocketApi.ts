@@ -1,5 +1,10 @@
 import WebSocket from "ws";
-import {frontendClients} from "../bot/frontendClients";
+import {
+    frontendClients,
+    getFrontendClientTwitchStreamMetadata,
+    incrementSentimentMessageCount,
+    SentimentLabel
+} from "../bot/frontendClients";
 import {sendMessageToFrontendClient} from "../bot/wsServer";
 
 const LOG_PREFIX = `API_GATEWAY_WS:`
@@ -58,6 +63,10 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
                 if (data.type === NLP_MESSAGE_WEBSOCKET_TYPE && data.data) {
                     //TODO handle processed messages on FE
                     sendMessageToFrontendClient(cognitoUserId, data.data);
+
+                    // TODO TCA-83 sentiment label should be send by AWS, not hardcoded
+                    incrementSentimentMessageCount(cognitoUserId, SentimentLabel.POSITIVE)
+
                     console.log(`${LOG_PREFIX} Message sent to frontend client`);
                 }
             } catch (error) {
