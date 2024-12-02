@@ -160,7 +160,8 @@ async function cleanupUserConnections(userId: string, subscriptions: Set<string>
 
     await cleanupSubscriptions(userId, subscriptions);
 
-    deletePostStreamMetadataInterval(userId)
+    if(verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "delete post-stream-metadata-interval"))
+        deletePostStreamMetadataInterval(userId)
 
     if (userData?.ws && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.close();
