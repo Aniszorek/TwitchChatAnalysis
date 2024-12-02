@@ -15,6 +15,7 @@ export interface TwitchStreamData {
     title?: string;
     viewer_count?: number;
     started_at?: string;
+    category?: string;
 }
 
 
@@ -44,7 +45,7 @@ export async function fetchTwitchUserId(nickname: string): Promise<TwitchUserIdR
 /**
  * Fetches Twitch stream data for a specific user ID
  */
-export async function fetchTwitchStreamId(userId: string): Promise<TwitchStreamData> {
+export async function fetchTwitchStreamMetadata(userId: string): Promise<TwitchStreamData> {
     try {
         const response = await twitchApiClient.get('/streams', {
             params: { user_id: userId },
@@ -57,13 +58,12 @@ export async function fetchTwitchStreamId(userId: string): Promise<TwitchStreamD
             return {stream_id: undefined};
         }
 
-        console.log(`${LOG_PREFIX} stream online: ${streamData.title}`);
-
         return {
             stream_id: streamData.id,
             title: streamData.title,
             viewer_count: streamData.viewer_count,
-            started_at: streamData.started_at
+            started_at: streamData.started_at,
+            category: streamData.game_name
         };
     } catch (error: any) {
         console.error(`${LOG_PREFIX} Error fetching Twitch stream data:`, error);

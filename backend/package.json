@@ -4,7 +4,6 @@
   "main": "entryPoint.ts",
   "scripts": {
     "start": "npx dotenvx run -- npx ts-node entryPoint.ts"
-
   },
   "author": "",
   "license": "ISC",
@@ -17,12 +16,14 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.1.0",
+    "luxon": "^3.5.0",
     "node-fetch": "^3.3.2",
     "open": "^10.1.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^22.10.1",
     "@types/ws": "^8.5.13",
     "ts-node": "^10.9.2",

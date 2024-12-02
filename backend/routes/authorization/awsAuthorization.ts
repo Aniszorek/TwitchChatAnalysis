@@ -92,6 +92,7 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
 
 
         // Validate role for user
+        // todo move .toLowerCase to separate variable and use it everywhere (especially in pendingWebSocketInitializations)
         const roleResponse = await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
 
         if (!roleResponse) {
@@ -100,6 +101,11 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
 
         const streamId = result.streamStatus!.stream_id!;
         const twitchBroadcasterUserId = result.userId!;
+        const streamTitle = result.streamStatus?.title!;
+        const streamCategory = result.streamStatus?.category!;
+        const streamStartedAt = result.streamStatus?.started_at!;
+        const streamViewerCount = result.streamStatus?.viewer_count!;
+
         const twitchRole = roleResponse.role;
         const cognitoUsername = roleResponse.cognitoUsername;
 
@@ -108,6 +114,10 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
             twitchBroadcasterUserId,
             twitchRole,
             streamId,
+            streamTitle,
+            streamCategory,
+            streamStartedAt,
+            streamViewerCount,
             cognitoUsername,
             cognitoIdToken,
         });
