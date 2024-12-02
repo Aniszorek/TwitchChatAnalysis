@@ -152,3 +152,23 @@ const incrementNeutralCount = (client: UserConnections) => {
     else
         client.twitchData.streamMetadata.neutralMessageCount = 1
 }
+
+export const incrementFollowersCount = (cognitoUserId: string)=> {
+    const client = frontendClients.get(cognitoUserId)
+    if(client){
+        if(client.twitchData.streamMetadata.followersCount)
+            client.twitchData.streamMetadata.followersCount += 1
+        else
+            client.twitchData.streamMetadata.followersCount = 1
+    }
+}
+
+export const incrementSubscriberCount = (cognitoUserId: string)=> {
+    const client = frontendClients.get(cognitoUserId)
+    if(client){
+        if(client.twitchData.streamMetadata.subscriberCount)
+            client.twitchData.streamMetadata.subscriberCount += 1
+        else
+            client.twitchData.streamMetadata.subscriberCount = 1
+    }
+}
