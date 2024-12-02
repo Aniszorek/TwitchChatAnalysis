@@ -100,6 +100,11 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
 
         const streamId = result.streamStatus!.stream_id!;
         const twitchBroadcasterUserId = result.userId!;
+        const streamTitle = result.streamStatus?.title!;
+        const streamCategory = result.streamStatus?.category!;
+        const streamStartedAt = result.streamStatus?.started_at!;
+        const streamViewerCount = result.streamStatus?.viewer_count!;
+
         const twitchRole = roleResponse.role;
         const cognitoUsername = roleResponse.cognitoUsername;
 
@@ -108,6 +113,10 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
             twitchBroadcasterUserId,
             twitchRole,
             streamId,
+            streamTitle,
+            streamCategory,
+            streamStartedAt,
+            streamViewerCount,
             cognitoUsername,
             cognitoIdToken,
         });

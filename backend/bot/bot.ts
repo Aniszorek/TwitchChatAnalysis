@@ -3,19 +3,18 @@ import WebSocket from "ws";
 import {sendMessageToApiGateway} from "../aws/apiGateway";
 import axios, {AxiosResponse} from "axios";
 import {
-    frontendClients,
     sendMessageToFrontendClient,
-    setFrontendClientTwitchDataStreamId,
     trackSubscription
 } from "./wsServer";
 import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {
-    fetchTwitchStreamId,
+    fetchTwitchStreamMetadata,
     fetchTwitchUserId,
     fetchTwitchUserIdFromOauthToken,
     TwitchStreamData
 } from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
+import {frontendClients, setFrontendClientTwitchDataStreamId} from "./frontendClients";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -65,7 +64,7 @@ export async function verifyTwitchUsernameAndStreamStatus(twitchUsername: string
 
     const broadcasterId = fetchResponse.userId!;
 
-    const streamStatus: TwitchStreamData = await fetchTwitchStreamId(broadcasterId);
+    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
     return {success: true, message: "Twitch username validated and authorized", streamStatus, userId: broadcasterId};
 }
 
