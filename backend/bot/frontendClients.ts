@@ -97,3 +97,13 @@ export const setFrontendClientTwitchStreamMetadata = (cognitoUserId: string, met
         client.twitchData.streamMetadata = metadata
     }
 }
+
+export const incrementMessageCount = (cognitoUserId: string)=> {
+    const client = frontendClients.get(cognitoUserId)
+    if(client){
+        if(client.twitchData.streamMetadata.messageCount)
+            client.twitchData.streamMetadata.messageCount += 1
+        else
+            client.twitchData.streamMetadata.messageCount = 1
+    }
+}

@@ -14,7 +14,12 @@ import {
     TwitchStreamData
 } from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
-import {frontendClients, setFrontendClientTwitchDataStreamId} from "./frontendClients";
+import {
+    frontendClients,
+    getFrontendClientTwitchStreamMetadata,
+    incrementMessageCount,
+    setFrontendClientTwitchDataStreamId
+} from "./frontendClients";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -117,6 +122,11 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
                         "messageTimestamp": data.metadata.message_timestamp!
                     }
                     console.log(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`);
+
+                    incrementMessageCount(cognitoUserId)
+
+                    console.log(`SANITY CHECK: message count after increment: ${getFrontendClientTwitchStreamMetadata(cognitoUserId)?.messageCount}`)
+
                     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws")) {
                         sendMessageToApiGateway(msg, cognitoUserId);
                     }
