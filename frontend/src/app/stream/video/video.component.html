@@ -1,0 +1,11 @@
+<div class="stream-container" *ngIf="safeUrl">
+  <iframe
+    [src]="safeUrl"
+    title="Twitch Stream Player"
+    class="stream-iframe"
+    allowfullscreen>
+  </iframe>
+</div>
+<div *ngIf="!safeUrl" class="no-stream-message">
+  <p>No streamer selected. Please search for a user to display their stream.</p>
+</div>

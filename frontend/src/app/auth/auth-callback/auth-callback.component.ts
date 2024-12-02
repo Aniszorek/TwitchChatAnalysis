@@ -31,8 +31,8 @@ export class AuthCallbackComponent implements OnInit {
                 // Token is valid, save tokens and navigate
                 this.authService.saveTokens(idToken, refreshToken, expireTime);
                 this.authService.isLoggedIn.set(true);
-                console.log("Token verified. Redirecting to /chat");
-                this.router.navigate(['/chat']);
+                console.log("Token verified. Redirecting to /stream");
+                this.router.navigate(['/stream']);
               } else {
                 console.error(response.message);
                 // Token verification failed

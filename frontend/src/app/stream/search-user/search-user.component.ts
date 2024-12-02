@@ -1,6 +1,5 @@
-import {Component, inject} from '@angular/core';
+import {Component, EventEmitter, inject, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {AuthService} from '../../auth/auth.service';
 import {TwitchService} from '../../twitch/twitch.service';
 import {NgIf} from '@angular/common';
 
@@ -21,7 +20,7 @@ export class SearchUserComponent {
   successMessage: string | null = null;
   errorMessage: string | null = null;
   loading = false;
-
+  @Output() userSelected = new EventEmitter<string>();
 
 
   constructor() {
@@ -29,9 +28,10 @@ export class SearchUserComponent {
       if (state) {
         if (state.success) {
           this.errorMessage = null;
-          this.successMessage = state.message || 'Operation successful.';
+          this.successMessage = state.message ?? 'Operation successful.';
+          this.userSelected.emit(this.username);
         } else {
-          this.errorMessage = state.errorMessage || 'Unknown error occurred';
+          this.errorMessage = state.errorMessage ?? 'Unknown error occurred';
           this.successMessage = null;
         }
       }

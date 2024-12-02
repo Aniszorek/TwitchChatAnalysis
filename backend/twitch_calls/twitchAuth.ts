@@ -58,8 +58,6 @@ export async function fetchTwitchStreamMetadata(userId: string): Promise<TwitchS
             return {stream_id: undefined};
         }
 
-        console.log(`${LOG_PREFIX} stream online: ${streamData.title}`);
-
         return {
             stream_id: streamData.id,
             title: streamData.title,
