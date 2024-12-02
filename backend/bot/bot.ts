@@ -13,10 +13,10 @@ import {
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {
     createPostStreamMetadataInterval, deletePostStreamMetadataInterval,
-    frontendClients,
+    frontendClients, getFrontendClientTwitchStreamMetadata,
     incrementFollowersCount,
     incrementMessageCount, incrementSubscriberCount,
-    setFrontendClientTwitchDataStreamId
+    setFrontendClientTwitchDataStreamId, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
 } from "./frontendClients";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 
@@ -46,6 +46,8 @@ export interface TwitchWebSocketMessage {
             message_id?: string;
             id?: string; // For stream.online events
             user_login?: string; // for channel.follow, subscribe, subscription.message events
+            title?: string; // for channel.update event
+            category_name?: string; // for channel.update event
         };
     };
 }
@@ -163,6 +165,25 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
                     incrementSubscriberCount(cognitoUserId)
                     break;
                 }
+                case EventSubSubscriptionType.CHANNEL_UPDATE:
+                {
+                    const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
+                    const newMetadata: TwitchStreamMetadata = {
+                        title: data.payload.event?.title,
+                        startedAt: oldMetadata?.startedAt,
+                        category: data.payload.event?.category_name,
+                        viewerCount: oldMetadata?.viewerCount,
+                        followersCount: oldMetadata?.followersCount,
+                        subscriberCount: oldMetadata?.subscriberCount,
+                        messageCount: oldMetadata?.messageCount,
+                        positiveMessageCount: oldMetadata?.positiveMessageCount,
+                        negativeMessageCount: oldMetadata?.negativeMessageCount,
+                        neutralMessageCount: oldMetadata?.neutralMessageCount
+                    }
+                    setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
+                    console.log(`${LOG_PREFIX}: channel updated: title: ${data.payload.event?.title}, category ${data.payload.event?.category_name}`)
+                    break;
+                }
             }
             break;
         }
@@ -211,7 +232,9 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             broadcaster_user_id: broadcasterId
         }, headers)
 
-
+        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_UPDATE, {
+            broadcaster_user_id: broadcasterId
+        }, headers)
 
 
     } catch (error: any) {
