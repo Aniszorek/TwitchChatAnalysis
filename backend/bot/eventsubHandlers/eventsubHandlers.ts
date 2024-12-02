@@ -3,9 +3,13 @@ import {TwitchWebSocketMessage} from "../bot";
 const LOG_PREFIX = "EVENTSUB_HANDLERS: "
 
 import {
-    createPostStreamMetadataInterval, deletePostStreamMetadataInterval, incrementFollowersCount,
-    incrementMessageCount, incrementSubscriberCount,
-    setFrontendClientTwitchDataStreamId
+    createPostStreamMetadataInterval,
+    deletePostStreamMetadataInterval,
+    getFrontendClientTwitchStreamMetadata,
+    incrementFollowersCount,
+    incrementMessageCount,
+    incrementSubscriberCount,
+    setFrontendClientTwitchDataStreamId, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
 } from "../frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
 import {sendMessageToApiGateway} from "../../aws/apiGateway";
@@ -59,5 +63,23 @@ export const channelFollowHandler = (cognitoUserId: string, data: TwitchWebSocke
 export const channelSubscribeHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     console.log(`${LOG_PREFIX} new subscriber: ${data.payload.event?.user_login}`);
     incrementSubscriberCount(cognitoUserId)
+}
+
+export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
+    const newMetadata: TwitchStreamMetadata = {
+        title: data.payload.event?.title,
+        startedAt: oldMetadata?.startedAt,
+        category: data.payload.event?.category_name,
+        viewerCount: oldMetadata?.viewerCount,
+        followersCount: oldMetadata?.followersCount,
+        subscriberCount: oldMetadata?.subscriberCount,
+        messageCount: oldMetadata?.messageCount,
+        positiveMessageCount: oldMetadata?.positiveMessageCount,
+        negativeMessageCount: oldMetadata?.negativeMessageCount,
+        neutralMessageCount: oldMetadata?.neutralMessageCount
+    }
+    setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
+    console.log(`${LOG_PREFIX}: channel updated: title: ${data.payload.event?.title}, category ${data.payload.event?.category_name}`)
 }
 
