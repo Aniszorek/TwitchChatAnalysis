@@ -1,25 +1,25 @@
 import {WebSocket} from "ws";
 
-interface CognitoData {
+export interface CognitoData {
     cognitoIdToken: string | null;
     cognitoUsername: string | null;
 }
 
-interface TwitchStreamMetadata {
-    title: string | null ;
-    started_at: string | null;
-    category: string | null ;
-    viewerCount: number;
-    followersCount: number;
-    subscriberCount: number;
-    messageCount: number;
-    positiveMessageCount: number;
-    negativeMessageCount: number;
-    neutralMessageCount: number;
+export interface TwitchStreamMetadata {
+    title: string | undefined ;
+    startedAt: string | undefined;
+    category: string | undefined ;
+    viewerCount: number | undefined;
+    followersCount: number | undefined;
+    subscriberCount: number | undefined;
+    messageCount: number | undefined;
+    positiveMessageCount: number| undefined;
+    negativeMessageCount: number | undefined;
+    neutralMessageCount: number | undefined;
 }
 
 
-interface TwitchData {
+export interface TwitchData {
     twitchBroadcasterUsername: string | null;
     twitchBroadcasterUserId: string | null;
     twitchRole: string | null;
@@ -27,7 +27,7 @@ interface TwitchData {
     streamMetadata: TwitchStreamMetadata;
 }
 
-interface UserConnections {
+export interface UserConnections {
     ws: WebSocket;
     twitchWs: WebSocket | null;
     awsWs: WebSocket | null;

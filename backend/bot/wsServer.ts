@@ -8,7 +8,7 @@ import {
     frontendClients,
     getFrontendClientTwitchStreamMetadata,
     setFrontendClientCognitoData,
-    setFrontendClientTwitchData
+    setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
 } from "./frontendClients";
 
 const LOG_PREFIX = 'BACKEND WS:'
@@ -58,9 +58,9 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             twitchRole: null,
                             streamId: null,
                             streamMetadata: {
-                                title: null,
-                                started_at: null,
-                                category: null,
+                                title: undefined,
+                                startedAt: undefined,
+                                category: undefined,
                                 viewerCount: 0,
                                 followersCount: 0,
                                 subscriberCount: 0,
@@ -86,8 +86,22 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             cognitoIdToken,
                         } = pendingWebSocketInitializations.get(userId)!;
 
+                        const streamMetadata: TwitchStreamMetadata = {
+                            title: streamTitle,
+                            startedAt: streamStartedAt,
+                            category: streamCategory,
+                            viewerCount: streamViewerCount,
+                            followersCount: 0,
+                            subscriberCount: 0,
+                            messageCount: 0,
+                            positiveMessageCount: 0,
+                            negativeMessageCount: 0,
+                            neutralMessageCount: 0
+                        }
+
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
                         setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
+                        setFrontendClientTwitchStreamMetadata(userId, streamMetadata)
 
                         const twitchResult = await startTwitchWebSocket(twitchBroadcasterUsername, userId);
                         if (twitchResult != null) {
