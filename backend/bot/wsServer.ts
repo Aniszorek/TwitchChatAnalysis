@@ -12,6 +12,7 @@ import {
     setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
 } from "./frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
+import {postStreamToApiGateway} from "../aws/apiGateway";
 
 const LOG_PREFIX = 'BACKEND WS:'
 
@@ -108,6 +109,9 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
 
                         if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
                             createPostStreamMetadataInterval(userId)
+
+                        if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send POST /stream to api gateway"))
+                            await postStreamToApiGateway(userId)
 
                         const twitchResult = await startTwitchWebSocket(twitchBroadcasterUsername, userId);
                         if (twitchResult != null) {

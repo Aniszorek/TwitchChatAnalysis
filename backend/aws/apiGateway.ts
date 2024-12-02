@@ -15,6 +15,7 @@ const API_GATEWAY_URL = "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.c
 const MESSAGES_PATH = `${API_GATEWAY_URL}/twitch-message`;
 const STREAM_METADATA_PATH = `${API_GATEWAY_URL}/stream-metadata`;
 const UPDATE_USER_PATH = `${API_GATEWAY_URL}/twitchChatAnalytics-authorization`;
+const STREAM_PATH = `${API_GATEWAY_URL}/stream`;
 
 const LOG_PREFIX = `API_GATEWAY_REST:`;
 
@@ -43,6 +44,18 @@ interface StreamMetadataMessage {
     positive_message_count?: number,
     negative_message_count?: number,
     neutral_message_count?: number
+}
+
+interface StreamMessage {
+    stream_id: string,
+    broadcaster_username: string,
+    stream_title: string,
+    started_at: string,
+    start_follows: number,
+    start_subs: number,
+    ended_at?: string,
+    end_follows?: number,
+    end_subs?: number
 }
 
 interface CognitoIdTokenData {
@@ -143,19 +156,7 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
 
 export async function sendMetadataToApiGateway(cognitoUserId: string) {
 
-
-    const client = frontendClients.get(cognitoUserId);
-
-    if (!client) {
-        throw new Error(`client not found for cognitoUserId: ${cognitoUserId}`);
-    }
-
-    const cognitoIdToken = client.cognito?.cognitoIdToken;
-
-    if (!cognitoIdToken) {
-        console.error(`${LOG_PREFIX} Cognito token missing in wsServer for user: ${cognitoUserId}`);
-        return;
-    }
+    const { client, cognitoIdToken } = getClientAndCognitoIdToken(cognitoUserId)
 
     // required:
     const stream_id = client.twitchData.streamId
@@ -229,9 +230,98 @@ export async function sendMetadataToApiGateway(cognitoUserId: string) {
     refreshStreamMetadataCounters(cognitoUserId);
 }
 
+export async function postStreamToApiGateway(cognitoUserId: string) {
+
+    const { client, cognitoIdToken } = getClientAndCognitoIdToken(cognitoUserId)
+
+    // required
+    const stream_id = client.twitchData.streamId
+    const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
+    const streamTitle = client.twitchData.streamMetadata.title
+    const startedAt = client.twitchData.streamMetadata.startedAt
+    // TODO fetch startFollows at the begining of the stream
+    // TODO fetch endFollows too
+    // TODO start/end subs too
+    // TODO at the end of the stream (or connection end):
+    // TODO PATCH /stream with end subs,follows and timestamp ended at
+    // TODO GET /stream?broadcaster_username for frontend (also on AWS)
+    // TODO refactor names in this file from send... to post.. accordingly to the method it executes
+    const startFollows = 1
+    const startSubs = 1
+
+    if(!stream_id)
+    {
+        throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
+    }
+    if(!broadcasterUsername)
+    {
+        throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+    }
+    if(!streamTitle)
+    {
+        throw new Error(`missing streamTitle for cognitoUserId: ${cognitoUserId}`);
+    }
+    if(!startedAt)
+    {
+        throw new Error(`missing startedAt for cognitoUserId: ${cognitoUserId}`);
+    }
+    if(!startFollows)
+    {
+        throw new Error(`missing startFollows for cognitoUserId: ${cognitoUserId}`);
+    }
+    if(!startSubs)
+    {
+        throw new Error(`missing startSubs for cognitoUserId: ${cognitoUserId}`);
+    }
+
+    const streamMessage: StreamMessage = {
+        stream_id: stream_id,
+        broadcaster_username: broadcasterUsername,
+        stream_title: streamTitle,
+        started_at: startedAt,
+        start_follows: startFollows,
+        start_subs: startSubs
+    }
+
+    const response = await axios.post(STREAM_PATH, streamMessage,
+        {
+            headers: {
+                Authorization: `Bearer ${cognitoIdToken}`,
+                "Content-Type": "application/json",
+                BroadcasterUserLogin: broadcasterUsername,
+            },
+        });
+
+    if (response.status === 200) {
+        console.log(`${LOG_PREFIX} Stream sent to API Gateway: ${JSON.stringify(streamMessage)}`);
+
+    } else {
+        console.error(`${LOG_PREFIX} Failed to send stream to API Gateway. Status: ${response.status}`);
+    }
+}
+
+
+
 const createTimestamp = (): string => {
     const now = DateTime.now().toUTC()
     const milliseconds = now.toFormat("SSS");
     const microseconds = milliseconds + "000";
     return now.toFormat("yyyy-LL-dd HH:mm:ss") + `.${microseconds}` + now.toFormat("ZZ");
+}
+
+const getClientAndCognitoIdToken = (cognitoUserId: string) => {
+    const client = frontendClients.get(cognitoUserId);
+
+    if (!client) {
+        throw Error(`${LOG_PREFIX} client not found for cognitoUserId: ${cognitoUserId}`)
+    }
+
+    const cognitoIdToken = client.cognito?.cognitoIdToken;
+
+    if (!cognitoIdToken) {
+        throw Error(`${LOG_PREFIX} Cognito token missing in wsServer for user: ${cognitoUserId}`)
+
+    }
+
+    return {client, cognitoIdToken}
 }
