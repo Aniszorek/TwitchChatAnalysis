@@ -13,14 +13,14 @@ import {
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {
     createPostStreamMetadataInterval, deletePostStreamMetadataInterval,
-    frontendClients,
+    frontendClients, getFrontendClientTwitchStreamMetadata,
     incrementFollowersCount,
     incrementMessageCount, incrementSubscriberCount,
-    setFrontendClientTwitchDataStreamId
+    setFrontendClientTwitchDataStreamId, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
 } from "./frontendClients";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
-    channelChatMessageHandler, channelFollowHandler, channelSubscribeHandler,
+    channelChatMessageHandler, channelFollowHandler, channelSubscribeHandler, channelUpdateHandler,
     streamOfflineHandler,
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";
@@ -51,6 +51,8 @@ export interface TwitchWebSocketMessage {
             message_id?: string;
             id?: string; // For stream.online events
             user_login?: string; // for channel.follow, subscribe, subscription.message events
+            title?: string; // for channel.update event
+            category_name?: string; // for channel.update event
         };
     };
 }
@@ -136,6 +138,11 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
                     channelSubscribeHandler(cognitoUserId, data)
                     break;
                 }
+                case EventSubSubscriptionType.CHANNEL_UPDATE:
+                {
+                    channelUpdateHandler(cognitoUserId, data)
+                    break;
+                }
             }
             break;
         }
@@ -184,7 +191,9 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             broadcaster_user_id: broadcasterId
         }, headers)
 
-
+        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_UPDATE, {
+            broadcaster_user_id: broadcasterId
+        }, headers)
 
 
     } catch (error: any) {
