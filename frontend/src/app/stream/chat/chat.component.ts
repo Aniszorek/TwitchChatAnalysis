@@ -3,17 +3,17 @@ import {ChatMessage, TwitchService} from '../../twitch/twitch.service';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 
 @Component({
-  selector: 'app-chat-widget',
+  selector: 'app-stream-chat',
   standalone: true,
   imports: [
     NgForOf,
     NgIf,
     DatePipe
   ],
-  templateUrl: './chat-widget.component.html',
-  styleUrl: './chat-widget.component.css'
+  templateUrl: './chat.component.html',
+  styleUrl: './chat.component.css'
 })
-export class ChatWidgetComponent implements OnInit {
+export class ChatComponent implements OnInit {
   private twitchService = inject(TwitchService);
   private destroyRef = inject(DestroyRef)
   messages: ChatMessage[] = [];
