@@ -9,6 +9,8 @@ const UPDATE_USER_PATH = `${API_GATEWAY_URL}/twitchChatAnalytics-authorization`;
 
 const LOG_PREFIX = `API_GATEWAY_REST:`;
 
+export const METADATA_SEND_INTERVAL = 5 * 60 * 1000
+
 interface TwitchMessage {
     broadcasterUserId: string,
     broadcasterUserLogin: string,
@@ -115,4 +117,9 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
         console.error(`${LOG_PREFIX} [ValidateUserRole] Error sending message to API Gateway: ${error.message}`);
         return undefined;
     }
+}
+
+export async function sendMetadataToApiGateway() {
+    // TODO TCA-75 implement
+    console.error('sendMetadataToApiGateway - not implemented.');
 }

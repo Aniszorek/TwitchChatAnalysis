@@ -12,6 +12,7 @@ import {
 } from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {
+    createPostStreamMetadataInterval, deletePostStreamMetadataInterval,
     frontendClients,
     incrementFollowersCount,
     incrementMessageCount, incrementSubscriberCount,
@@ -135,11 +136,19 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
                     const streamId = data.payload.event!.id!;
                     console.log(`${LOG_PREFIX} Stream online. Stream ID: ${streamId}`);
                     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
+
+                    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
+                        createPostStreamMetadataInterval(cognitoUserId)
+
+
                     break;
                 }
                 case EventSubSubscriptionType.STREAM_OFFLINE: {
                     console.log(`${LOG_PREFIX} Stream offline.`);
                     setFrontendClientTwitchDataStreamId(cognitoUserId, null)
+
+                    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "delete post-stream-metadata-interval"))
+                        deletePostStreamMetadataInterval(cognitoUserId)
                     break;
                 }
                 case EventSubSubscriptionType.CHANNEL_FOLLOW: {

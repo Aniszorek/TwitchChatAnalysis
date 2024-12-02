@@ -1,4 +1,8 @@
 import {WebSocket} from "ws";
+import {METADATA_SEND_INTERVAL, sendMetadataToApiGateway} from "../aws/apiGateway";
+import {clearInterval} from "node:timers";
+
+const LOG_PREFIX = 'FRONTEND_CLIENTS:'
 
 export interface CognitoData {
     cognitoIdToken: string | null;
@@ -34,6 +38,7 @@ export interface UserConnections {
     subscriptions: Set<string>;
     cognito: CognitoData;
     twitchData: TwitchData;
+    postStreamMetadataIntervalId: NodeJS.Timeout | undefined;
 }
 
 // TODO TCA-83 might be moved somewhere more related to sentiment analysis and AWS
@@ -81,10 +86,15 @@ export const setFrontendClientTwitchData = (
 
 
 export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | null) => {
-    const userData = frontendClients.get(cognitoUserId);
-    if (userData) {
-        userData.twitchData.streamId = streamId;
+    const client = frontendClients.get(cognitoUserId);
+    if (client) {
+        client.twitchData.streamId = streamId;
     }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
 };
 
 
@@ -94,7 +104,10 @@ export const getFrontendClientTwitchStreamMetadata = (cognitoUserId: string ) : 
     {
         return client.twitchData.streamMetadata
     }
-    return undefined
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
 }
 
 export const setFrontendClientTwitchStreamMetadata = (cognitoUserId: string, metadata: TwitchStreamMetadata) => {
@@ -102,6 +115,10 @@ export const setFrontendClientTwitchStreamMetadata = (cognitoUserId: string, met
     if(client)
     {
         client.twitchData.streamMetadata = metadata
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
 
@@ -112,6 +129,10 @@ export const incrementMessageCount = (cognitoUserId: string)=> {
             client.twitchData.streamMetadata.messageCount += 1
         else
             client.twitchData.streamMetadata.messageCount = 1
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
 
@@ -129,6 +150,10 @@ export const incrementSentimentMessageCount = (cognitoUserId: string, label: Sen
                 incrementNeutralCount(client)
                 break
         }
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
 
@@ -161,6 +186,10 @@ export const incrementFollowersCount = (cognitoUserId: string)=> {
         else
             client.twitchData.streamMetadata.followersCount = 1
     }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
 }
 
 export const incrementSubscriberCount = (cognitoUserId: string)=> {
@@ -171,4 +200,44 @@ export const incrementSubscriberCount = (cognitoUserId: string)=> {
         else
             client.twitchData.streamMetadata.subscriberCount = 1
     }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+}
+
+export const createPostStreamMetadataInterval = (cognitoUserId: string ) => {
+    const client = frontendClients.get(cognitoUserId)
+    if(client)
+    {
+        client.postStreamMetadataIntervalId = setInterval(async () => {
+            try {
+                await sendMetadataToApiGateway()
+            } catch (error) {
+                console.error(`${LOG_PREFIX} error when setting post interval for ${cognitoUserId}: ${error}`);
+            }
+        }, METADATA_SEND_INTERVAL)
+        console.log(`${LOG_PREFIX} successfully created post-stream-metadata-interval for ${cognitoUserId}`)
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+}
+
+export const deletePostStreamMetadataInterval = (cognitoUserId: string ) => {
+    const client = frontendClients.get(cognitoUserId)
+    if(client)
+    {
+        if(client.postStreamMetadataIntervalId)
+        {
+            clearInterval(client.postStreamMetadataIntervalId)
+            console.log(`${LOG_PREFIX} successfully deleted post-stream-metadata-interval for ${cognitoUserId}`)
+        }
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
 }

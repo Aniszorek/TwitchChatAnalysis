@@ -5,11 +5,14 @@ import {connectAwsWebSocket} from "../aws/websocketApi";
 import {deleteTwitchSubscription} from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {
+    createPostStreamMetadataInterval,
+    deletePostStreamMetadataInterval,
     frontendClients,
     getFrontendClientTwitchStreamMetadata,
     setFrontendClientCognitoData,
     setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
 } from "./frontendClients";
+import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 
 const LOG_PREFIX = 'BACKEND WS:'
 
@@ -69,7 +72,8 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                                 negativeMessageCount: 0,
                                 neutralMessageCount: 0
                             }
-                        }
+                        },
+                        postStreamMetadataIntervalId: undefined,
                     });
 
                     if (pendingWebSocketInitializations.has(userId)) {
@@ -102,6 +106,9 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
                         setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
                         setFrontendClientTwitchStreamMetadata(userId, streamMetadata)
+
+                        if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
+                            createPostStreamMetadataInterval(userId)
 
                         const twitchResult = await startTwitchWebSocket(twitchBroadcasterUsername, userId);
                         if (twitchResult != null) {
@@ -153,6 +160,8 @@ async function cleanupUserConnections(userId: string, subscriptions: Set<string>
     }
 
     await cleanupSubscriptions(userId, subscriptions);
+
+    deletePostStreamMetadataInterval(userId)
 
     if (userData?.ws && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.close();
