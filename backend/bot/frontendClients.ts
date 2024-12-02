@@ -212,9 +212,9 @@ export const createPostStreamMetadataInterval = (cognitoUserId: string ) => {
     {
         client.postStreamMetadataIntervalId = setInterval(async () => {
             try {
-                await sendMetadataToApiGateway()
+                await sendMetadataToApiGateway(cognitoUserId)
             } catch (error) {
-                console.error(`${LOG_PREFIX} error when setting post interval for ${cognitoUserId}: ${error}`);
+                console.error(`${LOG_PREFIX} error with post interval for ${cognitoUserId}: ${error}`);
             }
         }, METADATA_SEND_INTERVAL)
         console.log(`${LOG_PREFIX} successfully created post-stream-metadata-interval for ${cognitoUserId}`)
@@ -239,5 +239,21 @@ export const deletePostStreamMetadataInterval = (cognitoUserId: string ) => {
     {
         throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
+}
 
+export const refreshStreamMetadataCounters = (cognitoUserId: string ) => {
+    const client = frontendClients.get(cognitoUserId)
+    if(client){
+        client.twitchData.streamMetadata.viewerCount = 0
+        client.twitchData.streamMetadata.followersCount = 0
+        client.twitchData.streamMetadata.subscriberCount = 0
+        client.twitchData.streamMetadata.messageCount = 0
+        client.twitchData.streamMetadata.positiveMessageCount = 0
+        client.twitchData.streamMetadata.negativeMessageCount = 0
+        client.twitchData.streamMetadata.neutralMessageCount = 0
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
 }

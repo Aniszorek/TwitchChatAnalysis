@@ -8,7 +8,6 @@ import {
     createPostStreamMetadataInterval,
     deletePostStreamMetadataInterval,
     frontendClients,
-    getFrontendClientTwitchStreamMetadata,
     setFrontendClientCognitoData,
     setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
 } from "./frontendClients";

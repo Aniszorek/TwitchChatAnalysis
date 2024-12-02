@@ -92,6 +92,7 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
 
 
         // Validate role for user
+        // todo move .toLowerCase to separate variable and use it everywhere (especially in pendingWebSocketInitializations)
         const roleResponse = await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
 
         if (!roleResponse) {

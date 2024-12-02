@@ -1,7 +1,6 @@
 import WebSocket from "ws";
 import {
     frontendClients,
-    getFrontendClientTwitchStreamMetadata,
     incrementSentimentMessageCount,
     SentimentLabel
 } from "../bot/frontendClients";
