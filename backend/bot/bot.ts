@@ -19,6 +19,11 @@ import {
     setFrontendClientTwitchDataStreamId
 } from "./frontendClients";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
+import {
+    channelChatMessageHandler, channelFollowHandler, channelSubscribeHandler,
+    streamOfflineHandler,
+    streamOnlineHandler
+} from "./eventsubHandlers/eventsubHandlers";
 
 const LOG_PREFIX = 'TWITCH_WS:'
 
@@ -110,57 +115,25 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
         case 'notification': {
             switch (data.metadata.subscription_type) {
                 case EventSubSubscriptionType.CHANNEL_CHAT_MESSAGE: {
-                    const msg = {
-                        "broadcasterUserId": data.payload.event!.broadcaster_user_id!,
-                        "broadcasterUserLogin": data.payload.event!.broadcaster_user_login!,
-                        "broadcasterUserName": data.payload.event!.broadcaster_user_name!,
-                        "chatterUserId": data.payload.event!.chatter_user_id!,
-                        "chatterUserLogin": data.payload.event!.chatter_user_login!,
-                        "chatterUserName": data.payload.event!.chatter_user_name!,
-                        "messageText": data.payload.event!.message!.text,
-                        "messageId": data.payload.event!.message_id!,
-                        "messageTimestamp": data.metadata.message_timestamp!
-                    }
-                    console.log(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`);
-
-                    incrementMessageCount(cognitoUserId)
-
-                    if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws")) {
-                        sendMessageToApiGateway(msg, cognitoUserId);
-                    }
-
-                    sendMessageToFrontendClient(cognitoUserId, msg);
+                    channelChatMessageHandler(cognitoUserId,data)
                     break;
                 }
                 case EventSubSubscriptionType.STREAM_ONLINE: {
-                    const streamId = data.payload.event!.id!;
-                    console.log(`${LOG_PREFIX} Stream online. Stream ID: ${streamId}`);
-                    setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
-
-                    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
-                        createPostStreamMetadataInterval(cognitoUserId)
-
-
+                    streamOnlineHandler(cognitoUserId, data)
                     break;
                 }
                 case EventSubSubscriptionType.STREAM_OFFLINE: {
-                    console.log(`${LOG_PREFIX} Stream offline.`);
-                    setFrontendClientTwitchDataStreamId(cognitoUserId, null)
-
-                    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "delete post-stream-metadata-interval"))
-                        deletePostStreamMetadataInterval(cognitoUserId)
+                    streamOfflineHandler(cognitoUserId, data)
                     break;
                 }
                 case EventSubSubscriptionType.CHANNEL_FOLLOW: {
-                    console.log(`${LOG_PREFIX} new follower: ${data.payload.event?.user_login}`);
-                    incrementFollowersCount(cognitoUserId)
+                    channelFollowHandler(cognitoUserId, data)
                     break;
                 }
                 case EventSubSubscriptionType.CHANNEL_SUBSCRIBE:
                 case EventSubSubscriptionType.CHANNEL_SUBSCRIPTION_MESSAGE:
                 {
-                    console.log(`${LOG_PREFIX} new subscriber: ${data.payload.event?.user_login}`);
-                    incrementSubscriberCount(cognitoUserId)
+                    channelSubscribeHandler(cognitoUserId, data)
                     break;
                 }
             }
