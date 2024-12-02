@@ -125,8 +125,6 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
 
                     incrementMessageCount(cognitoUserId)
 
-                    console.log(`SANITY CHECK: message count after increment: ${getFrontendClientTwitchStreamMetadata(cognitoUserId)?.messageCount}`)
-
                     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws")) {
                         sendMessageToApiGateway(msg, cognitoUserId);
                     }
@@ -162,43 +160,37 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
         const viewerId = await fetchTwitchUserIdFromOauthToken();
         const broadcasterId = frontendClients.get(cognitoUserId)?.twitchData.twitchBroadcasterUserId;
 
+        await registerResponse(cognitoUserId, websocketSessionID, 'channel.chat.message', {
+            broadcaster_user_id: broadcasterId, user_id: viewerId,
+        }, headers)
 
-        // todo można zrobić funkcję do rejestrowania tych responsów a nie 3 razy copy-paste
+        await registerResponse(cognitoUserId, websocketSessionID, 'stream.online', {
+            broadcaster_user_id: broadcasterId
+        }, headers)
 
-        const registerMessageResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
-            type: 'channel.chat.message', version: '1', condition: {
-                broadcaster_user_id: broadcasterId, user_id: viewerId,
-            }, transport: {
-                method: 'websocket', session_id: websocketSessionID
-            }
-        }, {
-            headers: headers
-        });
-        verifyRegisterResponse(registerMessageResponse, 'channel.chat.message', cognitoUserId);
+        await registerResponse(cognitoUserId, websocketSessionID, 'stream.offline', {
+            broadcaster_user_id: broadcasterId
+        }, headers)
 
 
-        const registerOnlineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
-            type: 'stream.online', version: '1', condition: {
-                broadcaster_user_id: broadcasterId
-            }, transport: {
-                method: 'websocket', session_id: websocketSessionID
-            }
-        }, {
-            headers: headers
-        });
-        verifyRegisterResponse(registerOnlineResponse, 'stream.online', cognitoUserId);
+        // moderator role required
+        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow'))
+        {
+            await registerResponse(cognitoUserId, websocketSessionID, 'channel.follow', {
+                broadcaster_user_id: broadcasterId, moderator_user_id: viewerId,
+            }, headers, '2')
+        }
+
+        await registerResponse(cognitoUserId, websocketSessionID, 'channel.subscribe', {
+            broadcaster_user_id: broadcasterId
+        }, headers)
+
+        await registerResponse(cognitoUserId, websocketSessionID, 'channel.subscription.message', {
+            broadcaster_user_id: broadcasterId
+        }, headers)
 
 
-        const registerOfflineResponse = await axios.post(EVENTSUB_SUBSCRIPTION_URL, {
-            type: 'stream.offline', version: '1', condition: {
-                broadcaster_user_id: broadcasterId
-            }, transport: {
-                method: 'websocket', session_id: websocketSessionID
-            }
-        }, {
-            headers: headers
-        });
-        verifyRegisterResponse(registerOfflineResponse, 'stream.offline', cognitoUserId);
+
 
     } catch (error: any) {
         console.error(`${LOG_PREFIX} Error during subscription:`, error.response ? error.response.data : error.message);
@@ -214,4 +206,21 @@ function verifyRegisterResponse(response: AxiosResponse<VerifyResponseData>, reg
         console.error(`${LOG_PREFIX} Failed to subscribe to ${registerType}. Status code ${response.status}`);
         console.error(response.data);
     }
+}
+
+async function registerResponse(cognitoUserId: string, websocketSessionID: string, type:string, condition:any, headers:any, version:string = '1' ): Promise<void> {
+    const response = await axios.post(
+        EVENTSUB_SUBSCRIPTION_URL,
+        {
+            type,
+            version: version,
+            condition,
+            transport: {
+                method: 'websocket',
+                session_id: websocketSessionID,
+            },
+        },
+        { headers }
+    );
+    verifyRegisterResponse(response, type, cognitoUserId);
 }
