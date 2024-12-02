@@ -1,0 +1,23 @@
+.stream-container {
+  padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.stream-iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+}
+
+.no-stream-message {
+  text-align: center;
+  color: gray;
+  font-size: 1.2em;
+  margin-top: 20px;
+  padding: 10px;
+}

@@ -2,7 +2,6 @@ import axios from "axios";
 import querystring from "querystring";
 import jwt, {JwtHeader, JwtPayload} from "jsonwebtoken";
 import jwksClient, {SigningKey} from "jwks-rsa";
-import {frontendClients, setFrontendClientCognitoData} from "../bot/wsServer";
 
 
 const LOG_PREFIX = `COGNITO_AUTH:`;

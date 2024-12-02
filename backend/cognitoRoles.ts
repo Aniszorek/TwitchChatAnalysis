@@ -1,4 +1,4 @@
-import {frontendClients} from "./bot/wsServer";
+import {frontendClients} from "./bot/frontendClients";
 
 export const COGNITO_ROLES = {
     STREAMER: "Streamer",

@@ -1,7 +1,7 @@
 import {Routes} from '@angular/router';
 import {AuthCallbackComponent} from './auth/auth-callback/auth-callback.component';
 import {LoginComponent} from './login/login.component';
-import {ChatComponent} from './chat/chat.component';
+import {StreamComponent} from './stream/stream.component';
 import {authGuard} from "./auth/auth.guard";
 
 export const routes: Routes = [
@@ -14,8 +14,8 @@ export const routes: Routes = [
         component: AuthCallbackComponent
     },
     {
-        path: 'chat',
-        component: ChatComponent,
+        path: 'stream',
+        component: StreamComponent,
         canActivate: [authGuard]
     },
     {

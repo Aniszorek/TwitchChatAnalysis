@@ -4,37 +4,26 @@ import { startTwitchWebSocket } from "./bot";
 import {connectAwsWebSocket} from "../aws/websocketApi";
 import {deleteTwitchSubscription} from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
-
+import {
+    createPostStreamMetadataInterval,
+    deletePostStreamMetadataInterval,
+    frontendClients,
+    setFrontendClientCognitoData,
+    setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
+} from "./frontendClients";
+import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 
 const LOG_PREFIX = 'BACKEND WS:'
 
-interface CognitoData {
-    cognitoIdToken: string | null;
-    cognitoUsername: string | null;
-}
-
-interface TwitchData {
-    twitchBroadcasterUsername: string | null;
-    twitchBroadcasterUserId: string | null;
-    twitchRole: string | null;
-    streamId: string | null;
-}
-
-interface UserConnections {
-    ws: WebSocket;
-    twitchWs: WebSocket | null;
-    awsWs: WebSocket | null;
-    subscriptions: Set<string>;
-    cognito: CognitoData;
-    twitchData: TwitchData;
-}
-
-export const frontendClients = new Map<string, UserConnections>();
 export const pendingWebSocketInitializations = new Map<string, {
     twitchBroadcasterUsername: string;
     twitchBroadcasterUserId: string;
     twitchRole: string;
     streamId: string;
+    streamTitle?: string;
+    streamCategory?: string;
+    streamStartedAt?: string;
+    streamViewerCount?: number;
     cognitoUsername: string;
     cognitoIdToken: string;
 }>();
@@ -70,7 +59,20 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             twitchBroadcasterUserId: null,
                             twitchRole: null,
                             streamId: null,
-                        }
+                            streamMetadata: {
+                                title: undefined,
+                                startedAt: undefined,
+                                category: undefined,
+                                viewerCount: 0,
+                                followersCount: 0,
+                                subscriberCount: 0,
+                                messageCount: 0,
+                                positiveMessageCount: 0,
+                                negativeMessageCount: 0,
+                                neutralMessageCount: 0
+                            }
+                        },
+                        postStreamMetadataIntervalId: undefined,
                     });
 
                     if (pendingWebSocketInitializations.has(userId)) {
@@ -79,12 +81,33 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             twitchBroadcasterUserId,
                             twitchRole,
                             streamId,
+                            streamTitle,
+                            streamCategory,
+                            streamStartedAt,
+                            streamViewerCount,
                             cognitoUsername,
                             cognitoIdToken,
                         } = pendingWebSocketInitializations.get(userId)!;
 
+                        const streamMetadata: TwitchStreamMetadata = {
+                            title: streamTitle,
+                            startedAt: streamStartedAt,
+                            category: streamCategory,
+                            viewerCount: streamViewerCount,
+                            followersCount: 0,
+                            subscriberCount: 0,
+                            messageCount: 0,
+                            positiveMessageCount: 0,
+                            negativeMessageCount: 0,
+                            neutralMessageCount: 0
+                        }
+
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
                         setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
+                        setFrontendClientTwitchStreamMetadata(userId, streamMetadata)
+
+                        if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
+                            createPostStreamMetadataInterval(userId)
 
                         const twitchResult = await startTwitchWebSocket(twitchBroadcasterUsername, userId);
                         if (twitchResult != null) {
@@ -137,6 +160,9 @@ async function cleanupUserConnections(userId: string, subscriptions: Set<string>
 
     await cleanupSubscriptions(userId, subscriptions);
 
+    if(verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "delete post-stream-metadata-interval"))
+        deletePostStreamMetadataInterval(userId)
+
     if (userData?.ws && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.close();
         console.log(`${LOG_PREFIX} Closed frontend WebSocket for user ID: ${userId}`);
@@ -178,44 +204,5 @@ export const sendMessageToFrontendClient = (userId: string, message: any) => {
         userData.ws.send(JSON.stringify(message));
     } else {
         console.log(`${LOG_PREFIX} WebSocket for user ID ${userId} is not available`);
-    }
-};
-
-
-export const setFrontendClientCognitoData = (
-    cognitoUserId: string,
-    cognitoIdToken: string | null,
-    cognitoUsername: string | null
-) => {
-    const userData = frontendClients.get(cognitoUserId);
-    if (!userData) return;
-
-    if (cognitoIdToken) userData.cognito.cognitoIdToken = cognitoIdToken;
-    if (cognitoUsername) userData.cognito.cognitoUsername = cognitoUsername;
-
-}
-
-
-export const setFrontendClientTwitchData = (
-    cognitoUserId: string,
-    twitchBroadcasterUsername: string,
-    twitchBroadcasterUserId: string,
-    twitchRole: string,
-    streamId: string | null
-) => {
-    const userData = frontendClients.get(cognitoUserId);
-    if (!userData) return;
-
-    userData.twitchData.twitchBroadcasterUsername = twitchBroadcasterUsername;
-    userData.twitchData.twitchBroadcasterUserId = twitchBroadcasterUserId;
-    userData.twitchData.twitchRole = twitchRole;
-    setFrontendClientTwitchDataStreamId(cognitoUserId, streamId);
-}
-
-
-export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | null) => {
-    const userData = frontendClients.get(cognitoUserId);
-    if (userData) {
-        userData.twitchData.streamId = streamId;
     }
 };
