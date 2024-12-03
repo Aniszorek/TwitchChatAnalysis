@@ -249,15 +249,6 @@ export async function postStreamToApiGateway(cognitoUserId: string) {
         const startedAt = client.twitchData.streamData.startedAt
         const startFollows = client.twitchData.streamData.startFollows
         const startSubs = client.twitchData.streamData.startSubs
-        // TODO fetch startFollows at the begining of the stream
-        // TODO fetch endFollows too
-        // TODO start/end subs too
-
-        // TODO at the end of the stream (or connection end):
-        // TODO PATCH /stream with end subs,follows and timestamp ended at
-        // TODO GET /stream?broadcaster_username for frontend (also on AWS)
-        // TODO refactor names in this file from send... to post.. accordingly to the method it executes
-
 
         if (!stream_id) {
             throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
