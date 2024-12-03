@@ -16,10 +16,11 @@ import {
     TwitchStreamMetadata
 } from "./frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
-import {patchStreamToApiGateway, postStreamToApiGateway} from "../aws/apiGateway";
 import {getChannelSubscriptionsCount} from "../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../utilities/utilities";
+import {postStreamToApiGateway} from "../api_gateway_calls/stream/postStream";
+import {patchStreamToApiGateway} from "../api_gateway_calls/stream/patchStream";
 
 const LOG_PREFIX = 'BACKEND WS:'
 
