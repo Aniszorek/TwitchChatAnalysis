@@ -1,7 +1,4 @@
 import {TwitchWebSocketMessage} from "../bot";
-
-const LOG_PREFIX = "EVENTSUB_HANDLERS: "
-
 import {
     createPostStreamMetadataInterval,
     deletePostStreamMetadataInterval,
@@ -9,11 +6,21 @@ import {
     incrementFollowersCount,
     incrementMessageCount,
     incrementSubscriberCount,
-    setFrontendClientTwitchDataStreamId, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
+    setFrontendClientTwitchDataStreamId,
+    setFrontendClientTwitchStreamMetadata,
+    setStreamDataEndValues,
+    setStreamDataStartValues,
+    TwitchStreamMetadata
 } from "../frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
-import {sendMessageToApiGateway} from "../../aws/apiGateway";
+import {patchStreamToApiGateway, postMessageToApiGateway, postStreamToApiGateway} from "../../aws/apiGateway";
 import {sendMessageToFrontendClient} from "../wsServer";
+import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
+import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
+import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
+import {createTimestamp} from "../../utilities/utilities";
+
+const LOG_PREFIX = "EVENTSUB_HANDLERS: "
 
 export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     const msg = {
@@ -32,23 +39,64 @@ export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWeb
     incrementMessageCount(cognitoUserId)
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws")) {
-        sendMessageToApiGateway(msg, cognitoUserId);
+        postMessageToApiGateway(msg, cognitoUserId);
     }
 
     sendMessageToFrontendClient(cognitoUserId, msg);
 }
 
-export const streamOnlineHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     const streamId = data.payload.event!.id!;
+    const broadcasterId = data.payload.event!.broadcaster_user_id!;
     console.log(`${LOG_PREFIX} Stream online. Stream ID: ${streamId}`);
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
 
-    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
+    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
+    const startedAt = streamStatus?.started_at
+
+    const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId);
+    const newMetadata: TwitchStreamMetadata = {
+        title: streamStatus?.title,
+        category: streamStatus?.category,
+        viewerCount: streamStatus?.viewer_count!,
+        followersCount: oldMetadata?.followersCount,
+        subscriberCount: oldMetadata?.subscriberCount,
+        messageCount: oldMetadata?.messageCount,
+        positiveMessageCount: oldMetadata?.positiveMessageCount,
+        negativeMessageCount: oldMetadata?.negativeMessageCount,
+        neutralMessageCount: oldMetadata?.neutralMessageCount
+    }
+    setFrontendClientTwitchStreamMetadata(cognitoUserId,newMetadata)
+
+    if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
         createPostStreamMetadataInterval(cognitoUserId)
+
+    if(streamId && startedAt && verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
+    {
+        const subCount = await getChannelSubscriptionsCount(broadcasterId)
+        const followerCount = await getChannelFollowersCount(broadcasterId)
+        setStreamDataStartValues(cognitoUserId, startedAt, followerCount, subCount)
+    }
+
+    if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send POST /stream to api gateway"))
+        await postStreamToApiGateway(cognitoUserId)
 }
 
-export const streamOfflineHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+
     console.log(`${LOG_PREFIX} Stream offline.`);
+    const broadcasterId = data.payload.event!.broadcaster_user_id!;
+
+    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
+    {
+        const subCount = await getChannelSubscriptionsCount(broadcasterId)
+        const followerCount = await getChannelFollowersCount(broadcasterId)
+        setStreamDataEndValues(cognitoUserId,  createTimestamp(), followerCount, subCount)
+    }
+
+    if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
+        await patchStreamToApiGateway(cognitoUserId)
+
     setFrontendClientTwitchDataStreamId(cognitoUserId, null)
 
     if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "delete post-stream-metadata-interval"))
@@ -69,7 +117,6 @@ export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocke
     const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
     const newMetadata: TwitchStreamMetadata = {
         title: data.payload.event?.title,
-        startedAt: oldMetadata?.startedAt,
         category: data.payload.event?.category_name,
         viewerCount: oldMetadata?.viewerCount,
         followersCount: oldMetadata?.followersCount,

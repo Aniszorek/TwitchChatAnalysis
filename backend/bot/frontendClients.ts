@@ -1,5 +1,5 @@
 import {WebSocket} from "ws";
-import {METADATA_SEND_INTERVAL, sendMetadataToApiGateway} from "../aws/apiGateway";
+import {METADATA_SEND_INTERVAL, postMetadataToApiGateway} from "../aws/apiGateway";
 import {clearInterval} from "node:timers";
 
 const LOG_PREFIX = 'FRONTEND_CLIENTS:'
@@ -11,7 +11,6 @@ export interface CognitoData {
 
 export interface TwitchStreamMetadata {
     title: string | undefined ;
-    startedAt: string | undefined;
     category: string | undefined ;
     viewerCount: number | undefined;
     followersCount: number | undefined;
@@ -22,6 +21,14 @@ export interface TwitchStreamMetadata {
     neutralMessageCount: number | undefined;
 }
 
+export interface StreamData {
+    startedAt: string | undefined;
+    startFollows: number | undefined;
+    startSubs: number | undefined;
+    endedAt: string | undefined;
+    endFollows: number | undefined;
+    endSubs: number | undefined;
+}
 
 export interface TwitchData {
     twitchBroadcasterUsername: string | null;
@@ -29,6 +36,7 @@ export interface TwitchData {
     twitchRole: string | null;
     streamId: string | null;
     streamMetadata: TwitchStreamMetadata;
+    streamData: StreamData;
 }
 
 export interface UserConnections {
@@ -212,7 +220,7 @@ export const createPostStreamMetadataInterval = (cognitoUserId: string ) => {
     {
         client.postStreamMetadataIntervalId = setInterval(async () => {
             try {
-                await sendMetadataToApiGateway(cognitoUserId)
+                await postMetadataToApiGateway(cognitoUserId)
             } catch (error) {
                 console.error(`${LOG_PREFIX} error with post interval for ${cognitoUserId}: ${error}`);
             }
@@ -257,3 +265,31 @@ export const refreshStreamMetadataCounters = (cognitoUserId: string ) => {
         throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
+
+export const setStreamDataStartValues = (cognitoUserId: string, startedAt: string, startFollows:number, startSubs:number) => {
+    const client = frontendClients.get(cognitoUserId);
+    if (client) {
+        client.twitchData.streamData.startedAt = startedAt
+        client.twitchData.streamData.startSubs = startSubs
+        client.twitchData.streamData.startFollows = startFollows
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
+};
+
+export const setStreamDataEndValues = (cognitoUserId: string, endedAt: string, endFollows:number, endSubs:number) => {
+    const client = frontendClients.get(cognitoUserId);
+    if (client) {
+        client.twitchData.streamData.endedAt = endedAt
+        client.twitchData.streamData.endSubs = endSubs
+        client.twitchData.streamData.endFollows = endFollows
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
+};
