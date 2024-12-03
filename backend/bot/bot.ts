@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 
-import {sendMessageToApiGateway} from "../aws/apiGateway";
+import {postMessageToApiGateway} from "../aws/apiGateway";
 import axios, {AxiosResponse} from "axios";
 import {sendMessageToFrontendClient, trackSubscription} from "./wsServer";
 import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";

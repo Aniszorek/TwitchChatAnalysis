@@ -1,5 +1,5 @@
 import {WebSocket} from "ws";
-import {METADATA_SEND_INTERVAL, sendMetadataToApiGateway} from "../aws/apiGateway";
+import {METADATA_SEND_INTERVAL, postMetadataToApiGateway} from "../aws/apiGateway";
 import {clearInterval} from "node:timers";
 
 const LOG_PREFIX = 'FRONTEND_CLIENTS:'
@@ -220,7 +220,7 @@ export const createPostStreamMetadataInterval = (cognitoUserId: string ) => {
     {
         client.postStreamMetadataIntervalId = setInterval(async () => {
             try {
-                await sendMetadataToApiGateway(cognitoUserId)
+                await postMetadataToApiGateway(cognitoUserId)
             } catch (error) {
                 console.error(`${LOG_PREFIX} error with post interval for ${cognitoUserId}: ${error}`);
             }

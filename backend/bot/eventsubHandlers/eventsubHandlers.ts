@@ -15,7 +15,7 @@ import {
     TwitchStreamMetadata
 } from "../frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
-import {postStreamToApiGateway, sendMessageToApiGateway} from "../../aws/apiGateway";
+import {postStreamToApiGateway, postMessageToApiGateway} from "../../aws/apiGateway";
 import {sendMessageToFrontendClient} from "../wsServer";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
@@ -38,7 +38,7 @@ export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWeb
     incrementMessageCount(cognitoUserId)
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws")) {
-        sendMessageToApiGateway(msg, cognitoUserId);
+        postMessageToApiGateway(msg, cognitoUserId);
     }
 
     sendMessageToFrontendClient(cognitoUserId, msg);
