@@ -1,6 +1,6 @@
 import {twitchApiClient} from "../twitchApiConfig";
 
-const LOG_PREFIX = "TWITCH+API_CHANNELS:"
+const LOG_PREFIX = "TWITCH_API_CHANNELS:"
 
 export interface SubscriptionsCountResponse {
     total: number;
