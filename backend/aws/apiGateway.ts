@@ -185,7 +185,6 @@ export async function sendMetadataToApiGateway(cognitoUserId: string) {
         const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
         const newMetadata: TwitchStreamMetadata = {
             title: streamStatus.title,
-            startedAt: oldMetadata?.startedAt,
             category: streamStatus.category,
             viewerCount: streamStatus.viewer_count,
             followersCount: oldMetadata?.followersCount,
@@ -238,16 +237,18 @@ export async function postStreamToApiGateway(cognitoUserId: string) {
     const stream_id = client.twitchData.streamId
     const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
     const streamTitle = client.twitchData.streamMetadata.title
-    const startedAt = client.twitchData.streamMetadata.startedAt
+    const startedAt = client.twitchData.streamData.startedAt
+    const startFollows = client.twitchData.streamData.startFollows
+    const startSubs = client.twitchData.streamData.startSubs
     // TODO fetch startFollows at the begining of the stream
     // TODO fetch endFollows too
     // TODO start/end subs too
+
     // TODO at the end of the stream (or connection end):
     // TODO PATCH /stream with end subs,follows and timestamp ended at
     // TODO GET /stream?broadcaster_username for frontend (also on AWS)
     // TODO refactor names in this file from send... to post.. accordingly to the method it executes
-    const startFollows = 1
-    const startSubs = 1
+
 
     if(!stream_id)
     {
@@ -261,7 +262,7 @@ export async function postStreamToApiGateway(cognitoUserId: string) {
     {
         throw new Error(`missing streamTitle for cognitoUserId: ${cognitoUserId}`);
     }
-    if(!startedAt)
+    if(startedAt === undefined)
     {
         throw new Error(`missing startedAt for cognitoUserId: ${cognitoUserId}`);
     }
@@ -269,7 +270,7 @@ export async function postStreamToApiGateway(cognitoUserId: string) {
     {
         throw new Error(`missing startFollows for cognitoUserId: ${cognitoUserId}`);
     }
-    if(!startSubs)
+    if(startSubs === undefined)
     {
         throw new Error(`missing startSubs for cognitoUserId: ${cognitoUserId}`);
     }

@@ -11,7 +11,6 @@ export interface CognitoData {
 
 export interface TwitchStreamMetadata {
     title: string | undefined ;
-    startedAt: string | undefined;
     category: string | undefined ;
     viewerCount: number | undefined;
     followersCount: number | undefined;
@@ -22,6 +21,14 @@ export interface TwitchStreamMetadata {
     neutralMessageCount: number | undefined;
 }
 
+export interface StreamData {
+    startedAt: string | undefined;
+    startFollows: number | undefined;
+    startSubs: number | undefined;
+    endedAt: string | undefined;
+    endFollows: number | undefined;
+    endSubs: number | undefined;
+}
 
 export interface TwitchData {
     twitchBroadcasterUsername: string | null;
@@ -29,6 +36,7 @@ export interface TwitchData {
     twitchRole: string | null;
     streamId: string | null;
     streamMetadata: TwitchStreamMetadata;
+    streamData: StreamData;
 }
 
 export interface UserConnections {
@@ -257,3 +265,31 @@ export const refreshStreamMetadataCounters = (cognitoUserId: string ) => {
         throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
+
+export const setStreamDataStartValues = (cognitoUserId: string, startedAt: string, startFollows:number, startSubs:number) => {
+    const client = frontendClients.get(cognitoUserId);
+    if (client) {
+        client.twitchData.streamData.startedAt = startedAt
+        client.twitchData.streamData.startSubs = startSubs
+        client.twitchData.streamData.startFollows = startFollows
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
+};
+
+export const setStreamDataEndValues = (cognitoUserId: string, endeddAt: string, endFollows:number, endSubs:number) => {
+    const client = frontendClients.get(cognitoUserId);
+    if (client) {
+        client.twitchData.streamData.startedAt = endeddAt
+        client.twitchData.streamData.startSubs = endSubs
+        client.twitchData.streamData.startFollows = endFollows
+    }
+    else
+    {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
+};

@@ -9,10 +9,12 @@ import {
     deletePostStreamMetadataInterval,
     frontendClients,
     setFrontendClientCognitoData,
-    setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
+    setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, setStreamDataStartValues, TwitchStreamMetadata
 } from "./frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {postStreamToApiGateway} from "../aws/apiGateway";
+import {getChannelSubscriptionsCount} from "../twitch_calls/twitch/getBroadcastersSubscriptions";
+import {getChannelFollowersCount} from "../twitch_calls/twtichChannels/getChannelFollowers";
 
 const LOG_PREFIX = 'BACKEND WS:'
 
@@ -62,7 +64,6 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             streamId: null,
                             streamMetadata: {
                                 title: undefined,
-                                startedAt: undefined,
                                 category: undefined,
                                 viewerCount: 0,
                                 followersCount: 0,
@@ -71,6 +72,14 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                                 positiveMessageCount: 0,
                                 negativeMessageCount: 0,
                                 neutralMessageCount: 0
+                            },
+                            streamData:{
+                                startedAt: undefined,
+                                startFollows: 0,
+                                startSubs: 0,
+                                endedAt: undefined,
+                                endFollows: 0,
+                                endSubs: 0
                             }
                         },
                         postStreamMetadataIntervalId: undefined,
@@ -92,7 +101,6 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
 
                         const streamMetadata: TwitchStreamMetadata = {
                             title: streamTitle,
-                            startedAt: streamStartedAt,
                             category: streamCategory,
                             viewerCount: streamViewerCount,
                             followersCount: 0,
@@ -109,6 +117,13 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
 
                         if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
                             createPostStreamMetadataInterval(userId)
+
+                        if(streamId && streamStartedAt && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
+                        {
+                            const subCount = await getChannelSubscriptionsCount(twitchBroadcasterUserId)
+                            const followerCount = await getChannelFollowersCount(twitchBroadcasterUserId)
+                            setStreamDataStartValues(userId, streamStartedAt, followerCount, subCount)
+                        }
 
                         if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send POST /stream to api gateway"))
                             await postStreamToApiGateway(userId)

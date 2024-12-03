@@ -9,12 +9,17 @@ import {
     incrementFollowersCount,
     incrementMessageCount,
     incrementSubscriberCount,
-    setFrontendClientTwitchDataStreamId, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
+    setFrontendClientTwitchDataStreamId,
+    setFrontendClientTwitchStreamMetadata,
+    setStreamDataStartValues,
+    TwitchStreamMetadata
 } from "../frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
 import {postStreamToApiGateway, sendMessageToApiGateway} from "../../aws/apiGateway";
 import {sendMessageToFrontendClient} from "../wsServer";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
+import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
+import {getChannelFollowersCount} from "../../twitch_calls/twtichChannels/getChannelFollowers";
 
 export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     const msg = {
@@ -46,11 +51,11 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
 
     const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
+    const startedAt = streamStatus?.started_at
 
     const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId);
     const newMetadata: TwitchStreamMetadata = {
         title: streamStatus?.title,
-        startedAt: streamStatus?.started_at,
         category: streamStatus?.category,
         viewerCount: streamStatus?.viewer_count!,
         followersCount: oldMetadata?.followersCount,
@@ -64,6 +69,13 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
         createPostStreamMetadataInterval(cognitoUserId)
+
+    if(streamId && startedAt && verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
+    {
+        const subCount = await getChannelSubscriptionsCount(broadcasterId)
+        const followerCount = await getChannelFollowersCount(broadcasterId)
+        setStreamDataStartValues(cognitoUserId, startedAt, followerCount, subCount)
+    }
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send POST /stream to api gateway"))
         postStreamToApiGateway(cognitoUserId)
@@ -91,7 +103,6 @@ export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocke
     const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
     const newMetadata: TwitchStreamMetadata = {
         title: data.payload.event?.title,
-        startedAt: oldMetadata?.startedAt,
         category: data.payload.event?.category_name,
         viewerCount: oldMetadata?.viewerCount,
         followersCount: oldMetadata?.followersCount,

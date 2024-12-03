@@ -1,10 +1,12 @@
 import {twitchApiClient} from "../twitchApiConfig";
 
+const LOG_PREFIX = "TWITCH+API_CHANNELS:"
+
 export interface SubscriptionsCountResponse {
     total: number;
 }
 
-export const getChannelSubscriptionsCount = async (broadcasterId: string): Promise<SubscriptionsCountResponse> => {
+export const getChannelSubscriptionsCount = async (broadcasterId: string): Promise<number> => {
     try {
         const response = await twitchApiClient.get<SubscriptionsCountResponse>('/subscriptions', {
             params: {
@@ -12,11 +14,9 @@ export const getChannelSubscriptionsCount = async (broadcasterId: string): Promi
             },
         });
 
-        return {
-            total: response.data.total,
-        };
+        return response.data.total
     } catch (error) {
-        console.error('Error fetching channel subscription count:', error);
+        console.error(`${LOG_PREFIX} Error fetching channel subscription count:`, error);
         throw error;
     }
 };
