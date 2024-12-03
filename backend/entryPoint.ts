@@ -7,7 +7,6 @@ import {initializeTwitchApiClient} from "./twitch_calls/twitchApiConfig";
 import {twitchUsersRouter} from "./routes/twitch/twitchUsersRouter";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "./envConfig";
 import {twitchChannelsRouter} from "./routes/twitch/twitchChannelsRouter";
-import {twitchRouter} from "./routes/twitch/twitchRouter";
 
 const LOG_PREFIX = `ENTRYPOINT:`;
 
@@ -25,7 +24,6 @@ app.use(cors({
 app.use("/", authRouter);
 app.use("/twitch/users", twitchUsersRouter);
 app.use("/twitch/channels", twitchChannelsRouter);
-app.use("/twitch", twitchRouter);
 
 
 const server = http.createServer(app);
