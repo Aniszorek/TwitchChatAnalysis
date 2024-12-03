@@ -4,13 +4,16 @@ import {AuthService} from "./auth.service";
 
 // Attaches cognito ID token to each request (if token is present)
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-    const authTokens = inject(AuthService).getAuthTokens();
-    if (authTokens.idToken) {
+    const authService = inject(AuthService);
+    const authTokens = authService.getStoredTokens();
+
+    if (authTokens?.idToken) {
         const newReq = req.clone({
-            headers: req.headers.append('x-cognito-id-token', authTokens.idToken,)
+            headers: req.headers.append('x-cognito-id-token', authTokens.idToken)
         });
-        console.log(newReq.url)
+        console.log(newReq.url);
         return next(newReq);
     }
-    return next(req)
+
+    return next(req);
 };

@@ -3,15 +3,15 @@ import {inject} from '@angular/core';
 import {AuthService} from './auth.service';
 
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
   if (authService.isLoggedIn()) {
     return true;
-  } else {
-    console.log("User is not logged in. Redirecting to /login");
-    router.navigate(['/login']);
-    return false;
   }
+
+  console.log("User is not logged in. Redirecting to /login");
+  return router.navigate(['/login']);
 };
+

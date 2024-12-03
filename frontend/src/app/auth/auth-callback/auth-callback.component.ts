@@ -10,50 +10,52 @@ import {ActivatedRoute, Router} from "@angular/router";
   styleUrl: './auth-callback.component.css'
 })
 export class AuthCallbackComponent implements OnInit {
-  authService = inject(AuthService)
-  route = inject(ActivatedRoute);
-  router = inject(Router)
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
-  ngOnInit() {
-    this.route.queryParamMap.subscribe(params => {
-      const successful = params.get('successful') === 'true';
-
-      if (successful) {
-        const idToken = params.get('idToken');
-        const refreshToken = params.get('refreshToken');
-        const expireTime = params.get('expireTime')
-
-        if (idToken && refreshToken && expireTime) {
-          // Verify if the token is valid
-          this.authService.validateToken(idToken).subscribe({
-            next: (response) => {
-              if (response.message === 'verified') {
-                // Token is valid, save tokens and navigate
-                this.authService.saveTokens(idToken, refreshToken, expireTime);
-                this.authService.isLoggedIn.set(true);
-                console.log("Token verified. Redirecting to /stream");
-                this.router.navigate(['/stream']);
-              } else {
-                console.error(response.message);
-                // Token verification failed
-                console.error("Invalid token");
-                this.router.navigate(['/login']);
-              }
-            },
-            error: (e) => {
-              console.error("Token validation failed", e);
-              this.router.navigate(['/login']);
-            }
-          });
-        } else {
-          console.error("Tokens or refresh time missing in callback");
-          this.router.navigate(['/login']);
-        }
-      } else {
-        console.error("Login failed");
-        this.router.navigate(['/login']);
-      }
-    });
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => this.handleAuthCallback(params));
   }
 
+  private handleAuthCallback(params: any): void {
+    const successful = params.get('successful') === 'true';
+
+    if (!successful) {
+      console.error("Login failed");
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const idToken = params.get('idToken');
+    const refreshToken = params.get('refreshToken');
+    const expireTime = params.get('expireTime');
+
+    if (idToken && refreshToken && expireTime) {
+      this.authService.validateToken(idToken).subscribe({
+        next: (response) => this.handleValidationResponse(response, idToken, refreshToken, expireTime),
+        error: (err) => this.handleValidationError(err),
+      });
+    } else {
+      console.error("Tokens or refresh time missing in callback");
+      this.router.navigate(['/login']);
+    }
+  }
+
+  private handleValidationResponse(response: {
+    message: string
+  }, idToken: string, refreshToken: string, expireTime: string): void {
+    if (response.message === 'verified') {
+      this.authService.saveTokens(idToken, refreshToken, expireTime);
+      this.router.navigate(['/stream']);
+    } else {
+      console.error("Invalid token");
+      this.router.navigate(['/login']);
+    }
+  }
+
+  private handleValidationError(err: any): void {
+    console.error("Token validation failed", err);
+    this.router.navigate(['/login']);
+  }
 }

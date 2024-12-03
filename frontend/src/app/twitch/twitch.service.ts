@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {urls} from '../app.config';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {BehaviorSubject, catchError, Subject, tap} from 'rxjs';
+import {BehaviorSubject, Subject, catchError, tap} from 'rxjs';
 import {AuthService} from "../auth/auth.service";
 
 export interface SearchUserState {
@@ -11,108 +11,104 @@ export interface SearchUserState {
 }
 
 export interface ChatMessage {
-  broadcasterUserId: string,
-  broadcasterUserLogin: string,
-  broadcasterUserName: string,
-  chatterUserId: string,
-  chatUserLogin: string,
-  chatUserName: string,
-  messageId: string,
-  messageText: string,
-  messageTimestamp: string
+  broadcasterUserId: string;
+  broadcasterUserLogin: string;
+  broadcasterUserName: string;
+  chatterUserId: string;
+  chatUserLogin: string;
+  chatUserName: string;
+  messageId: string;
+  messageText: string;
+  messageTimestamp: string;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TwitchService {
-  http = inject(HttpClient)
-  authService = inject(AuthService);
-  backendUrl = urls.backendUrl
+  private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
+  private readonly backendUrl = urls.backendUrl;
+
   private chatMessages = new Subject<ChatMessage | null>();
   chatMessages$ = this.chatMessages.asObservable();
+
   private searchUserState = new BehaviorSubject<SearchUserState | null>(null);
   searchUserState$ = this.searchUserState.asObservable();
+
   private loadingState = new BehaviorSubject<boolean>(false);
   loadingState$ = this.loadingState.asObservable();
 
   private websocket: WebSocket | null = null;
 
-
   constructor() {
-    inject(AuthService).logout$.subscribe(() => {
-      this.disconnectWebSocket();
-    });
+    this.authService.logout$.subscribe(() => this.disconnectWebSocket());
   }
 
+  /**
+   * Searches for a Twitch user and connects to their chat.
+   */
   searchUser(twitchUsername: string): void {
-    const headers = new HttpHeaders({'Content-Type': 'application/json'});
-    const payload = {
-      twitchBroadcasterUsername: twitchUsername,
-      cognitoIdToken: this.authService.getIdToken(),
-      cognitoRefreshToken: this.authService.getRefreshToken(),
-      cognitoTokenExpiryTime: this.authService.getExpiryDate(),
-    };
+    if (!twitchUsername) {
+      this.searchUserState.next({success: false, errorMessage: 'Username cannot be empty.'});
+      return;
+    }
 
+    const payload = this.createAuthPayload(twitchUsername);
     this.disconnectWebSocket();
 
-    console.log('Sending Twitch username to /set-twitch-username endpoint');
-    this.loadingState.next(true);
+    this.startLoading();
+    this.sendUsernameToBackend(payload, twitchUsername);
+  }
 
+  /**
+   * Starts the loading state.
+   */
+  private startLoading(): void {
+    this.loadingState.next(true);
+  }
+
+  /**
+   * Sends the username to the backend API to set the Twitch username.
+   */
+  private sendUsernameToBackend(payload: any, twitchUsername: string): void {
     this.http
-      .post(`${this.backendUrl}/set-twitch-username`, payload, {headers})
+      .post(`${this.backendUrl}/set-twitch-username`, payload, this.getHttpOptions())
       .pipe(
         tap(() => {
-          this.searchUserState.next({success: true, message: `Connected to ${twitchUsername}'s chat`});
-          this.connectToChatWebSocket();
+          this.handleSearchSuccess(twitchUsername);
         }),
         catchError((error) => {
-          console.error('Failed to set Twitch username:', error);
-          this.searchUserState.next({
-            success: false,
-            errorMessage: 'Streamer not found. Please check the username and try again.',
-          });
-          this.loadingState.next(false);
+          this.handleSearchError(error);
           throw error;
         })
       )
       .subscribe();
   }
 
-  private connectToChatWebSocket() {
-    console.log('connecting to backend via websocket to receive messages from twitch')
-    this.websocket = new WebSocket(`${this.backendUrl.replace('http', 'ws')}/chat`)
-
-    this.websocket.onopen = () => {
-      const cognitoIdToken = this.authService.getIdToken();
-      if (cognitoIdToken) {
-        this.websocket?.send(JSON.stringify({ type: 'auth', cognitoIdToken }));
-      } else {
-        console.error('No ID token available to authenticate WebSocket connection');
-      }
-      this.loadingState.next(false);
-    };
-
-    this.websocket.onmessage = (event) => {
-      const rawMessage = JSON.parse(event.data);
-      const message: ChatMessage = {
-        broadcasterUserId: rawMessage.broadcasterUserId,
-        broadcasterUserLogin: rawMessage.broadcasterUserLogin,
-        broadcasterUserName: rawMessage.broadcasterUserName,
-        chatterUserId: rawMessage.chatterUserId,
-        chatUserLogin: rawMessage.chatterUserLogin,
-        chatUserName: rawMessage.chatterUserName,
-        messageId: rawMessage.messageId,
-        messageText: rawMessage.messageText,
-        messageTimestamp: rawMessage.messageTimestamp
-      };
-      this.chatMessages.next(message);
-    };
-
-    this.websocket.onerror = (err) => console.error('WebSocket error:', err);
+  /**
+   * Handles a successful search response.
+   */
+  private handleSearchSuccess(twitchUsername: string): void {
+    this.searchUserState.next({success: true, message: `Connected to ${twitchUsername}'s chat`});
+    this.connectToChatWebSocket();
   }
 
+  /**
+   * Handles an error that occurs during the search.
+   */
+  private handleSearchError(error: any): void {
+    console.error('Failed to set Twitch username:', error);
+    this.searchUserState.next({
+      success: false,
+      errorMessage: 'Streamer not found. Please check the username and try again.',
+    });
+    this.loadingState.next(false);
+  }
 
+  /**
+   * Disconnects the WebSocket connection.
+   */
   disconnectWebSocket(): void {
     if (this.websocket) {
       console.log('Disconnecting WebSocket');
@@ -121,5 +117,73 @@ export class TwitchService {
     }
     this.chatMessages.next(null);
     this.loadingState.next(false);
+  }
+
+  /**
+   * Connects to the backend WebSocket to receive Twitch chat messages.
+   */
+  private connectToChatWebSocket(): void {
+    console.log('Connecting to backend via WebSocket for Twitch chat');
+    this.websocket = new WebSocket(`${this.backendUrl.replace('http', 'ws')}/chat`);
+
+    this.websocket.onopen = () => {
+      const cognitoIdToken = this.authService.getIdToken();
+      if (cognitoIdToken) {
+        this.websocket?.send(JSON.stringify({ type: 'auth', cognitoIdToken }));
+      } else {
+        console.error('No ID token available to authenticate WebSocket connection');
+        this.disconnectWebSocket();
+      }
+      this.loadingState.next(false);
+    };
+
+    this.websocket.onmessage = (event) => {
+      try {
+        const rawMessage = JSON.parse(event.data);
+        const message: ChatMessage = this.mapRawMessage(rawMessage);
+        this.chatMessages.next(message);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    this.websocket.onerror = (err) => console.error('WebSocket error:', err);
+    this.websocket.onclose = () => console.log('WebSocket connection closed');
+  }
+
+  /**
+   * Maps a raw WebSocket message to a ChatMessage object.
+   */
+  private mapRawMessage(rawMessage: any): ChatMessage {
+    return {
+      broadcasterUserId: rawMessage.broadcasterUserId,
+      broadcasterUserLogin: rawMessage.broadcasterUserLogin,
+      broadcasterUserName: rawMessage.broadcasterUserName,
+      chatterUserId: rawMessage.chatterUserId,
+      chatUserLogin: rawMessage.chatterUserLogin,
+      chatUserName: rawMessage.chatterUserName,
+      messageId: rawMessage.messageId,
+      messageText: rawMessage.messageText,
+      messageTimestamp: rawMessage.messageTimestamp,
+    };
+  }
+
+  /**
+   * Creates the authentication payload for API requests.
+   */
+  private createAuthPayload(twitchUsername: string): Record<string, string | null> {
+    return {
+      twitchBroadcasterUsername: twitchUsername,
+      cognitoIdToken: this.authService.getIdToken(),
+      cognitoRefreshToken: this.authService.getRefreshToken(),
+      cognitoTokenExpiryTime: this.authService.getExpiryDate(),
+    };
+  }
+
+  /**
+   * Returns default HTTP options for API requests.
+   */
+  private getHttpOptions(): { headers: HttpHeaders } {
+    return {headers: new HttpHeaders({'Content-Type': 'application/json'})};
   }
 }

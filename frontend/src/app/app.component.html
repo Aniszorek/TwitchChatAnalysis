@@ -1,4 +1,14 @@
-<app-header/>
-<div class="content">
-  <router-outlet></router-outlet>
+<div *ngIf="!isLoading; else loading">
+  <app-header/>
+  <div class="content">
+    <router-outlet></router-outlet>
+  </div>
 </div>
+
+
+<ng-template #loading>
+  <div class="loading-message">
+    <div class="spinner"></div>
+    <span>Loading...</span>
+  </div>
+</ng-template>
