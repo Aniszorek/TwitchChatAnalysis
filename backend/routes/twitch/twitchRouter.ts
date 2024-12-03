@@ -1,5 +1,4 @@
 import express from "express";
-import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUsers";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
 
 export const twitchRouter = express.Router();

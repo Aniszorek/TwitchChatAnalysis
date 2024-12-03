@@ -1,8 +1,6 @@
 import WebSocket from "ws";
-
-import {postMessageToApiGateway} from "../aws/apiGateway";
 import axios, {AxiosResponse} from "axios";
-import {sendMessageToFrontendClient, trackSubscription} from "./wsServer";
+import {trackSubscription} from "./wsServer";
 import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {
     fetchTwitchStreamMetadata,
@@ -11,16 +9,13 @@ import {
     TwitchStreamData
 } from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
-import {
-    createPostStreamMetadataInterval, deletePostStreamMetadataInterval,
-    frontendClients, getFrontendClientTwitchStreamMetadata,
-    incrementFollowersCount,
-    incrementMessageCount, incrementSubscriberCount,
-    setFrontendClientTwitchDataStreamId, setFrontendClientTwitchStreamMetadata, TwitchStreamMetadata
-} from "./frontendClients";
+import {frontendClients} from "./frontendClients";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
-    channelChatMessageHandler, channelFollowHandler, channelSubscribeHandler, channelUpdateHandler,
+    channelChatMessageHandler,
+    channelFollowHandler,
+    channelSubscribeHandler,
+    channelUpdateHandler,
     streamOfflineHandler,
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";

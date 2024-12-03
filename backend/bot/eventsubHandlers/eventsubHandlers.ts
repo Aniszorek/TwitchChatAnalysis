@@ -1,7 +1,4 @@
 import {TwitchWebSocketMessage} from "../bot";
-
-const LOG_PREFIX = "EVENTSUB_HANDLERS: "
-
 import {
     createPostStreamMetadataInterval,
     deletePostStreamMetadataInterval,
@@ -10,17 +7,20 @@ import {
     incrementMessageCount,
     incrementSubscriberCount,
     setFrontendClientTwitchDataStreamId,
-    setFrontendClientTwitchStreamMetadata, setStreamDataEndValues,
+    setFrontendClientTwitchStreamMetadata,
+    setStreamDataEndValues,
     setStreamDataStartValues,
     TwitchStreamMetadata
 } from "../frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
-import {postStreamToApiGateway, postMessageToApiGateway, patchStreamToApiGateway} from "../../aws/apiGateway";
+import {patchStreamToApiGateway, postMessageToApiGateway, postStreamToApiGateway} from "../../aws/apiGateway";
 import {sendMessageToFrontendClient} from "../wsServer";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../../twitch_calls/twtichChannels/getChannelFollowers";
 import {createTimestamp} from "../../utilities/utilities";
+
+const LOG_PREFIX = "EVENTSUB_HANDLERS: "
 
 export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     const msg = {

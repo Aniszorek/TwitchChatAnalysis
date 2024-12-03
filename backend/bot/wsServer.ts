@@ -1,6 +1,6 @@
 import {WebSocket, WebSocketServer} from 'ws';
 import {verifyToken} from "../aws/cognitoAuth";
-import { startTwitchWebSocket } from "./bot";
+import {startTwitchWebSocket} from "./bot";
 import {connectAwsWebSocket} from "../aws/websocketApi";
 import {deleteTwitchSubscription} from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
