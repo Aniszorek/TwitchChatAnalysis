@@ -1,5 +1,5 @@
 import express from "express";
-import {getChannelFollowersCount} from "../../twitch_calls/twtichChannels/getChannelFollowers";
+import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 
 export const twitchChannelsRouter = express.Router();
 

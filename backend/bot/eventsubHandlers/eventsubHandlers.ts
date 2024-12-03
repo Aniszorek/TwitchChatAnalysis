@@ -17,7 +17,7 @@ import {patchStreamToApiGateway, postMessageToApiGateway, postStreamToApiGateway
 import {sendMessageToFrontendClient} from "../wsServer";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
-import {getChannelFollowersCount} from "../../twitch_calls/twtichChannels/getChannelFollowers";
+import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../../utilities/utilities";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS: "
