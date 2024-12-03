@@ -9,12 +9,17 @@ import {
     deletePostStreamMetadataInterval,
     frontendClients,
     setFrontendClientCognitoData,
-    setFrontendClientTwitchData, setFrontendClientTwitchStreamMetadata, setStreamDataStartValues, TwitchStreamMetadata
+    setFrontendClientTwitchData,
+    setFrontendClientTwitchStreamMetadata,
+    setStreamDataEndValues,
+    setStreamDataStartValues,
+    TwitchStreamMetadata
 } from "./frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
-import {postStreamToApiGateway} from "../aws/apiGateway";
+import {patchStreamToApiGateway, postStreamToApiGateway} from "../aws/apiGateway";
 import {getChannelSubscriptionsCount} from "../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../twitch_calls/twtichChannels/getChannelFollowers";
+import {createTimestamp} from "../utilities/utilities";
 
 const LOG_PREFIX = 'BACKEND WS:'
 
@@ -155,6 +160,17 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
         ws.on('close', async () => {
             console.log(`${LOG_PREFIX} Frontend client disconnected`);
             if (userId) {
+                const broadcasterId = frontendClients.get(userId)?.twitchData.twitchBroadcasterUserId
+                if(broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
+                {
+                    const subCount = await getChannelSubscriptionsCount(broadcasterId)
+                    const followerCount = await getChannelFollowersCount(broadcasterId)
+                    setStreamDataEndValues(userId,  createTimestamp(), followerCount, subCount)
+                }
+
+                if (verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
+                    await patchStreamToApiGateway(userId)
+
                 await cleanupUserConnections(userId, frontendClients.get(userId)!.subscriptions);
                 frontendClients.delete(userId);
             }

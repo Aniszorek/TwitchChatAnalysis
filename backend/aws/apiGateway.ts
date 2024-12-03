@@ -1,6 +1,5 @@
 import axios, {AxiosResponse} from "axios";
 import jwt from "jsonwebtoken";
-import { DateTime } from 'luxon';
 
 import {isCognitoRoleValid} from "../cognitoRoles";
 import {
@@ -10,6 +9,7 @@ import {
     TwitchStreamMetadata
 } from "../bot/frontendClients";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../twitch_calls/twitchAuth";
+import {createTimestamp} from "../utilities/utilities";
 
 const API_GATEWAY_URL = "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test";
 const MESSAGES_PATH = `${API_GATEWAY_URL}/twitch-message`;
@@ -163,206 +163,199 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
 
 export async function postMetadataToApiGateway(cognitoUserId: string) {
 
-    const { client, cognitoIdToken } = getClientAndCognitoIdToken(cognitoUserId)
+    try {
+        const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
 
-    // required:
-    const stream_id = client.twitchData.streamId
-    const timestamp = createTimestamp()
-    const broadcasterUserLogin = client.twitchData.twitchBroadcasterUsername
-    const broadcasterId = client.twitchData.twitchBroadcasterUserId;
+        // required:
+        const stream_id = client.twitchData.streamId
+        const timestamp = createTimestamp()
+        const broadcasterUserLogin = client.twitchData.twitchBroadcasterUsername
+        const broadcasterId = client.twitchData.twitchBroadcasterUserId;
 
 
-    if(!stream_id)
-    {
-        throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
-    }
-    if(!broadcasterUserLogin)
-    {
-        throw new Error(`missing broadcasterUserLogin for cognitoUserId: ${cognitoUserId}`);
-    }
-
-    if (!broadcasterId) {
-        throw new Error(`broadcasterId not found for cognitoUserId: ${cognitoUserId}`);
-    }
-
-    // fetch current streamStatus (category, title, viewerCount)
-    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
-    if(streamStatus.stream_id === stream_id)
-    {
-        const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
-        const newMetadata: TwitchStreamMetadata = {
-            title: streamStatus.title,
-            category: streamStatus.category,
-            viewerCount: streamStatus.viewer_count,
-            followersCount: oldMetadata?.followersCount,
-            subscriberCount: oldMetadata?.subscriberCount,
-            messageCount: oldMetadata?.messageCount,
-            positiveMessageCount: oldMetadata?.positiveMessageCount,
-            negativeMessageCount: oldMetadata?.negativeMessageCount,
-            neutralMessageCount: oldMetadata?.neutralMessageCount
+        if (!stream_id) {
+            throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
         }
-        setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
+        if (!broadcasterUserLogin) {
+            throw new Error(`missing broadcasterUserLogin for cognitoUserId: ${cognitoUserId}`);
+        }
+
+        if (!broadcasterId) {
+            throw new Error(`broadcasterId not found for cognitoUserId: ${cognitoUserId}`);
+        }
+
+        // fetch current streamStatus (category, title, viewerCount)
+        const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
+        if (streamStatus.stream_id === stream_id) {
+            const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
+            const newMetadata: TwitchStreamMetadata = {
+                title: streamStatus.title,
+                category: streamStatus.category,
+                viewerCount: streamStatus.viewer_count,
+                followersCount: oldMetadata?.followersCount,
+                subscriberCount: oldMetadata?.subscriberCount,
+                messageCount: oldMetadata?.messageCount,
+                positiveMessageCount: oldMetadata?.positiveMessageCount,
+                negativeMessageCount: oldMetadata?.negativeMessageCount,
+                neutralMessageCount: oldMetadata?.neutralMessageCount
+            }
+            setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
+        }
+
+        const metadata: StreamMetadataMessage = {
+            stream_id: stream_id,
+            timestamp: timestamp,
+            viewer_count: client.twitchData.streamMetadata.viewerCount,
+            category: client.twitchData.streamMetadata.category,
+            follower_count: client.twitchData.streamMetadata.followersCount,
+            subscriber_count: client.twitchData.streamMetadata.subscriberCount,
+            message_count: client.twitchData.streamMetadata.messageCount,
+            positive_message_count: client.twitchData.streamMetadata.positiveMessageCount,
+            negative_message_count: client.twitchData.streamMetadata.negativeMessageCount,
+            neutral_message_count: client.twitchData.streamMetadata.neutralMessageCount
+        }
+
+        const response = await axios.post(STREAM_METADATA_PATH, metadata,
+            {
+                headers: {
+                    Authorization: `Bearer ${cognitoIdToken}`,
+                    "Content-Type": "application/json",
+                    BroadcasterUserLogin: broadcasterUserLogin,
+                },
+            });
+
+        if (response.status === 200) {
+            console.log(`${LOG_PREFIX} Metadata sent to API Gateway: ${JSON.stringify(metadata)}`);
+
+        } else {
+            console.error(`${LOG_PREFIX} Failed to send metadata to API Gateway. Status: ${response.status}`);
+        }
+
+        refreshStreamMetadataCounters(cognitoUserId);
+    } catch (error: any) {
+        console.error(`${LOG_PREFIX} Error sending metadata to API Gateway: ${error.message}`);
     }
-
-    const metadata: StreamMetadataMessage = {
-        stream_id: stream_id,
-        timestamp: timestamp,
-        viewer_count: client.twitchData.streamMetadata.viewerCount,
-        category: client.twitchData.streamMetadata.category,
-        follower_count: client.twitchData.streamMetadata.followersCount,
-        subscriber_count: client.twitchData.streamMetadata.subscriberCount,
-        message_count: client.twitchData.streamMetadata.messageCount,
-        positive_message_count: client.twitchData.streamMetadata.positiveMessageCount,
-        negative_message_count: client.twitchData.streamMetadata.negativeMessageCount,
-        neutral_message_count: client.twitchData.streamMetadata.neutralMessageCount
-    }
-
-    const response = await axios.post(STREAM_METADATA_PATH, metadata,
-        {
-        headers: {
-            Authorization: `Bearer ${cognitoIdToken}`,
-            "Content-Type": "application/json",
-            BroadcasterUserLogin: broadcasterUserLogin,
-        },
-    });
-
-    if (response.status === 200) {
-        console.log(`${LOG_PREFIX} Metadata sent to API Gateway: ${JSON.stringify(metadata)}`);
-
-    } else {
-        console.error(`${LOG_PREFIX} Failed to send metadata to API Gateway. Status: ${response.status}`);
-    }
-
-    refreshStreamMetadataCounters(cognitoUserId);
 }
 
 export async function postStreamToApiGateway(cognitoUserId: string) {
 
-    const { client, cognitoIdToken } = getClientAndCognitoIdToken(cognitoUserId)
+    try {
+        const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
 
-    // required
-    const stream_id = client.twitchData.streamId
-    const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
-    const streamTitle = client.twitchData.streamMetadata.title
-    const startedAt = client.twitchData.streamData.startedAt
-    const startFollows = client.twitchData.streamData.startFollows
-    const startSubs = client.twitchData.streamData.startSubs
-    // TODO fetch startFollows at the begining of the stream
-    // TODO fetch endFollows too
-    // TODO start/end subs too
+        // required
+        const stream_id = client.twitchData.streamId
+        const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
+        const streamTitle = client.twitchData.streamMetadata.title
+        const startedAt = client.twitchData.streamData.startedAt
+        const startFollows = client.twitchData.streamData.startFollows
+        const startSubs = client.twitchData.streamData.startSubs
+        // TODO fetch startFollows at the begining of the stream
+        // TODO fetch endFollows too
+        // TODO start/end subs too
 
-    // TODO at the end of the stream (or connection end):
-    // TODO PATCH /stream with end subs,follows and timestamp ended at
-    // TODO GET /stream?broadcaster_username for frontend (also on AWS)
-    // TODO refactor names in this file from send... to post.. accordingly to the method it executes
+        // TODO at the end of the stream (or connection end):
+        // TODO PATCH /stream with end subs,follows and timestamp ended at
+        // TODO GET /stream?broadcaster_username for frontend (also on AWS)
+        // TODO refactor names in this file from send... to post.. accordingly to the method it executes
 
 
-    if(!stream_id)
-    {
-        throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
-    }
-    if(!broadcasterUsername)
-    {
-        throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
-    }
-    if(!streamTitle)
-    {
-        throw new Error(`missing streamTitle for cognitoUserId: ${cognitoUserId}`);
-    }
-    if(startedAt === undefined)
-    {
-        throw new Error(`missing startedAt for cognitoUserId: ${cognitoUserId}`);
-    }
-    if(!startFollows)
-    {
-        throw new Error(`missing startFollows for cognitoUserId: ${cognitoUserId}`);
-    }
-    if(startSubs === undefined)
-    {
-        throw new Error(`missing startSubs for cognitoUserId: ${cognitoUserId}`);
-    }
+        if (!stream_id) {
+            throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
+        }
+        if (!broadcasterUsername) {
+            throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+        }
+        if (!streamTitle) {
+            throw new Error(`missing streamTitle for cognitoUserId: ${cognitoUserId}`);
+        }
+        if (startedAt === undefined) {
+            throw new Error(`missing startedAt for cognitoUserId: ${cognitoUserId}`);
+        }
+        if (!startFollows) {
+            throw new Error(`missing startFollows for cognitoUserId: ${cognitoUserId}`);
+        }
+        if (startSubs === undefined) {
+            throw new Error(`missing startSubs for cognitoUserId: ${cognitoUserId}`);
+        }
 
-    const streamMessage: PostStreamMessage = {
-        stream_id: stream_id,
-        broadcaster_username: broadcasterUsername,
-        stream_title: streamTitle,
-        started_at: startedAt,
-        start_follows: startFollows,
-        start_subs: startSubs
-    }
+        const streamMessage: PostStreamMessage = {
+            stream_id: stream_id,
+            broadcaster_username: broadcasterUsername,
+            stream_title: streamTitle,
+            started_at: startedAt,
+            start_follows: startFollows,
+            start_subs: startSubs
+        }
 
-    const response = await axios.post(STREAM_PATH, streamMessage,
-        {
-            headers: {
-                Authorization: `Bearer ${cognitoIdToken}`,
-                "Content-Type": "application/json",
-                BroadcasterUserLogin: broadcasterUsername,
-            },
-        });
+        const response = await axios.post(STREAM_PATH, streamMessage,
+            {
+                headers: {
+                    Authorization: `Bearer ${cognitoIdToken}`,
+                    "Content-Type": "application/json",
+                    BroadcasterUserLogin: broadcasterUsername,
+                },
+            });
 
-    if (response.status === 200) {
-        console.log(`${LOG_PREFIX} Stream sent to API Gateway: ${JSON.stringify(streamMessage)}`);
+        if (response.status === 200) {
+            console.log(`${LOG_PREFIX} Stream sent to API Gateway: ${JSON.stringify(streamMessage)}`);
 
-    } else {
-        console.error(`${LOG_PREFIX} Failed to send stream to API Gateway. Status: ${response.status}`);
+        } else {
+            console.error(`${LOG_PREFIX} Failed to send stream to API Gateway. Status: ${response.status}`);
+        }
+    }catch (error: any) {
+        console.error(`${LOG_PREFIX} Error sending stream to API Gateway: ${error.message}`);
     }
 }
 
 export async function patchStreamToApiGateway(cognitoUserId: string) {
 
-    const { client, cognitoIdToken } = getClientAndCognitoIdToken(cognitoUserId)
+    try {
+        const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
 
-    // required
-    const stream_id = client.twitchData.streamId
-    const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
+        // required
+        const stream_id = client.twitchData.streamId
+        const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
 
 
-    // optional
-    const ended_at = createTimestamp()
-    const end_follows = client.twitchData.streamData.endFollows
-    const end_subs = client.twitchData.streamData.endSubs
+        // optional
+        const ended_at = createTimestamp()
+        const end_follows = client.twitchData.streamData.endFollows
+        const end_subs = client.twitchData.streamData.endSubs
 
-    if(!stream_id)
-    {
-        throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
-    }
-    if(!broadcasterUsername)
-    {
-        throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
-    }
+        if (!stream_id) {
+            throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
+        }
+        if (!broadcasterUsername) {
+            throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+        }
 
-    const streamMessage: PatchStreamMessage = {
-        stream_id: stream_id,
-        ended_at: ended_at,
-        end_follows: end_follows,
-        end_subs: end_subs
-    }
+        const streamMessage: PatchStreamMessage = {
+            stream_id: stream_id,
+            ended_at: ended_at,
+            end_follows: end_follows,
+            end_subs: end_subs
+        }
 
-    const response = await axios.patch(STREAM_PATH, streamMessage,
-        {
-            headers: {
-                Authorization: `Bearer ${cognitoIdToken}`,
-                "Content-Type": "application/json",
-                BroadcasterUserLogin: broadcasterUsername
-            },
-        });
+        const response = await axios.patch(STREAM_PATH, streamMessage,
+            {
+                headers: {
+                    Authorization: `Bearer ${cognitoIdToken}`,
+                    "Content-Type": "application/json",
+                    BroadcasterUserLogin: broadcasterUsername
+                },
+            });
 
-    if (response.status === 200) {
-        console.log(`${LOG_PREFIX} Stream updated to API Gateway: ${JSON.stringify(streamMessage)}`);
+        if (response.status === 200) {
+            console.log(`${LOG_PREFIX} Stream updated to API Gateway: ${JSON.stringify(streamMessage)}`);
 
-    } else {
-        console.error(`${LOG_PREFIX} Failed to update stream to API Gateway. Status: ${response.status}`);
+        } else {
+            console.error(`${LOG_PREFIX} Failed to update stream to API Gateway. Status: ${response.status}`);
+        }
+    }catch (error: any) {
+        console.error(`${LOG_PREFIX} Error updating stream to API Gateway: ${error.message}`);
     }
 }
 
-
-
-const createTimestamp = (): string => {
-    const now = DateTime.now().toUTC()
-    const milliseconds = now.toFormat("SSS");
-    const microseconds = milliseconds + "000";
-    return now.toFormat("yyyy-LL-dd HH:mm:ss") + `.${microseconds}` + now.toFormat("ZZ");
-}
 
 const getClientAndCognitoIdToken = (cognitoUserId: string) => {
     const client = frontendClients.get(cognitoUserId);

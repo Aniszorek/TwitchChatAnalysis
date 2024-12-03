@@ -10,16 +10,17 @@ import {
     incrementMessageCount,
     incrementSubscriberCount,
     setFrontendClientTwitchDataStreamId,
-    setFrontendClientTwitchStreamMetadata,
+    setFrontendClientTwitchStreamMetadata, setStreamDataEndValues,
     setStreamDataStartValues,
     TwitchStreamMetadata
 } from "../frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
-import {postStreamToApiGateway, postMessageToApiGateway} from "../../aws/apiGateway";
+import {postStreamToApiGateway, postMessageToApiGateway, patchStreamToApiGateway} from "../../aws/apiGateway";
 import {sendMessageToFrontendClient} from "../wsServer";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../../twitch_calls/twtichChannels/getChannelFollowers";
+import {createTimestamp} from "../../utilities/utilities";
 
 export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     const msg = {
@@ -78,11 +79,24 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
     }
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send POST /stream to api gateway"))
-        postStreamToApiGateway(cognitoUserId)
+        await postStreamToApiGateway(cognitoUserId)
 }
 
-export const streamOfflineHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+
     console.log(`${LOG_PREFIX} Stream offline.`);
+    const broadcasterId = data.payload.event!.broadcaster_user_id!;
+
+    if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
+    {
+        const subCount = await getChannelSubscriptionsCount(broadcasterId)
+        const followerCount = await getChannelFollowersCount(broadcasterId)
+        setStreamDataEndValues(cognitoUserId,  createTimestamp(), followerCount, subCount)
+    }
+
+    if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
+        await patchStreamToApiGateway(cognitoUserId)
+
     setFrontendClientTwitchDataStreamId(cognitoUserId, null)
 
     if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "delete post-stream-metadata-interval"))

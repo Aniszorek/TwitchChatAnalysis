@@ -280,12 +280,12 @@ export const setStreamDataStartValues = (cognitoUserId: string, startedAt: strin
 
 };
 
-export const setStreamDataEndValues = (cognitoUserId: string, endeddAt: string, endFollows:number, endSubs:number) => {
+export const setStreamDataEndValues = (cognitoUserId: string, endedAt: string, endFollows:number, endSubs:number) => {
     const client = frontendClients.get(cognitoUserId);
     if (client) {
-        client.twitchData.streamData.startedAt = endeddAt
-        client.twitchData.streamData.startSubs = endSubs
-        client.twitchData.streamData.startFollows = endFollows
+        client.twitchData.streamData.endedAt = endedAt
+        client.twitchData.streamData.endSubs = endSubs
+        client.twitchData.streamData.endFollows = endFollows
     }
     else
     {
