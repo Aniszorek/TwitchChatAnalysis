@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 import {isCognitoRoleValid} from "../cognitoRoles";
 import {
     frontendClients,
-    getFrontendClientTwitchStreamMetadata, refreshStreamMetadataCounters,
+    getFrontendClientTwitchStreamMetadata,
+    refreshStreamMetadataCounters,
     setFrontendClientTwitchStreamMetadata,
     TwitchStreamMetadata
 } from "../bot/frontendClients";
@@ -63,6 +64,18 @@ interface PatchStreamMessage {
     ended_at?: string,
     end_follows?: number,
     end_subs?: number
+}
+
+interface GetStreamMessage {
+    "stream_id": string,
+    "broadcaster_username": string,
+    "stream_title": string,
+    "started_at": string,
+    "ended_at": string | null,
+    "start_follows": number,
+    "end_follows": string | null,
+    "start_subs": number,
+    "end_subs": string | null
 }
 
 interface CognitoIdTokenData {
@@ -344,6 +357,80 @@ export async function patchStreamToApiGateway(cognitoUserId: string) {
         }
     }catch (error: any) {
         console.error(`${LOG_PREFIX} Error updating stream to API Gateway: ${error.message}`);
+    }
+}
+
+export async function getStreamFromApiGateway(cognitoUserId: string, stream_id: string) {
+    try {
+        const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
+
+        // required
+        const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
+
+        if (!stream_id) {
+            throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
+        }
+        if (!broadcasterUsername) {
+            throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+        }
+
+        const response = await axios.get(STREAM_PATH,
+            {
+                headers: {
+                    Authorization: `Bearer ${cognitoIdToken}`,
+                    "Content-Type": "application/json",
+                    BroadcasterUserLogin: broadcasterUsername
+                },
+                params: {
+                    stream_id: stream_id
+                }
+            });
+
+        const result:GetStreamMessage = response.data as GetStreamMessage
+
+        if (response.status === 200) {
+            console.log(`${LOG_PREFIX} GET /stream/stream_id OK`);
+            return result
+
+        } else {
+            console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED. Status: ${response.status}`);
+        }
+    }catch (error: any) {
+        console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED: ${error.message}`);
+    }
+}
+
+export async function getStreamsByBroadcasterUsernameFromApiGateway(cognitoUserId: string, broadcasterUsername: string) {
+    try {
+        const {cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
+
+        if (!broadcasterUsername) {
+            throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+        }
+
+        const response = await axios.get(STREAM_PATH,
+            {
+                headers: {
+                    Authorization: `Bearer ${cognitoIdToken}`,
+                    "Content-Type": "application/json",
+                    BroadcasterUserLogin: broadcasterUsername
+                },
+            });
+
+
+        if (response.status === 200) {
+            console.log(`${LOG_PREFIX} GET /stream/stream_id OK`);
+            return Array.isArray(response.data)
+                ? (response.data as GetStreamMessage[])
+                : [];
+
+        } else {
+            console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED. Status: ${response.status}`);
+            return [];
+        }
+    }catch (error: any) {
+        console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED: ${error.message}`);
+        return [];
     }
 }
 
