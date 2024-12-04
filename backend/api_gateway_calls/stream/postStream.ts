@@ -1,7 +1,8 @@
 import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {logger} from "../../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_REST:`;
+const LOG_PREFIX = `API_GATEWAY_REST`;
 
 interface PostStreamMessage {
     stream_id: string,
@@ -63,12 +64,12 @@ export async function postStreamToApiGateway(cognitoUserId: string) {
         } as CustomAxiosRequestConfig)
 
         if (response.status === 200) {
-            console.log(`${LOG_PREFIX} Stream sent to API Gateway: ${JSON.stringify(streamMessage)}`);
+            logger.info(`Stream sent to API Gateway: ${JSON.stringify(streamMessage, null, 2)}`, LOG_PREFIX);
 
         } else {
-            console.error(`${LOG_PREFIX} Failed to send stream to API Gateway. Status: ${response.status}`);
+            logger.error(`Failed to send stream to API Gateway. Status: ${response.status}`, LOG_PREFIX);
         }
     }catch (error: any) {
-        console.error(`${LOG_PREFIX} Error sending stream to API Gateway: ${error.message}`);
+        logger.error(`Error sending stream to API Gateway: ${error.message}`, LOG_PREFIX);
     }
 }

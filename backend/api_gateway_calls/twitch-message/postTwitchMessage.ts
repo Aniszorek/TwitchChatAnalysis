@@ -1,7 +1,8 @@
 import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {logger} from "../../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_REST: `;
+const LOG_PREFIX = `API_GATEWAY_REST`;
 
 interface TwitchMessage {
     broadcasterUserId: string,
@@ -23,7 +24,7 @@ export async function postMessageToApiGateway(msg: TwitchMessage, cognitoUserId:
 
         const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
         if (!cognitoIdToken) {
-            console.error(`${LOG_PREFIX} Cognito token missing for user: ${cognitoUserId}`);
+            logger.error(`Cognito token missing for user: ${cognitoUserId}`, LOG_PREFIX);
             return;
         }
 
@@ -41,11 +42,11 @@ export async function postMessageToApiGateway(msg: TwitchMessage, cognitoUserId:
         )
 
         if (response.status === 200) {
-            console.log(`${LOG_PREFIX} Message sent to API Gateway: ${msg.messageText}`);
+            logger.info(`Message sent to API Gateway: ${msg.messageText}`, LOG_PREFIX);
         } else {
-            console.error(`${LOG_PREFIX} Failed to send message to API Gateway. Status: ${response.status}`);
+            logger.error(`Failed to send message to API Gateway. Status: ${response.status}`, LOG_PREFIX);
         }
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error sending message to API Gateway: ${error.message}`);
+        logger.error(`Error sending message to API Gateway: ${error.message}`, LOG_PREFIX);
     }
 }

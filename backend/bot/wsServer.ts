@@ -19,10 +19,11 @@ import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {getChannelSubscriptionsCount} from "../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../utilities/utilities";
+import {LogBackgroundColor, LogColor, logger, LogStyle} from "../utilities/logger";
 import {postStreamToApiGateway} from "../api_gateway_calls/stream/postStream";
 import {patchStreamToApiGateway} from "../api_gateway_calls/stream/patchStream";
 
-const LOG_PREFIX = 'BACKEND WS:'
+const LOG_PREFIX = 'BACKEND_WS'
 
 export const pendingWebSocketInitializations = new Map<string, {
     twitchBroadcasterUsername: string;
@@ -42,7 +43,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
     const wss = new WebSocketServer({server});
 
     wss.on('connection', (ws: WebSocket) => {
-        console.log(`${LOG_PREFIX} Frontend client connected`);
+        logger.info(`Frontend client connected`, LOG_PREFIX, {color: LogColor.CYAN, backgroundColor: LogBackgroundColor.BG_BLACK, style: LogStyle.BOLD});
         let userId: string | null = null;
 
         ws.on('message', async (message: string) => {
@@ -132,36 +133,44 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                         }
 
                         if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send POST /stream to api gateway"))
-                            await postStreamToApiGateway(userId)
+                        {
+                            // sometimes twitch /get-streams endpoint is not ready at the moment of getting this event
+                            // so we wait a moment
+                            setTimeout(() => {
+                                if(userId)
+                                    postStreamToApiGateway(userId);
+                            }, 3000)
+                        }
 
                         const twitchResult = await startTwitchWebSocket(twitchBroadcasterUsername, userId);
                         if (twitchResult != null) {
                             frontendClients.get(userId)!.twitchWs = twitchResult;
                         } else {
-                            console.error(`${LOG_PREFIX} Twitch websocket not connected for ${userId}`);
+                            logger.error(`Twitch websocket not connected for ${userId}`, LOG_PREFIX);
                         }
 
                         const awsResult = connectAwsWebSocket(twitchBroadcasterUsername, userId);
                         if (awsResult != null) {
                             frontendClients.get(userId)!.awsWs = awsResult;
                         } else {
-                            console.error(`${LOG_PREFIX} AWS websocket not connected for ${userId}`);
+                            logger.error(`AWS websocket not connected for ${userId}`, LOG_PREFIX);
                         }
 
                         pendingWebSocketInitializations.delete(userId);
                     }
-                    console.log(`${LOG_PREFIX} WebSocket authenticated for user ID: ${userId}`);
+                    logger.info(`WebSocket authenticated for user ID: ${userId}`, LOG_PREFIX, {color: LogColor.CYAN, style: LogStyle.BOLD});
                 }
-            } catch (err) {
-                console.error(`${LOG_PREFIX} Error processing message:`, err);
+            } catch (err: any) {
+                logger.error(`Error processing message: ${err.message}`, LOG_PREFIX);
                 ws.close();
             }
         });
 
         ws.on('close', async () => {
-            console.log(`${LOG_PREFIX} Frontend client disconnected`);
+            logger.info(`Frontend client disconnected`, LOG_PREFIX, {color: LogColor.CYAN, backgroundColor: LogBackgroundColor.BG_BLACK, style: LogStyle.BOLD});
             if (userId) {
                 const broadcasterId = frontendClients.get(userId)?.twitchData.twitchBroadcasterUserId
+                const streamId = frontendClients.get(userId)?.twitchData.streamId
                 if(broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
                 {
                     const subCount = await getChannelSubscriptionsCount(broadcasterId)
@@ -169,7 +178,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                     setStreamDataEndValues(userId,  createTimestamp(), followerCount, subCount)
                 }
 
-                if (verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
+                if (streamId &&verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
                     await patchStreamToApiGateway(userId)
 
                 await cleanupUserConnections(userId, frontendClients.get(userId)!.subscriptions);
@@ -186,12 +195,12 @@ async function cleanupUserConnections(userId: string, subscriptions: Set<string>
 
     if (userData?.twitchWs && userData.twitchWs.readyState === WebSocket.OPEN) {
         userData.twitchWs.close();
-        console.log(`${LOG_PREFIX} Closed Twitch WebSocket for user ID: ${userId}`);
+        logger.info(`Closed Twitch WebSocket for user ID: ${userId}`, LOG_PREFIX, {color: LogColor.CYAN});
     }
 
     if (userData?.awsWs && userData.awsWs.readyState === WebSocket.OPEN) {
         userData.awsWs.close();
-        console.log(`${LOG_PREFIX} Closed AWS WebSocket for user ID: ${userId}`);
+        logger.info(`Closed AWS WebSocket for user ID: ${userId}`, LOG_PREFIX, {color: LogColor.CYAN});
     }
 
     await cleanupSubscriptions(userId, subscriptions);
@@ -201,13 +210,13 @@ async function cleanupUserConnections(userId: string, subscriptions: Set<string>
 
     if (userData?.ws && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.close();
-        console.log(`${LOG_PREFIX} Closed frontend WebSocket for user ID: ${userId}`);
+        logger.info(`Closed frontend WebSocket for user ID: ${userId}`, LOG_PREFIX, {color: LogColor.CYAN});
     }
 }
 
 
 async function cleanupSubscriptions(userId: string, subscriptions: Set<string>) {
-    console.log(`${LOG_PREFIX} Cleaning up subscriptions for user ID: ${userId}`);
+    logger.info(`Cleaning up subscriptions for user ID: ${userId}`, LOG_PREFIX, {color: LogColor.CYAN});
 
     for (const subscriptionId of subscriptions) {
         try {
@@ -215,11 +224,11 @@ async function cleanupSubscriptions(userId: string, subscriptions: Set<string>) 
             if (result) {
                 subscriptions.delete(subscriptionId);
             }
-        } catch (err) {
-            console.error(`${LOG_PREFIX} Failed to delete subscription ${subscriptionId}:`, err);
+        } catch (err: any) {
+            logger.error(`Failed to delete subscription ${subscriptionId}: ${err.message}`, LOG_PREFIX);
         }
     }
-    console.log(`${LOG_PREFIX} Cleanup completed for user ID: ${userId}`);
+    logger.info(`Cleanup completed for user ID: ${userId}`, LOG_PREFIX, {color: LogColor.CYAN});
 }
 
 
@@ -227,9 +236,9 @@ export function trackSubscription(userId: string, subscriptionId: string) {
     const userData = frontendClients.get(userId);
     if (userData) {
         userData.subscriptions.add(subscriptionId);
-        console.log(`${LOG_PREFIX} Tracked subscription ${subscriptionId} for user ID: ${userId}`);
+        logger.info(`Tracked subscription ${subscriptionId} for user ID: ${userId}`, LOG_PREFIX, {color: LogColor.CYAN});
     } else {
-        console.error(`${LOG_PREFIX} Attempted to track subscription for nonexistent user ID: ${userId}`);
+        logger.error(`Attempted to track subscription for nonexistent user ID: ${userId}`, LOG_PREFIX);
     }
 }
 
@@ -239,6 +248,6 @@ export const sendMessageToFrontendClient = (userId: string, message: any) => {
     if (userData && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.send(JSON.stringify(message));
     } else {
-        console.log(`${LOG_PREFIX} WebSocket for user ID ${userId} is not available`);
+        logger.error(`WebSocket for user ID ${userId} is not available`, LOG_PREFIX);
     }
 };

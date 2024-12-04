@@ -1,7 +1,8 @@
 import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {LogColor, logger} from "../../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_REST:`;
+const LOG_PREFIX = `API_GATEWAY_REST`;
 
 export interface GetStreamMessage {
     "stream_id": string,
@@ -40,13 +41,13 @@ export async function getStreamFromApiGateway(cognitoUserId: string, stream_id: 
         const result = response.data as GetStreamMessage
 
         if (response.status === 200) {
-            console.log(`${LOG_PREFIX} GET /stream/stream_id OK`);
+            logger.info(`GET /stream/stream_id OK`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
             return result
 
         } else {
-            console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED. Status: ${response.status}`);
+            logger.error(`GET /stream/stream_id FAILED. Status: ${response.status}`, LOG_PREFIX);
         }
     }catch (error: any) {
-        console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED: ${error.message}`);
+        logger.error(`GET /stream/stream_id FAILED: ${error.message}`, LOG_PREFIX);
     }
 }

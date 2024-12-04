@@ -1,11 +1,12 @@
 import {WebSocket} from "ws";
 import {clearInterval} from "node:timers";
+import {LogColor, logger} from "../utilities/logger";
 import {
     METADATA_SEND_INTERVAL,
     postMetadataToApiGateway
 } from "../api_gateway_calls/stream-metadata/postStreamMetadata";
 
-const LOG_PREFIX = 'FRONTEND_CLIENTS:'
+const LOG_PREFIX = 'FRONTEND_CLIENTS'
 
 export interface CognitoData {
     cognitoIdToken: string | null;
@@ -224,11 +225,11 @@ export const createPostStreamMetadataInterval = (cognitoUserId: string ) => {
         client.postStreamMetadataIntervalId = setInterval(async () => {
             try {
                 await postMetadataToApiGateway(cognitoUserId)
-            } catch (error) {
-                console.error(`${LOG_PREFIX} error with post interval for ${cognitoUserId}: ${error}`);
+            } catch (error: any) {
+                logger.error(`error with post interval for ${cognitoUserId}: ${error.message}`, LOG_PREFIX);
             }
         }, METADATA_SEND_INTERVAL)
-        console.log(`${LOG_PREFIX} successfully created post-stream-metadata-interval for ${cognitoUserId}`)
+        logger.info(`successfully created post-stream-metadata-interval for ${cognitoUserId}`, LOG_PREFIX, {color: LogColor.WHITE});
     }
     else
     {
@@ -243,7 +244,7 @@ export const deletePostStreamMetadataInterval = (cognitoUserId: string ) => {
         if(client.postStreamMetadataIntervalId)
         {
             clearInterval(client.postStreamMetadataIntervalId)
-            console.log(`${LOG_PREFIX} successfully deleted post-stream-metadata-interval for ${cognitoUserId}`)
+            logger.info(`successfully deleted post-stream-metadata-interval for ${cognitoUserId}`, LOG_PREFIX, {color: LogColor.WHITE})
         }
     }
     else

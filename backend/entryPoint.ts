@@ -7,9 +7,15 @@ import {initializeTwitchApiClient} from "./twitch_calls/twitchApiConfig";
 import {twitchUsersRouter} from "./routes/twitch/twitchUsersRouter";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "./envConfig";
 import {twitchChannelsRouter} from "./routes/twitch/twitchChannelsRouter";
+import {logger, LogLevel} from "./utilities/logger";
 import {initializeApiGatewayClient} from "./api_gateway_calls/apiGatewayConfig";
 
-const LOG_PREFIX = `ENTRYPOINT:`;
+// INFO > WARN > ERROR
+// DEBUG LOGS CONSIDERED SEPARATELY WITH IS_DEBUG_ENABLED
+export const LOG_LEVEL = LogLevel.INFO
+export const IS_DEBUG_ENABLED = true
+
+const LOG_PREFIX = `ENTRYPOINT`;
 
 const port = 3000;
 const app = express();
@@ -26,7 +32,6 @@ app.use("/", authRouter);
 app.use("/twitch/users", twitchUsersRouter);
 app.use("/twitch/channels", twitchChannelsRouter);
 
-
 const server = http.createServer(app);
 
 initWebSocketServer(server);
@@ -35,5 +40,5 @@ initializeTwitchApiClient(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
 initializeApiGatewayClient()
 
 server.listen(port, () => {
-    console.log(`${LOG_PREFIX} Express server started on: ${port}`);
+    logger.info(`Express server started on: ${port}`, LOG_PREFIX)
 });

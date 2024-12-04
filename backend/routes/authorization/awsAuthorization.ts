@@ -6,9 +6,10 @@ import {pendingWebSocketInitializations} from "../../bot/wsServer";
 import {validateTwitchAuth} from "../../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../envConfig";
 import {validateUserRole} from "../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
+import {LogColor, logger} from "../../utilities/logger";
 
 
-const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION:`;
+const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION`;
 
 interface SetTwitchUsernameRequestBody {
     cognitoIdToken: string;
@@ -26,9 +27,8 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
         await verifyToken(cognitoIdToken);
         next();
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Token verification failed: ${error}`);
+        logger.error(`Token verification failed: ${error.message}`, LOG_PREFIX);
         res.status(401).json({message: 'Token verification failed', error: error.message});
-
     }
 }
 
@@ -37,7 +37,7 @@ export const authRouter = express.Router();
 
 authRouter.get('/auth-url', (req, res) => {
     const authUrl = generateAuthUrl();
-    console.log(`${LOG_PREFIX} Redirecting to authUrl`)
+    logger.info(`Redirecting to authUrl`, LOG_PREFIX, {color: LogColor.YELLOW})
     res.redirect(authUrl);
 });
 
@@ -57,10 +57,10 @@ authRouter.get('/callback', async (req, res) => {
         const expireTime = Date.now() + tokenResponse['expires_in'] * 1000
 
         const redirectUrl = `http://localhost:4200/auth-callback?successful=true&idToken=${idToken}&refreshToken=${refreshToken}&expireTime=${expireTime}`;
-        console.log(`${LOG_PREFIX} Redirecting with tokens`);
+        logger.info(`Redirecting with tokens`, LOG_PREFIX, {color: LogColor.YELLOW});
         res.redirect(redirectUrl);
-    } catch (error) {
-        console.error(`${LOG_PREFIX} Error during token exchange:`, error);
+    } catch (error: any) {
+        logger.error(`Error during token exchange: ${error.message}`, LOG_PREFIX);
         res.redirect('http://localhost:4200/auth-callback?successful=false');
     }
 })
@@ -123,8 +123,8 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
         });
 
         res.send({message: 'Streamer found and WebSocket connections can now be initialized'});
-    } catch (error) {
-        console.error(`${LOG_PREFIX}  Error during Twitch/AWS setup:`, error);
+    } catch (error: any) {
+        logger.error(`Error during Twitch/AWS setup: ${error.message}`, LOG_PREFIX);
         res.status(500).send('Error validating Twitch user and credentials');
     }
 });
@@ -144,7 +144,7 @@ authRouter.post('/verify-cognito', async (req, res) => {
             idToken
         });
     } catch (e: any) {
-        console.error(`${LOG_PREFIX} Error during verify idToken:`, e.message);
+        logger.error(`Error during verify idToken: ${e.message}`, LOG_PREFIX );
         res.status(401).json({message: 'idToken not verified', error: e.message});
     }
 })

@@ -8,9 +8,13 @@ import {
 import {createTimestamp} from "../../utilities/utilities";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {logger} from "../../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_REST: `;
-export const METADATA_SEND_INTERVAL = 10 * 1000
+const LOG_PREFIX = `API_GATEWAY_REST`;
+const MINUTES = 5
+const SECONDS = 60
+const MILLISECONDS = 1000
+export const METADATA_SEND_INTERVAL = MINUTES * SECONDS * MILLISECONDS
 
 interface StreamMetadataMessage {
     stream_id: string,
@@ -85,15 +89,15 @@ export async function postMetadataToApiGateway(cognitoUserId: string) {
             } as CustomAxiosRequestConfig)
 
         if (response.status === 200) {
-            console.log(`${LOG_PREFIX} Metadata sent to API Gateway: ${JSON.stringify(metadata)}`);
+            logger.info(`Metadata sent to API Gateway: ${JSON.stringify(metadata, null, 2)}`, LOG_PREFIX);
 
         } else {
-            console.error(`${LOG_PREFIX} Failed to send metadata to API Gateway. Status: ${response.status}`);
+            logger.error(`Failed to send metadata to API Gateway. Status: ${response.status}`, LOG_PREFIX);
         }
 
 
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error sending metadata to API Gateway: ${error.message}`);
+        logger.error(`Error sending metadata to API Gateway: ${error.message}`, LOG_PREFIX);
     } finally {
         refreshStreamMetadataCounters(cognitoUserId);
     }

@@ -19,8 +19,9 @@ import {
     streamOfflineHandler,
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";
+import {LogColor, logger, LogStyle} from "../utilities/logger";
 
-const LOG_PREFIX = 'TWITCH_WS:'
+const LOG_PREFIX = 'TWITCH_WS'
 
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
@@ -80,12 +81,12 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
     try {
         const twitchWebSocket = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
-        console.log(`${LOG_PREFIX} Starting WebSocket client for: ${twitchUsername}`);
+        logger.info(`Starting WebSocket client for: ${twitchUsername}`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT, style: LogStyle.BOLD});
 
-        twitchWebSocket.on("error", (error) => console.error(`${LOG_PREFIX} WebSocket Error:`, error));
+        twitchWebSocket.on("error", (error) => logger.error(`WebSocket Error: ${error.message}`, LOG_PREFIX));
 
         twitchWebSocket.on("open", () => {
-            console.log(`${LOG_PREFIX} Twitch WebSocket connection opened for user ID: ${cognitoUserId}`);
+            logger.info(`Twitch WebSocket connection opened for user ID: ${cognitoUserId}`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
         });
 
         twitchWebSocket.on("message", (data: WebSocket.Data) => {
@@ -95,7 +96,7 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
 
         return twitchWebSocket;
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error while starting WebSocket client for Twitch: ${error.message}`);
+        logger.error(`Error while starting WebSocket client for Twitch: ${error.message}`, LOG_PREFIX);
         return null;
     }
 
@@ -192,7 +193,7 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
 
 
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error during subscription:`, error.response ? error.response.data : error.message);
+        logger.error(`Error during subscription: ${error.response ? JSON.stringify(error.response.data, null, 2) : error.message}`, LOG_PREFIX);
     }
 }
 
@@ -200,10 +201,10 @@ function verifyRegisterResponse(response: AxiosResponse<VerifyResponseData>, reg
     if (response.status === 202) {
         const subscriptionId = response.data.data[0].id;
         trackSubscription(userId, subscriptionId);
-        console.log(`${LOG_PREFIX} Subscribed to ${registerType} [${response.data.data[0].id}]`);
+        logger.info(`Subscribed to ${registerType} [${response.data.data[0].id}]`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
     } else {
-        console.error(`${LOG_PREFIX} Failed to subscribe to ${registerType}. Status code ${response.status}`);
-        console.error(response.data);
+        logger.error(`Failed to subscribe to ${registerType}. Status code ${response.status}`, LOG_PREFIX);
+        logger.error(JSON.stringify(response.data, null, 2), LOG_PREFIX);
     }
 }
 
