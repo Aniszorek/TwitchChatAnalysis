@@ -154,7 +154,7 @@ class Logger {
         return isLevelValid || shouldShowDebug;
     }
 
-    log({ message, logPrefix, options }: LoggerArguments, level: LogLevel): void {
+    private log({ message, logPrefix, options }: LoggerArguments, level: LogLevel): void {
         const { color, backgroundColor, style } = options || {};
 
         if (!this.shouldDisplayLog(level)) {

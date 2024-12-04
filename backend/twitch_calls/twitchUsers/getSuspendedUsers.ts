@@ -1,6 +1,7 @@
 import {twitchApiClient} from "../twitchApiConfig";
+import {logger} from "../../utilities/logger";
 
-const LOG_PREFIX = 'TWITCH_API_USERS:';
+const LOG_PREFIX = 'TWITCH_API_USERS';
 
 export type SuspendedUser = {
     user_id: string;
@@ -34,7 +35,7 @@ export async function getSuspendedUsers(broadcasterId: string): Promise<Suspende
 
         return {banned_users: bannedUsers, timed_out_users: timedOutUsers};
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error in getBannedUsers:`, error.message);
+        logger.error(`Error in getBannedUsers: ${error.message}`, LOG_PREFIX);
         throw new Error('Failed to retrieve banned users from Twitch API');
     }
 }

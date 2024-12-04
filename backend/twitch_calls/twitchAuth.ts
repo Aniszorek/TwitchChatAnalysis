@@ -1,8 +1,9 @@
 import axios, {AxiosResponse} from 'axios';
 import {twitchApiClient} from "./twitchApiConfig";
 import {TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
+import {LogColor, logger} from "../utilities/logger";
 
-const LOG_PREFIX = 'TWITCH_API_AUTH:';
+const LOG_PREFIX = 'TWITCH_API_AUTH';
 const TWITCH_VALIDATE_AUTH_URL = 'https://id.twitch.tv/oauth2/validate';
 
 interface TwitchUserIdResponse {
@@ -36,7 +37,7 @@ export async function fetchTwitchUserId(nickname: string): Promise<TwitchUserIdR
         return {found: true, userId};
 
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error while fetching Twitch user ID`, error.message);
+        logger.error(`Error while fetching Twitch user ID ${error.message}`, LOG_PREFIX);
         throw error;
     }
 }
@@ -54,7 +55,7 @@ export async function fetchTwitchStreamMetadata(userId: string): Promise<TwitchS
         const streamData = response.data.data[0];
 
         if (!streamData) {
-            console.log(`${LOG_PREFIX} Streamer is currently offline`);
+            logger.info(`Streamer is currently offline`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
             return {stream_id: undefined};
         }
 
@@ -66,7 +67,7 @@ export async function fetchTwitchStreamMetadata(userId: string): Promise<TwitchS
             category: streamData.game_name
         };
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error fetching Twitch stream data:`, error);
+        logger.error(`Error fetching Twitch stream data: ${error.message}`, LOG_PREFIX);
         throw error;
     }
 }
@@ -85,14 +86,15 @@ export async function validateTwitchAuth() {
         });
 
         if (response.status !== 200) {
-            console.error(
-                `${LOG_PREFIX} Token is not valid. ${TWITCH_VALIDATE_AUTH_URL} returned status code ${response.status}`
+            logger.error(
+                `Token is not valid. ${TWITCH_VALIDATE_AUTH_URL} returned status code ${response.status}`,
+                LOG_PREFIX
             );
         }
 
-        console.log(`${LOG_PREFIX} Validated token.`);
+        logger.info(`Validated token.`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error validating token:`, error.message);
+        logger.error(`Error validating token: ${error.message}`, LOG_PREFIX);
         throw error;
     }
 }
@@ -108,14 +110,14 @@ export async function deleteTwitchSubscription(subscriptionId: string, accessTok
         });
 
         if (response.status === 204) {
-            console.log(`${LOG_PREFIX} Successfully unsubscribed from Twitch EventSub: ${subscriptionId}`);
+            logger.info(`Successfully unsubscribed from Twitch EventSub: ${subscriptionId}`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
             return true;
         } else {
-            console.warn(`${LOG_PREFIX} Unexpected response while unsubscribing:`, response.status);
+            logger.error(`Unexpected response while unsubscribing: ${response.status}`, LOG_PREFIX);
             return false;
         }
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error unsubscribing from Twitch EventSub:`, error.response?.data || error.message);
+        logger.error(`Error unsubscribing from Twitch EventSub: ${error.response?.data || error.message}`, LOG_PREFIX);
         throw error;
     }
 }

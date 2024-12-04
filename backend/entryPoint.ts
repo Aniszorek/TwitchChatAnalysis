@@ -7,7 +7,7 @@ import {initializeTwitchApiClient} from "./twitch_calls/twitchApiConfig";
 import {twitchUsersRouter} from "./routes/twitch/twitchUsersRouter";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "./envConfig";
 import {twitchChannelsRouter} from "./routes/twitch/twitchChannelsRouter";
-import {LogLevel} from "./utilities/logger";
+import {logger, LogLevel} from "./utilities/logger";
 
 
 // INFO > WARN > ERROR
@@ -38,5 +38,5 @@ initWebSocketServer(server);
 // todo [TCA-27] (https://twitchchatanalysis.atlassian.net/browse/TCA-27) Jak dane będą przychodzić w innym momencie niż na start apki, to będziemy musieli przenieść inicjalizację
 initializeTwitchApiClient(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
 server.listen(port, () => {
-    console.log(`${LOG_PREFIX} Express server started on: ${port}`);
+    logger.info(`Express server started on: ${port}`, LOG_PREFIX)
 });

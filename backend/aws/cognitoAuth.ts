@@ -2,9 +2,10 @@ import axios from "axios";
 import querystring from "querystring";
 import jwt, {JwtHeader, JwtPayload} from "jsonwebtoken";
 import jwksClient, {SigningKey} from "jwks-rsa";
+import {LogColor, logger, LogStyle} from "../utilities/logger";
 
 
-const LOG_PREFIX = `COGNITO_AUTH:`;
+const LOG_PREFIX = `COGNITO_AUTH`;
 
 const COGNITO_CLIENT_ID = process.env["COGNITO_CLIENT_ID"] as string;
 const COGNITO_DOMAIN = 'https://twitchchatanalytics.auth.eu-central-1.amazoncognito.com';
@@ -69,7 +70,7 @@ export async function exchangeCodeForToken(authCode: string): Promise<CognitoTok
 
         return await response.data;
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error exchanging code for token:`, error.response?.data || error.message);
+        logger.error(`Error exchanging code for token: ${error.response?.data || error.message}`, LOG_PREFIX);
         throw new Error(`${LOG_PREFIX} Could not get access token`);
     }
 }
@@ -88,7 +89,8 @@ async function refreshIdToken(refreshToken: string): Promise<CognitoTokenRespons
             }
         });
 
-        console.log(`${LOG_PREFIX} Token refreshed:`, response.data);
+        logger.info(`Token refreshed: ${JSON.stringify(response.data, null, 2)}`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
+
         return await response.data;
     } catch (error: any) {
         throw new Error(`${LOG_PREFIX} Could not refresh access token: ${error.message}`);
@@ -115,7 +117,7 @@ async function refreshIdToken(refreshToken: string): Promise<CognitoTokenRespons
 
 export async function refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken: string, cognitoTokenExpiryTime: number, twitchBroadcasterUsername: string): Promise<RefreshTokenResult> {
     if (Date.now() >= cognitoTokenExpiryTime) {
-        console.log(`${LOG_PREFIX} (new connection for ${twitchBroadcasterUsername}) Access token expired - refreshing`);
+        logger.info(`new connection for ${twitchBroadcasterUsername}: Access token expired - refreshing`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT,style: LogStyle.BOLD});
         const data = await refreshIdToken(cognitoRefreshToken);
         return {
             newIdToken: data.id_token,

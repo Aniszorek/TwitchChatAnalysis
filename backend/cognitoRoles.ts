@@ -1,4 +1,5 @@
 import {frontendClients} from "./bot/frontendClients";
+import {LogColor, logger, LogStyle} from "./utilities/logger";
 
 export const COGNITO_ROLES = {
     STREAMER: "Streamer",
@@ -18,7 +19,7 @@ interface UserData {
     };
 }
 
-const LOG_PREFIX = "COGNITO_ROLES: ";
+const LOG_PREFIX = "COGNITO_ROLES";
 
 export const verifyUserPermission = (cognitoUserId: string, expectedRole: CognitoRole, actionDescription: string): boolean => {
 
@@ -47,8 +48,7 @@ export const verifyUserPermission = (cognitoUserId: string, expectedRole: Cognit
     const expectedRoleLevel = roleHierarchy[expectedRole];
 
     const granted = userRoleLevel >= expectedRoleLevel;
-    console.log(`${LOG_PREFIX} [verifyUserPermission] - permission ${granted ? '' : 'NOT '}GRANTED for user ${cognitoUsername} with role ${userRole} to perform ${actionDescription}`)
-
+    logger.info(`permission ${granted ? '' : 'NOT '}GRANTED for user ${cognitoUsername} with role ${userRole} to perform ${actionDescription}`, LOG_PREFIX, {color: granted ? LogColor.GREEN : LogColor.RED_BRIGHT, style: LogStyle.BOLD})
     return granted
 }
 

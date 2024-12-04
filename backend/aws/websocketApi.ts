@@ -1,12 +1,9 @@
 import WebSocket from "ws";
-import {
-    frontendClients,
-    incrementSentimentMessageCount,
-    SentimentLabel
-} from "../bot/frontendClients";
+import {frontendClients, incrementSentimentMessageCount, SentimentLabel} from "../bot/frontendClients";
 import {sendMessageToFrontendClient} from "../bot/wsServer";
+import {LogColor, logger, LogStyle} from "../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_WS:`
+const LOG_PREFIX = `API_GATEWAY_WS`
 
 const WEBSOCKET_API_URL = 'wss://dh50useqij.execute-api.eu-central-1.amazonaws.com/test/';
 const PING_INTERVAL = 5 * 60 * 1000;
@@ -28,13 +25,13 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
         const cognitoData = frontendClients.get(cognitoUserId)?.cognito;
 
         if (!cognitoData?.cognitoIdToken) {
-            console.error(`${LOG_PREFIX} Missing Cognito ID token for user: ${cognitoUserId}`);
+            logger.error(`Missing Cognito ID token for user: ${cognitoUserId}`, LOG_PREFIX, {style: LogStyle.BOLD});
             return null;
         }
         const awsWebSocket = new WebSocket(`${WEBSOCKET_API_URL}?token=${cognitoData.cognitoIdToken}`);
 
         awsWebSocket.on('open', () => {
-            console.log(`${LOG_PREFIX} Connected, creating connection for streamer name: ${twitchUsername}`);
+            logger.info(`Connected, creating connection for streamer name: ${twitchUsername}`, LOG_PREFIX, {color: LogColor.YELLOW});
 
             const registerMessage: RegisterConnectionMessage = {
                 action: "registerConnection",
@@ -45,7 +42,7 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
             // regularly send ping message to maintain connection with AWS
             const interval = setInterval(() => {
                 if (awsWebSocket.readyState === WebSocket.OPEN) {
-                    console.log(`${LOG_PREFIX} Sending ping`);
+                    logger.info(`Sending ping`, LOG_PREFIX, {color: LogColor.YELLOW});
                     awsWebSocket.send(JSON.stringify({ action: 'ping' }));
                 } else {
                     clearInterval(interval);
@@ -57,7 +54,7 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
         awsWebSocket.on("message", (message: WebSocket.Data) => {
             try {
                 const data: WebSocketMessage = JSON.parse(message.toString());
-                console.log(`${LOG_PREFIX} Received message:`, data);
+                logger.info(`Received message: ${JSON.stringify(data, null, 2)}`,LOG_PREFIX, {color: LogColor.YELLOW, style: LogStyle.BOLD});
 
                 if (data.type === NLP_MESSAGE_WEBSOCKET_TYPE && data.data) {
                     //TODO handle processed messages on FE
@@ -66,25 +63,25 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
                     // TODO TCA-83 sentiment label should be send by AWS, not hardcoded
                     incrementSentimentMessageCount(cognitoUserId, SentimentLabel.POSITIVE)
 
-                    console.log(`${LOG_PREFIX} Message sent to frontend client`);
+                    logger.info(`Message sent to frontend client`, LOG_PREFIX, {color: LogColor.YELLOW});
                 }
             } catch (error) {
-                console.log(`${LOG_PREFIX} Received message:`, message.toString());
+                logger.info(`Received message: ${message.toString()}`, LOG_PREFIX, {color: LogColor.YELLOW, style: LogStyle.BOLD});
             }
         });
 
         awsWebSocket.on("close", () => {
-            console.log(`${LOG_PREFIX} Disconnected from AWS WebSocket`);
+            logger.info(`Disconnected from AWS WebSocket`, LOG_PREFIX, {color: LogColor.YELLOW});
         });
 
         awsWebSocket.on("error", (error: Error) => {
-            console.error(`${LOG_PREFIX} WebSocket error:`, error);
+            logger.error(`WebSocket error: ${error}`, LOG_PREFIX);
         });
 
         return awsWebSocket;
 
-    } catch (error) {
-        console.error(`${LOG_PREFIX} Failed to connect to AWS WebSocket:`, error);
+    } catch (error: any) {
+        logger.error(`Failed to connect to AWS WebSocket: ${error.message}`, LOG_PREFIX);
         return null;
     }
 }

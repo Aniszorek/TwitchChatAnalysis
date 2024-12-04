@@ -1,9 +1,10 @@
 import express from "express";
 import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUsers";
+import {logger} from "../../utilities/logger";
 
 export const twitchUsersRouter = express.Router();
 
-const LOG_PREFIX = 'TWITCH_API_USERS:';
+const LOG_PREFIX = 'TWITCH_API_USERS';
 
 twitchUsersRouter.get('/suspended', async (req, res) => {
     const broadcasterId = req.query.broadcaster_id as string;
@@ -16,7 +17,7 @@ twitchUsersRouter.get('/suspended', async (req, res) => {
         const result = await getSuspendedUsers(broadcasterId);
         res.json(result);
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} Error in /banned-users route:`, error.message);
+        logger.error(`Error in /banned-users route: ${error.message}`, LOG_PREFIX);
         res.status(500).json({error: 'Failed to fetch banned users'});
     }
 });
