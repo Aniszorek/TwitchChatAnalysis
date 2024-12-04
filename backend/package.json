@@ -11,6 +11,7 @@
   "dependencies": {
     "@dotenvx/dotenvx": "^1.16.1",
     "axios": "^1.7.7",
+    "chalk": "^4.1.2",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "express": "^4.21.0",
@@ -22,6 +23,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/chalk": "^0.4.31",
     "@types/cors": "^2.8.17",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.10.1",
