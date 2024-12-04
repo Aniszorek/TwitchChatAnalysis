@@ -11,7 +11,10 @@ import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
-export const METADATA_SEND_INTERVAL = 5 * 60 * 1000
+const MINUTES = 5
+const SECONDS = 60
+const MILLISECONDS = 1000
+export const METADATA_SEND_INTERVAL = MINUTES * SECONDS * MILLISECONDS
 
 interface StreamMetadataMessage {
     stream_id: string,
