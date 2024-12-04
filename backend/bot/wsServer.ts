@@ -170,6 +170,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
             logger.info(`Frontend client disconnected`, LOG_PREFIX, {color: LogColor.CYAN, backgroundColor: LogBackgroundColor.BG_BLACK, style: LogStyle.BOLD});
             if (userId) {
                 const broadcasterId = frontendClients.get(userId)?.twitchData.twitchBroadcasterUserId
+                const streamId = frontendClients.get(userId)?.twitchData.streamId
                 if(broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
                 {
                     const subCount = await getChannelSubscriptionsCount(broadcasterId)
@@ -177,7 +178,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                     setStreamDataEndValues(userId,  createTimestamp(), followerCount, subCount)
                 }
 
-                if (verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
+                if (streamId &&verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
                     await patchStreamToApiGateway(userId)
 
                 await cleanupUserConnections(userId, frontendClients.get(userId)!.subscriptions);
