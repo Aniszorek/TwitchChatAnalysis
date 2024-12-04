@@ -13,13 +13,15 @@ import {
     TwitchStreamMetadata
 } from "../frontendClients";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
-import {patchStreamToApiGateway, postMessageToApiGateway, postStreamToApiGateway} from "../../aws/apiGateway";
 import {sendMessageToFrontendClient} from "../wsServer";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../../utilities/utilities";
 import {LogColor, logger} from "../../utilities/logger";
+import {postMessageToApiGateway} from "../../api_gateway_calls/twitch-message/postTwitchMessage";
+import {postStreamToApiGateway} from "../../api_gateway_calls/stream/postStream";
+import {patchStreamToApiGateway} from "../../api_gateway_calls/stream/patchStream";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS"
 

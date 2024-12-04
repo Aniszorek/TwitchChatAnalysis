@@ -1,7 +1,10 @@
 import {WebSocket} from "ws";
-import {METADATA_SEND_INTERVAL, postMetadataToApiGateway} from "../aws/apiGateway";
 import {clearInterval} from "node:timers";
 import {LogColor, logger} from "../utilities/logger";
+import {
+    METADATA_SEND_INTERVAL,
+    postMetadataToApiGateway
+} from "../api_gateway_calls/stream-metadata/postStreamMetadata";
 
 const LOG_PREFIX = 'FRONTEND_CLIENTS'
 
@@ -294,3 +297,20 @@ export const setStreamDataEndValues = (cognitoUserId: string, endedAt: string, e
     }
 
 };
+
+export const getClientAndCognitoIdToken = (cognitoUserId: string) => {
+    const client = frontendClients.get(cognitoUserId);
+
+    if (!client) {
+        throw Error(`${LOG_PREFIX} client not found for cognitoUserId: ${cognitoUserId}`)
+    }
+
+    const cognitoIdToken = client.cognito?.cognitoIdToken;
+
+    if (!cognitoIdToken) {
+        throw Error(`${LOG_PREFIX} Cognito token missing in wsServer for user: ${cognitoUserId}`)
+
+    }
+
+    return {client, cognitoIdToken}
+}
