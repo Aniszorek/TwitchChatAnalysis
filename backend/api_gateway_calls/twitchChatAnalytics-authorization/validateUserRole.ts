@@ -34,7 +34,8 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
             broadcaster_user_login: broadcaster_user_login,
             client_id: client_id
         },{
-            cognitoIdToken: cognitoIdToken
+            cognitoIdToken: cognitoIdToken,
+            broadcasterUserLogin: broadcaster_user_login,
         } as CustomAxiosRequestConfig)
 
         const {statusCode, body} = response.data;
@@ -55,7 +56,7 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
         }
 
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} [ValidateUserRole] Error sending message to API Gateway: ${error.message}`);
+        console.error(`${LOG_PREFIX} [ValidateUserRole] Error sending message to API Gateway: ${JSON.stringify(error, null, 2)}`);
         return undefined;
     }
 }
