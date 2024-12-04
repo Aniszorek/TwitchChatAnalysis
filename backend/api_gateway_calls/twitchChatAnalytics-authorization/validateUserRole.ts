@@ -4,7 +4,7 @@ import {isCognitoRoleValid} from "../../cognitoRoles";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_REST:`;
+const LOG_PREFIX = `API_GATEWAY_REST`;
 
 interface CognitoIdTokenData {
     "cognito:username": string;

@@ -10,7 +10,7 @@ import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/tw
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_REST: `;
+const LOG_PREFIX = `API_GATEWAY_REST`;
 export const METADATA_SEND_INTERVAL = 10 * 1000
 
 interface StreamMetadataMessage {

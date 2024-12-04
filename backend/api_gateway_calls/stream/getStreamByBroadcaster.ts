@@ -2,7 +2,7 @@ import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {LogColor, logger} from "../../utilities/logger";
 
-const LOG_PREFIX = `API_GATEWAY_REST:`;
+const LOG_PREFIX = `API_GATEWAY_REST`;
 
 interface GetStreamMessage {
     "stream_id": string,
