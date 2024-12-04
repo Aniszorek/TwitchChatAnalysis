@@ -1,6 +1,7 @@
 import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {createTimestamp} from "../../utilities/utilities";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {logger} from "../../utilities/logger";
 
 const LOG_PREFIX = `API_GATEWAY_REST:`;
 
@@ -46,12 +47,12 @@ export async function patchStreamToApiGateway(cognitoUserId: string) {
         } as CustomAxiosRequestConfig)
 
         if (response.status === 200) {
-            console.log(`${LOG_PREFIX} Stream updated to API Gateway: ${JSON.stringify(streamMessage)}`);
+            logger.info(`Stream updated to API Gateway: ${JSON.stringify(streamMessage, null, 2)}`, LOG_PREFIX);
 
         } else {
-            console.error(`${LOG_PREFIX} Failed to update stream to API Gateway. Status: ${response.status}`);
+            logger.error(`Failed to update stream to API Gateway. Status: ${response.status}`, LOG_PREFIX);
         }
     }catch (error: any) {
-        console.error(`${LOG_PREFIX} Error updating stream to API Gateway: ${error.message}`);
+        logger.error(`Error updating stream to API Gateway: ${error.message}`, LOG_PREFIX);
     }
 }

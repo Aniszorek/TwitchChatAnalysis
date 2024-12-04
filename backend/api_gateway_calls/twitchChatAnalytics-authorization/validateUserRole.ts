@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import {AxiosResponse} from "axios";
 import {isCognitoRoleValid} from "../../cognitoRoles";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {logger} from "../../utilities/logger";
 
 const LOG_PREFIX = `API_GATEWAY_REST:`;
 
@@ -23,7 +24,7 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
     try {
         const decoded: CognitoIdTokenData | null = jwt.decode(cognitoIdToken) as CognitoIdTokenData | null;
         if (!decoded?.["cognito:username"]) {
-            console.error(`${LOG_PREFIX} Invalid Cognito token`);
+            logger.error(`Invalid Cognito token`, LOG_PREFIX);
             return undefined;
         }
         const username = decoded["cognito:username"];
@@ -41,22 +42,23 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
         const {statusCode, body} = response.data;
 
         if (!isCognitoRoleValid(body.role)) {
-            console.error(`${LOG_PREFIX} Unknown role: ${body.role} - Status: ${JSON.stringify(body)}`);
+            logger.error(`Unknown role: ${body.role} - Status: ${JSON.stringify(body, null ,2)}`, LOG_PREFIX);
             return undefined;
         }
 
         if (statusCode === 200) {
-            console.log(
-                `${LOG_PREFIX} Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${JSON.stringify(body)}`
-            );
+            logger.info(
+                `Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${JSON.stringify(body, null, 2)}`,
+                LOG_PREFIX
+        );
             return {role: body.role, cognitoUsername: username};
         } else {
-            console.error(`${LOG_PREFIX} Failed authorization. Status: ${JSON.stringify(body)}`);
+            logger.error(`Failed authorization. Status: ${JSON.stringify(body, null, 2)}`, LOG_PREFIX);
             return undefined;
         }
 
     } catch (error: any) {
-        console.error(`${LOG_PREFIX} [ValidateUserRole] Error sending message to API Gateway: ${JSON.stringify(error, null, 2)}`);
+        logger.error(`Error sending message to API Gateway: ${JSON.stringify(error, null, 2)}`, LOG_PREFIX);
         return undefined;
     }
 }
