@@ -29,17 +29,17 @@ export async function getStreamsByBroadcasterUsernameFromApiGateway(cognitoUserI
         } as CustomAxiosRequestConfig)
 
         if (response.status === 200) {
-            console.log(`${LOG_PREFIX} GET /stream/stream_id OK`);
+            console.log(`${LOG_PREFIX} GET /stream OK`);
             return Array.isArray(response.data)
                 ? (response.data as GetStreamMessage[])
                 : [];
 
         } else {
-            console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED. Status: ${response.status}`);
+            console.error(`${LOG_PREFIX} GET /stream FAILED. Status: ${response.status}`);
             return [];
         }
     }catch (error: any) {
-        console.error(`${LOG_PREFIX} GET /stream/stream_id FAILED: ${error.message}`);
+        console.error(`${LOG_PREFIX} GET /stream FAILED: ${error.message}`);
         return [];
     }
 }
