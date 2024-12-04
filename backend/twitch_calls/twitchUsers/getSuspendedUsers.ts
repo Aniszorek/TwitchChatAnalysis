@@ -1,6 +1,6 @@
 import {twitchApiClient} from "../twitchApiConfig";
 
-const LOG_PREFIX = 'TWITCH API USERS:';
+const LOG_PREFIX = 'TWITCH_API_USERS:';
 
 export type SuspendedUser = {
     user_id: string;

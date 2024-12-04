@@ -21,7 +21,7 @@ import {getChannelSubscriptionsCount} from "../twitch_calls/twitch/getBroadcaste
 import {getChannelFollowersCount} from "../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../utilities/utilities";
 
-const LOG_PREFIX = 'BACKEND WS:'
+const LOG_PREFIX = 'BACKEND_WS:'
 
 export const pendingWebSocketInitializations = new Map<string, {
     twitchBroadcasterUsername: string;

@@ -3,7 +3,7 @@ import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUser
 
 export const twitchUsersRouter = express.Router();
 
-const LOG_PREFIX = 'TWITCH API USERS:';
+const LOG_PREFIX = 'TWITCH_API_USERS:';
 
 twitchUsersRouter.get('/suspended', async (req, res) => {
     const broadcasterId = req.query.broadcaster_id as string;

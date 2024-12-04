@@ -2,7 +2,7 @@ import axios, {AxiosResponse} from 'axios';
 import {twitchApiClient} from "./twitchApiConfig";
 import {TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 
-const LOG_PREFIX = 'TWITCH API AUTH:';
+const LOG_PREFIX = 'TWITCH_API_AUTH:';
 const TWITCH_VALIDATE_AUTH_URL = 'https://id.twitch.tv/oauth2/validate';
 
 interface TwitchUserIdResponse {
