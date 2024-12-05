@@ -11,6 +11,7 @@ import {encodeTimestamp} from "../../utilities/utilities";
 import {getChannelVips, VipUser} from "../../twitch_calls/twitchChannels/getChannelVips";
 import {verifyToken} from "../../aws/cognitoAuth";
 import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
+import {getChannelModerators} from "../../twitch_calls/twitchModeration/getModerators";
 
 export const awsTwitchMessageRouter = express.Router();
 
@@ -85,12 +86,13 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
                 const suspendedLists = await getSuspendedUsers(broadcasterId)
                 const isBanned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin)
                 const isTimeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin)
+
                 const vipList = await getChannelVips(broadcasterId)
                 const isVip = vipList ? vipList.some(user => user.user_login === chatterUserLogin) : undefined
 
-                // todo new twitch endpoints
-                // get is mod
-                const isMod = false
+                const modList = await getChannelModerators(broadcasterId)
+                const isMod = modList ? modList.some(user => user.user_login === chatterUserLogin) : undefined
+
 
                 const response: GetTwitchMessageResponse = {
                     chatter_user_login: chatterUserLogin,
@@ -110,8 +112,6 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
                 }
                 res.status(200).json(response)
             }
-
-            //res.status(500).json({"message": "unknown error"})
         }
         else
         {
