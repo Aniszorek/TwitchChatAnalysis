@@ -7,6 +7,7 @@ import {
 } from "../../api_gateway_calls/twitch-message/getTwitchMessage";
 import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUsers";
 import {fetchTwitchUserId} from "../../twitch_calls/twitchAuth";
+import {encodeTimestamp} from "../../utilities/utilities";
 
 export const awsTwitchMessageRouter = express.Router();
 
@@ -51,9 +52,12 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
 
         const options: GetTwitchMessageOptions = {};
         if (streamId) {options.stream_id = streamId}
-        if (startTime) {options.start_time = encodeURI(startTime)}
-        if (endTime) {options.end_time = encodeURI(endTime)}
+        if (startTime) {options.start_time = encodeTimestamp(startTime)}
+        if (endTime) {options.end_time = encodeTimestamp(endTime)}
         if (chatterUserLogin) {options.chatter_user_login = chatterUserLogin}
+
+        if(startTime)
+        logger.debug(encodeTimestamp(startTime),LOG_PREFIX)
 
         const result = await getTwitchMessageFromApiGateway(cognitoIdToken, broadcasterUsername, options)
 
