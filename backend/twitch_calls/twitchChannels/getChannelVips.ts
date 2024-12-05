@@ -3,7 +3,7 @@ import {logger} from "../../utilities/logger";
 
 const LOG_PREFIX = 'TWITCH_API_CHANNELS';
 
-type VipUser = {
+export type VipUser = {
     user_id: string;
     user_login: string;
     user_name: string;

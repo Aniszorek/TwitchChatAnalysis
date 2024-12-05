@@ -8,6 +8,9 @@ import {
 import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUsers";
 import {fetchTwitchUserId} from "../../twitch_calls/twitchAuth";
 import {encodeTimestamp} from "../../utilities/utilities";
+import {getChannelVips, VipUser} from "../../twitch_calls/twitchChannels/getChannelVips";
+import {verifyToken} from "../../aws/cognitoAuth";
+import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
 
 export const awsTwitchMessageRouter = express.Router();
 
@@ -15,10 +18,10 @@ const LOG_PREFIX = 'AWS_API_TWITCH_MESSAGE';
 
 interface GetTwitchMessageResponse {
     chatter_user_login: string;
-    is_banned: boolean;
-    is_timeouted: boolean;
-    is_vip: boolean;
-    is_mod: boolean;
+    is_banned?: boolean;
+    is_timeouted?: boolean;
+    is_vip?: boolean;
+    is_mod?: boolean;
     messages: TwitchMessageData[];
 }
 
@@ -48,6 +51,13 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
         return res.status(400).json({ error: 'Missing required param: chatter_user_login' });
     }
 
+    const cognitoUserId = (await verifyToken(cognitoIdToken)).sub
+    if(!cognitoUserId)
+    {
+        return res.status(400).json({ error: 'Invalid cognitoIdToken' });
+    }
+
+
     try {
 
         const options: GetTwitchMessageOptions = {};
@@ -69,27 +79,39 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
                 return res.status(400).json({ error: `Broadcaster with username: ${broadcasterUsername} does not exist` });
             }
 
-            const suspendedLists = await getSuspendedUsers(broadcasterId)
 
-            const isBanned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin)
-            const isTimeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin)
+            if(cognitoUserId && verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'get chatter data only for streamer access'))
+            {
+                const suspendedLists = await getSuspendedUsers(broadcasterId)
+                const isBanned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin)
+                const isTimeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin)
+                const vipList = await getChannelVips(broadcasterId)
+                const isVip = vipList ? vipList.some(user => user.user_login === chatterUserLogin) : undefined
 
-            // todo new twitch endpoints
-            // get is mod
-            const isMod = false
-            // get is vip
-            const isVip = false
+                // todo new twitch endpoints
+                // get is mod
+                const isMod = false
 
-            const response: GetTwitchMessageResponse = {
-                chatter_user_login: chatterUserLogin,
-                is_banned: isBanned,
-                is_timeouted: isTimeouted,
-                is_vip: isVip,
-                is_mod: isMod,
-                messages: result.data as TwitchMessageData[]
+                const response: GetTwitchMessageResponse = {
+                    chatter_user_login: chatterUserLogin,
+                    is_banned: isBanned,
+                    is_timeouted: isTimeouted,
+                    is_vip: isVip,
+                    is_mod: isMod,
+                    messages: result.data as TwitchMessageData[]
+                }
+                res.status(200).json(response)
+
+            } else {
+                // you are not a streamer :(
+                const response: GetTwitchMessageResponse = {
+                    chatter_user_login: chatterUserLogin,
+                    messages: result.data as TwitchMessageData[]
+                }
+                res.status(200).json(response)
             }
 
-            res.status(200).json(response)
+            //res.status(500).json({"message": "unknown error"})
         }
         else
         {
