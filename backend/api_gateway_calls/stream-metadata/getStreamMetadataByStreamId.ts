@@ -1,6 +1,7 @@
 import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {LogColor, logger} from "../../utilities/logger";
+import axios from "axios";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
@@ -21,18 +22,18 @@ interface StreamMetadata {
     "positive_message_count"?: number
 }
 
-export async function getStreamMetadataByStreamIdFromApiGateway(cognitoUserId: string, stream_id: string) {
+export async function getStreamMetadataByStreamIdFromApiGateway(cognitoIdToken: string, stream_id: string, broadcasterUsername: string) {
     try {
-        const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
 
         // required
-        const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
-
+        if (!cognitoIdToken) {
+            throw new Error(`Missing cognitoIdToken`);
+        }
         if (!stream_id) {
-            throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
+            throw new Error(`missing stream_id for cognitoIdToken: ${cognitoIdToken}`);
         }
         if (!broadcasterUsername) {
-            throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+            throw new Error(`missing broadcasterUsername for cognitoIdToken: ${cognitoIdToken}`);
         }
 
         const response = await apiGatewayClient.get('/stream-metadata',{
@@ -43,16 +44,23 @@ export async function getStreamMetadataByStreamIdFromApiGateway(cognitoUserId: s
             }
         } as CustomAxiosRequestConfig)
 
-        const result = response.data as GetStreamMetadataMessage
 
         if (response.status === 200) {
             logger.info(`GET /stream-metadata?stream_id OK`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
-            return result
+            return response
 
         } else {
             logger.error(`GET /stream-metadata?stream_id FAILED. Status: ${response.status}`, LOG_PREFIX);
+            return response
         }
     }catch (error: any) {
-        logger.error(`GET /stream-metadata?stream_idFAILED: ${error.message}`, LOG_PREFIX);
+        if(axios.isAxiosError(error) && error.response) {
+            logger.error(`GET /stream-metadata?stream_id FAILED: ${error.message}`, LOG_PREFIX);
+            throw {status: error.response.status, message: error.response.data}
+
+        } else {
+            logger.error(`GET /stream-metadata?stream_id: unexpected error:  ${error.message}`, LOG_PREFIX);
+            throw {status: 500, message: error.message};
+        }
     }
 }

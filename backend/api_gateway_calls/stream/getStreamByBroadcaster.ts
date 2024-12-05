@@ -17,12 +17,15 @@ interface GetStreamMessage {
     "end_subs": string | null
 }
 
-export async function getStreamsByBroadcasterUsernameFromApiGateway(cognitoUserId: string, broadcasterUsername: string) {
+export async function getStreamsByBroadcasterUsernameFromApiGateway(cognitoIdToken: string, broadcasterUsername: string) {
     try {
-        const { cognitoIdToken } = getClientAndCognitoIdToken(cognitoUserId);
 
+        //required
+        if (!cognitoIdToken) {
+            throw new Error(`Missing cognitoIdToken`);
+        }
         if (!broadcasterUsername) {
-            throw new Error(`Missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+            throw new Error(`Missing broadcasterUsername for cognitoIdToken: ${cognitoIdToken}`);
         }
 
         const response = await apiGatewayClient.get('/stream', {

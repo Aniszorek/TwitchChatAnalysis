@@ -17,18 +17,18 @@ export interface GetStreamMessage {
     "end_subs": string | null
 }
 
-export async function getStreamFromApiGateway(cognitoUserId: string, stream_id: string) {
+export async function getStreamFromApiGateway(cognitoIdToken: string, stream_id: string, broadcasterUsername: string) {
     try {
-        const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
 
         // required
-        const broadcasterUsername = client.twitchData.twitchBroadcasterUsername
-
+        if (!cognitoIdToken) {
+            throw new Error(`Missing cognitoIdToken`);
+        }
         if (!stream_id) {
-            throw new Error(`missing stream_id for cognitoUserId: ${cognitoUserId}`);
+            throw new Error(`missing stream_id for cognitoIdToken: ${cognitoIdToken}`);
         }
         if (!broadcasterUsername) {
-            throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+            throw new Error(`missing broadcasterUsername for cognitoIdToken: ${cognitoIdToken}`);
         }
 
         const response = await apiGatewayClient.get('/stream',{
@@ -54,7 +54,7 @@ export async function getStreamFromApiGateway(cognitoUserId: string, stream_id: 
             throw {status: error.response.status, message: error.response.data}
 
         } else {
-            logger.error(`GET /stream FAILED: unexpected error:  ${error.message}`, LOG_PREFIX);
+            logger.error(`GET /stream/stream_id FAILED: unexpected error:  ${error.message}`, LOG_PREFIX);
             throw {status: 500, message: error.message};
         }
     }

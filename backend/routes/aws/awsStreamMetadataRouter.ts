@@ -5,12 +5,15 @@ import {getStreamsByBroadcasterUsernameFromApiGateway} from "../../api_gateway_c
 import {verifyToken} from "../../aws/cognitoAuth";
 import {getStreamFromApiGateway, GetStreamMessage} from "../../api_gateway_calls/stream/getStream";
 import axios from "axios";
+import {
+    getStreamMetadataByStreamIdFromApiGateway
+} from "../../api_gateway_calls/stream-metadata/getStreamMetadataByStreamId";
 
-export const awsStreamRouter = express.Router();
+export const awsStreamMetadataRouter = express.Router();
 
 const LOG_PREFIX = 'AWS_API_STREAM';
 
-awsStreamRouter.get('/', async (req, res) => {
+awsStreamMetadataRouter.get('/', async (req, res) => {
     const broadcasterUsername = req.headers['broadcasteruserlogin'] as string | undefined;
     let cognitoIdToken = req.headers['authorization'] as string | undefined;
     const streamId = req.query.stream_id as string | undefined;
@@ -27,15 +30,16 @@ awsStreamRouter.get('/', async (req, res) => {
         cognitoIdToken = cognitoIdToken.slice(7);
     }
 
+    if (!streamId) {
+        return res.status(400).json({ error: 'Missing required param: stream_id' });
+    }
+
     try {
-        const result = streamId ? await getStreamFromApiGateway(cognitoIdToken, streamId, broadcasterUsername)
-            : await getStreamsByBroadcasterUsernameFromApiGateway(cognitoIdToken, broadcasterUsername);
+        const result = await getStreamMetadataByStreamIdFromApiGateway(cognitoIdToken, streamId, broadcasterUsername)
 
         if(result.status == 200)
         {
-            res.status(200).json(Array.isArray(result.data)
-                ? (result.data as GetStreamMessage[])
-                : [])
+            res.status(200).json(result.data)
         }
         else
         {
@@ -45,20 +49,19 @@ awsStreamRouter.get('/', async (req, res) => {
         }
 
     } catch (error: any) {
-
         if(error.status && error.message) {
             logger.error(
-                `Error in /aws/stream route: ${JSON.stringify(error.message)}, status: ${error.status}`,
+                `Error in /aws/stream-metadata?stream_id route: ${JSON.stringify(error.message)}, status: ${error.status}`,
                 LOG_PREFIX
             );
             res.status(error.status).json(error.message);
         }
         else {
             logger.error(
-                `Unexpected error in /aws/stream route: ${error.message || 'Unknown error'}`,
+                `Unexpected error in /aws/stream-metadata?stream_id route: ${error.message || 'Unknown error'}`,
                 LOG_PREFIX
             );
-            res.status(500).json({ error: `Failed to GET stream data: ${error.message || 'Unknown error'}` });
+            res.status(500).json({ error: `Failed to GET stream-metadata: ${error.message || 'Unknown error'}` });
         }
     }
 
