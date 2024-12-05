@@ -15,7 +15,7 @@ def custom_serializer(obj):
         return obj.isoformat()
     raise TypeError(f"Type {type(obj)} not serializable")
 
-def query_stream_metadata_by_stream_id(stream_id):
+def query_stream_metadata_by_stream_id(stream_id, broadcaster_username):
     try:
         conn = psycopg2.connect(
             host=DB_HOST,
@@ -30,9 +30,10 @@ def query_stream_metadata_by_stream_id(stream_id):
         SELECT * 
         FROM streams
         WHERE stream_id = %s
+        AND broadcaster_username = %s
         """
 
-        cursor.execute(query, (stream_id,))
+        cursor.execute(query, (stream_id, broadcaster_username,))
         results = cursor.fetchall()
 
         cursor.close()
@@ -84,18 +85,18 @@ def lambda_handler(event, context):
         query_params = event.get('queryStringParameters') or {}
         stream_id = query_params.get('stream_id')
 
+        headers = event.get('headers') or {}
+        broadcaster_username = headers.get('BroadcasterUserLogin')
+
+        if not broadcaster_username:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "BroadcasterUserLogin header is required"})
+            }
+
         if stream_id:
-            data = query_stream_metadata_by_stream_id(stream_id)
+            data = query_stream_metadata_by_stream_id(stream_id, broadcaster_username)
         else:
-            headers = event.get('headers') or {}
-            broadcaster_username = headers.get('BroadcasterUserLogin')
-
-            if not broadcaster_username:
-                return {
-                    "statusCode": 400,
-                    "body": json.dumps({"error": "BroadcasterUserLogin header is required"})
-                }
-
             data = query_streams_by_broadcaster_username(broadcaster_username)
 
         response_body = json.dumps(data, default=custom_serializer)
