@@ -3,7 +3,7 @@ import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getCha
 import {logger} from "../../utilities/logger";
 import {getStreamsByBroadcasterUsernameFromApiGateway} from "../../api_gateway_calls/stream/getStreamByBroadcaster";
 import {verifyToken} from "../../aws/cognitoAuth";
-import {GetStreamMessage} from "../../api_gateway_calls/stream/getStream";
+import {getStreamFromApiGateway, GetStreamMessage} from "../../api_gateway_calls/stream/getStream";
 import axios from "axios";
 
 export const awsStreamRouter = express.Router();
@@ -13,6 +13,7 @@ const LOG_PREFIX = 'AWS_API_STREAM';
 awsStreamRouter.get('/', async (req, res) => {
     const broadcasterId = req.headers['broadcasteruserlogin'] as string | undefined;
     let cognitoIdToken = req.headers['authorization'] as string | undefined;
+    const streamId = req.query.stream_id as string | undefined;
 
     if (!broadcasterId) {
         return res.status(400).json({ error: 'Missing required header: broadcasteruserlogin' });
@@ -33,7 +34,9 @@ awsStreamRouter.get('/', async (req, res) => {
             return res.status(400).json({ error: 'Invalid id_token' });
         }
 
-        const result = await getStreamsByBroadcasterUsernameFromApiGateway(cognitoUserId, broadcasterId);
+
+        const result = streamId ? await getStreamFromApiGateway(cognitoUserId, streamId)
+            : await getStreamsByBroadcasterUsernameFromApiGateway(cognitoUserId, broadcasterId);
 
         if(result.status == 200)
         {
