@@ -50,10 +50,10 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
     try {
 
         const options: GetTwitchMessageOptions = {};
-        if (streamId) {options.stream_id = streamId;}
-        if (startTime) {options.start_time = startTime;}
-        if (endTime) {options.end_time = endTime;}
-        if (chatterUserLogin) {options.chatter_user_login = chatterUserLogin;}
+        if (streamId) {options.stream_id = streamId}
+        if (startTime) {options.start_time = encodeURI(startTime)}
+        if (endTime) {options.end_time = encodeURI(endTime)}
+        if (chatterUserLogin) {options.chatter_user_login = chatterUserLogin}
 
         const result = await getTwitchMessageFromApiGateway(cognitoIdToken, broadcasterUsername, options)
 
