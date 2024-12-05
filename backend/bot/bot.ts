@@ -177,19 +177,24 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             }, headers, '2')
         }
 
-        // does not include resubscriptions
-        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIBE, {
-            broadcaster_user_id: broadcasterId
-        }, headers)
+        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'Subscribe to channel subscription'))
+        {
+            // does not include resubscriptions
+            await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIBE, {
+                broadcaster_user_id: broadcasterId
+            }, headers)
 
-        // for resubscription events (according to Twitch documentation, didn't test it)
-        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIPTION_MESSAGE, {
-            broadcaster_user_id: broadcasterId
-        }, headers)
+            // for resubscription events (according to Twitch documentation, didn't test it)
+            await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIPTION_MESSAGE, {
+                broadcaster_user_id: broadcasterId
+            }, headers)
+
+        }
 
         await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_UPDATE, {
             broadcaster_user_id: broadcasterId
         }, headers)
+
 
 
     } catch (error: any) {
