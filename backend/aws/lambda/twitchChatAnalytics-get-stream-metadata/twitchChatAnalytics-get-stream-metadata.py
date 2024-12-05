@@ -93,7 +93,16 @@ def lambda_handler(event, context):
                 "body": json.dumps({"error": "BroadcasterUserLogin header is required"})
             }
 
-        helper_query_result = query_stream_by_stream_id(stream_id)[0]['broadcaster_username']
+        query_result = query_stream_by_stream_id(stream_id)
+
+        # Sprawdzenie, czy wynik zapytania jest pusty
+        if not query_result:
+            return {
+                "statusCode": 404,
+                "body": json.dumps({"message": f"stream with stream_id: {stream_id} not found"})
+            }
+
+        helper_query_result = query_result[0]['broadcaster_username']
 
         isStreamIdRelatedToBroadcaster = helper_query_result == broadcaster_username
         status = 200
