@@ -1,18 +1,25 @@
 import express from "express";
-import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 import {logger} from "../../utilities/logger";
-import {getStreamsByBroadcasterUsernameFromApiGateway} from "../../api_gateway_calls/stream/getStreamByBroadcaster";
-import {verifyToken} from "../../aws/cognitoAuth";
-import {getStreamFromApiGateway, GetStreamMessage} from "../../api_gateway_calls/stream/getStream";
-import axios from "axios";
 import {
     getTwitchMessageFromApiGateway,
-    GetTwitchMessageOptions, GetTwitchMessageResponse
+    GetTwitchMessageOptions,
+    TwitchMessageData,
 } from "../../api_gateway_calls/twitch-message/getTwitchMessage";
+import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUsers";
+import {fetchTwitchUserId} from "../../twitch_calls/twitchAuth";
 
 export const awsTwitchMessageRouter = express.Router();
 
 const LOG_PREFIX = 'AWS_API_TWITCH_MESSAGE';
+
+interface GetTwitchMessageResponse {
+    chatter_user_login: string;
+    is_banned: boolean;
+    is_timeouted: boolean;
+    is_vip: boolean;
+    is_mod: boolean;
+    messages: TwitchMessageData[];
+}
 
 awsTwitchMessageRouter.get('/', async (req, res) => {
 
@@ -52,9 +59,33 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
 
         if(result.status == 200)
         {
-            res.status(200).json(Array.isArray(result.data)
-                ? (result.data as GetTwitchMessageResponse[])
-                : result.data)
+            const twitchUserIdResponse = await fetchTwitchUserId(broadcasterUsername)
+            const broadcasterId = twitchUserIdResponse.userId
+            if(!broadcasterId) {
+                return res.status(400).json({ error: `Broadcaster with username: ${broadcasterUsername} does not exist` });
+            }
+
+            const suspendedLists = await getSuspendedUsers(broadcasterId)
+
+            const isBanned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin)
+            const isTimeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin)
+
+            // todo new twitch endpoints
+            // get is mod
+            const isMod = false
+            // get is vip
+            const isVip = false
+
+            const response: GetTwitchMessageResponse = {
+                chatter_user_login: chatterUserLogin,
+                is_banned: isBanned,
+                is_timeouted: isTimeouted,
+                is_vip: isVip,
+                is_mod: isMod,
+                messages: result.data as TwitchMessageData[]
+            }
+
+            res.status(200).json(response)
         }
         else
         {

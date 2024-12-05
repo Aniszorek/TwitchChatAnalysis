@@ -12,7 +12,7 @@ export interface GetTwitchMessageOptions {
     chatter_user_login?: string;
 }
 
-export interface GetTwitchMessageResponse {
+export interface TwitchMessageData {
     stream_id: string,
     broadcaster_user_login: string,
     chatter_user_login: string,
