@@ -1,6 +1,7 @@
 import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {LogColor, logger} from "../../utilities/logger";
+import axios from "axios";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
@@ -16,31 +17,41 @@ interface GetStreamMessage {
     "end_subs": string | null
 }
 
-export async function getStreamsByBroadcasterUsernameFromApiGateway(cognitoUserId: string, broadcasterUsername: string) {
+export async function getStreamsByBroadcasterUsernameFromApiGateway(cognitoIdToken: string, broadcasterUsername: string) {
     try {
-        const {cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
 
+        //required
+        if (!cognitoIdToken) {
+            throw new Error(`Missing cognitoIdToken`);
+        }
         if (!broadcasterUsername) {
-            throw new Error(`missing broadcasterUsername for cognitoUserId: ${cognitoUserId}`);
+            throw new Error(`Missing broadcasterUsername for cognitoIdToken: ${cognitoIdToken}`);
         }
 
-        const response = await apiGatewayClient.get('/stream',{
+        const response = await apiGatewayClient.get('/stream', {
             broadcasterUserLogin: broadcasterUsername,
             cognitoIdToken: cognitoIdToken,
-        } as CustomAxiosRequestConfig)
+        } as CustomAxiosRequestConfig);
+
 
         if (response.status === 200) {
-            logger.info(`GET /stream OK`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
-            return Array.isArray(response.data)
-                ? (response.data as GetStreamMessage[])
-                : [];
-
+            logger.info(`GET /stream OK`, LOG_PREFIX, { color: LogColor.YELLOW_BRIGHT });
+            return response
         } else {
             logger.error(`GET /stream FAILED. Status: ${response.status}`, LOG_PREFIX);
-            return [];
+            return response
         }
-    }catch (error: any) {
-        logger.error(`GET /stream FAILED: ${error.message}`, LOG_PREFIX);
-        return [];
+    } catch (error: any) {
+
+        if(axios.isAxiosError(error) && error.response) {
+            logger.error(
+                `GET /stream FAILED: ${error.message}`,
+                LOG_PREFIX
+            );
+            throw {status: error.response.status, message: error.response.data}
+        } else {
+            logger.error(`GET /stream FAILED: unexpected error:  ${error.message}`, LOG_PREFIX);
+            throw {status: 500, message: error.message};
+        }
     }
 }
