@@ -9,6 +9,7 @@ import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "./envConfig";
 import {twitchChannelsRouter} from "./routes/twitch/twitchChannelsRouter";
 import {logger, LogLevel} from "./utilities/logger";
 import {initializeApiGatewayClient} from "./api_gateway_calls/apiGatewayConfig";
+import {awsRouter} from "./routes/aws/awsRouter";
 
 // INFO > WARN > ERROR
 // DEBUG LOGS CONSIDERED SEPARATELY WITH IS_DEBUG_ENABLED
@@ -31,6 +32,8 @@ app.use(cors({
 app.use("/", authRouter);
 app.use("/twitch/users", twitchUsersRouter);
 app.use("/twitch/channels", twitchChannelsRouter);
+
+app.use('/aws', awsRouter)
 
 const server = http.createServer(app);
 
