@@ -95,7 +95,6 @@ def lambda_handler(event, context):
 
         query_result = query_stream_by_stream_id(stream_id)
 
-        # Sprawdzenie, czy wynik zapytania jest pusty
         if not query_result:
             return {
                 "statusCode": 404,
