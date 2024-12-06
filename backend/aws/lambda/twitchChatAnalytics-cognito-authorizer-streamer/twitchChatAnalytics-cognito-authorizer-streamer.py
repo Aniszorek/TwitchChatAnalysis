@@ -5,7 +5,6 @@ from jwt import PyJWKClient
 # AWS Region and Cognito configurations
 REGION = "eu-central-1"
 USER_POOL_ID = "eu-central-1_IzUkrEEsr"
-ROLE_NAME = "Streamer"
 JWK_URL = f"https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json"
 TABLE_NAME = 'UserRoles'
 
@@ -22,7 +21,9 @@ def lambda_handler(event, context):
         # Extract JWT token from the Authorization header
         token = event['headers']['Authorization'].split(" ")[1]
         broadcaster_user_login = event['headers']['BroadcasterUserLogin']
-        print("Token received:", token)
+        method_arn = event["methodArn"]
+        api_gateway_arn = get_api_gateway_arn(method_arn)
+        print(event)
 
         # Retrieve the signing key from JWK URL
         jwk_client = PyJWKClient(JWK_URL)
@@ -43,34 +44,56 @@ def lambda_handler(event, context):
         print("Decoded username:", username)
 
         # Check if the user is in the specified Cognito group
-        user_in_group = check_user_role_in_db(username, broadcaster_user_login, ROLE_NAME)
+        user_role = get_user_role_from_db(username, broadcaster_user_login)
 
-        # Generate an IAM policy based on group membership
-        if user_in_group:
-            return generate_policy("user", "Allow", event["methodArn"])
+        # Check role and generate policy accordingly
+        if user_role == "Streamer":
+            # Streamers have access to all endpoints
+            return generate_policy("user", "Allow", api_gateway_arn)
+        elif user_role == "Moderator":
+            # Moderators have access only to GET methods
+            api_gateway_arn = get_api_gateway_arn_for_moderator(method_arn)
+            return generate_policy("user", "Allow", api_gateway_arn)
         else:
-            return generate_policy("user", "Deny", event["methodArn"])
+            # Deny access for other roles
+            return generate_policy("user", "Deny", api_gateway_arn)
 
     except jwt.ExpiredSignatureError:
         print("Token has expired")
-        return generate_policy("user", "Deny", event["methodArn"])
+        return generate_policy("user", "Deny", api_gateway_arn)
     except jwt.InvalidTokenError:
         print("Invalid token provided")
-        return generate_policy("user", "Deny", event["methodArn"])
+        return generate_policy("user", "Deny", api_gateway_arn)
     except Exception as e:
         print(f"Error during authorization: {str(e)}")
-        return generate_policy("user", "Deny", event["methodArn"])
+        return generate_policy("user", "Deny", api_gateway_arn)
 
-
-def check_user_role_in_db(cognito_username, broadcaster_user_login, required_role):
+def get_api_gateway_arn(method_arn, resource_path="*"):
     """
-    Checks if the specified user with the given Cognito username and Chatter user login has the required role.
+    Extracts and constructs a generalized API Gateway ARN from the given methodArn.
+    """
+    arn_parts = method_arn.split("/")
+
+    # Reconstruct the ARN with a wildcard for resource paths
+    api_gateway_arn = f"{arn_parts[0]}/{arn_parts[1]}/{resource_path}"
+
+    return api_gateway_arn
+
+def get_api_gateway_arn_for_moderator(method_arn, resource_path="GET/*"):
+    """
+    Extracts and constructs a generalized API Gateway ARN for moderators with only GET access.
+    """
+    arn_parts = method_arn.split("/")
+    # Moderator has access only to GET methods
+    api_gateway_arn = f"{arn_parts[0]}/{arn_parts[1]}/{resource_path}"
+    return api_gateway_arn
+
+def get_user_role_from_db(cognito_username, broadcaster_user_login):
+    """
+    Retrieves the user's role from DynamoDB.
     """
     try:
-        # Get the table instance
         table = dynamodb.Table(TABLE_NAME)
-
-        # Fetch the user data based on the primary keys
         response = table.get_item(
             Key={
                 'CognitoUsername': cognito_username,
@@ -78,39 +101,35 @@ def check_user_role_in_db(cognito_username, broadcaster_user_login, required_rol
             }
         )
 
-        # Check if the record exists in the database
         if 'Item' not in response:
-            print(f"User {cognito_username} with Chatter login {broadcaster_user_login} not found in DB")
-            return False
+            print(f"User {cognito_username} not found in DB")
+            return None
 
-        # Check if the user's role matches the required role
-        user_role = response['Item'].get('UserRole')
-        if user_role == required_role:
-            return True
-        else:
-            print(f"User {cognito_username} with Chatter login {broadcaster_user_login} does not have role {required_role}")
-            return False
+        return response['Item'].get('UserRole')
 
     except Exception as e:
-        # Handle any errors that occur during the process
-        print(f"Error in check_user_role_in_db: {str(e)}")
-        return False
+        print(f"Error fetching user role from DB: {str(e)}")
+        return None
 
 
 def generate_policy(principal_id, effect, resource):
     """
     Helper function to generate an IAM policy document.
     """
-    return {
-        "principalId": principal_id,
-        "policyDocument": {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Action": "execute-api:Invoke",
-                    "Effect": effect,
-                    "Resource": resource
-                }
-            ]
+    print(f"Generating policy with resource: {resource} and effect: {effect}")
+    if effect and resource:
+        return {
+            "principalId": principal_id,
+            "policyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Action": "execute-api:Invoke",
+                        "Effect": effect,
+                        "Resource": resource
+                    }
+                ]
+            }
         }
-    }
+    else:
+        raise ValueError("Effect and resource are required for policy generation")
