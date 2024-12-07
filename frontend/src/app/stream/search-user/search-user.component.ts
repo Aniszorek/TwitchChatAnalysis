@@ -46,7 +46,7 @@ export class SearchUserComponent {
     if (this.username) {
       this.previous_username = this.username;
       this.loading = true;
-      this.twitchService.searchUser(this.username);
+      this.twitchService.searchUser(this.username.toLowerCase());
     }
   }
 }

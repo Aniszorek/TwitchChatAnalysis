@@ -97,8 +97,8 @@ def lambda_handler(event, context):
         start_time = query_params.get('start_time', None)
         end_time = query_params.get('end_time', None)
 
-        parsed_start_time = parse_datetime(urllib.parse.unquote(start_time)) if start_time else None
-        parsed_end_time = parse_datetime(urllib.parse.unquote(end_time)) if end_time else None
+        parsed_start_time = parse_datetime(start_time) if start_time else None
+        parsed_end_time = parse_datetime(end_time) if end_time else None
         print(f"Parsed start_time: {parsed_start_time}")
 
         messages = fetch_messages_from_postgresql_db(

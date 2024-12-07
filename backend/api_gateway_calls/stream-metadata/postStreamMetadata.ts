@@ -36,7 +36,7 @@ export async function postMetadataToApiGateway(cognitoUserId: string) {
 
         // required:
         const stream_id = client.twitchData.streamId
-        const timestamp = createTimestamp()
+        const timestamp = encodeURIComponent(createTimestamp())
         const broadcasterUserLogin = client.twitchData.twitchBroadcasterUsername
         const broadcasterId = client.twitchData.twitchBroadcasterUserId;
 

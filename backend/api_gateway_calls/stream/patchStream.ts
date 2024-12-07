@@ -23,7 +23,7 @@ export async function patchStreamToApiGateway(cognitoUserId: string) {
 
 
         // optional
-        const ended_at = createTimestamp()
+        const ended_at = encodeURIComponent(createTimestamp())
         const end_follows = client.twitchData.streamData.endFollows
         const end_subs = client.twitchData.streamData.endSubs
 
