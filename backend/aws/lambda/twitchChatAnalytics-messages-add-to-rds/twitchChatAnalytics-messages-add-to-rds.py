@@ -16,10 +16,10 @@ def insert_data_to_postgresql_db(data):
     stream_id = data.get("stream_id")
     chatter_user_login = data.get("chatter_user_login")
     message_text = data.get("message_text")
-    sentiment_score = data.get("sentiment_score")
-    magnitude_score = data.get("magnitude_score")
+    nlp_classification = data.get("nlp_classification")
     timestamp = data.get("timestamp")
 
+    # Init database connection
     try:
         print("Establishing database connection...")
         conn = psycopg2.connect(
@@ -30,7 +30,6 @@ def insert_data_to_postgresql_db(data):
             port =      rds_port
         )
         print("Database connection established successfully.")
-
     except Exception as e:
         print(f"Error while connecting to database: {e}")
         raise
@@ -38,38 +37,39 @@ def insert_data_to_postgresql_db(data):
     try:
         cur = conn.cursor()
 
+        # Prepare query
         query = sql.SQL("""
                 INSERT INTO messages (
                     stream_id,
                     broadcaster_user_login,
                     chatter_user_login,
                     message_text,
-                    sentiment_score,
-                    magnitude_score,
-                    timestamp
+                    timestamp,
+                    nlp_classification
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s
                 )
             """)
 
+        # Execute query
         print("Executing query to insert data into the database...")
         cur.execute(query, (
             stream_id,
             broadcaster_user_login,
             chatter_user_login,
             message_text,
-            sentiment_score,
-            magnitude_score,
-            timestamp
+            timestamp,
+            nlp_classification
         ))
 
         conn.commit()
         print("Data inserted successfully.")
     except Exception as e:
         print(f"Error while executing query or committing data: {e}")
-        conn.rollback()
+        conn.rollback()  # Rollback in case of error
         raise
     finally:
+        # Close db connection
         cur.close()
         conn.close()
         print("Database connection closed.")

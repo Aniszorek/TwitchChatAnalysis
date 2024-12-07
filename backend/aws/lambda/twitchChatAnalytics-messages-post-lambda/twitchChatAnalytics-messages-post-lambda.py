@@ -14,20 +14,18 @@ lambda_send_back_name = 'twitchChatAnalytics-send-back-lambda'
 api_gateway_url = "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test/twitchChatAnalytics-messages-add-to-rds"
 
 def analyze(text, credentials_file):
-    # initialize credentials
-    print("Credentials initialization")
-    credentials = service_account.Credentials.from_service_account_file(credentials_file)
 
-    # send credentials to Google
+    credentials = service_account.Credentials.from_service_account_file(credentials_file)
     client = language_v1.LanguageServiceClient(credentials=credentials)
 
     document = language_v1.Document(
         content=text, type_=language_v1.Document.Type.PLAIN_TEXT
     )
-    print(f"Starting analysis for: {document}")
+
     annotations = client.analyze_sentiment(request={"document": document})
-    print("End of analysis")
+
     return annotations
+
 
 def sign_request(url, data, region="eu-central-1", method="POST"):
     """Sign an API Gateway request using AWS SigV4"""
@@ -45,9 +43,27 @@ def sign_request(url, data, region="eu-central-1", method="POST"):
 
     return dict(request.headers)
 
+
+def classify_sentiment(score, magnitude):
+    rules = [
+        (score < -0.65, "Clearly negative"),
+        (score < -0.3 and magnitude > 2, "Clearly negative"),
+        (score < -0.3, "Negative"),
+        (score < 0.35 and magnitude > 2, "Negative"),
+        (score < 0.35, "Neutral"),
+    ]
+
+    for condition, label in rules:
+        if condition:
+            return label
+    return "Positive"
+
+
 def lambda_handler(event, context):
     results = []
+
     for i, record in enumerate(event['Records']):
+
         try:
             message = record['body']
             message_data = json.loads(message)
@@ -58,27 +74,31 @@ def lambda_handler(event, context):
             chatter_user_login = message_data['chatter_user_login']
             message_text = message_data['message_text']
             timestamp = message_data['timestamp']
+
         except Exception as e:
             print(f"Failed reading json: {str(e)}")
             continue
+
 
         try:
             print(f"Sentiment Analysis: {message_text}", i)
             annotations = analyze(message_text, CREDENTIALS_FILE)
             sentiment_score = annotations.document_sentiment.score
             magnitude_score = annotations.document_sentiment.magnitude
+            nlp_classification = classify_sentiment(sentiment_score, magnitude_score)
+
         except Exception as e:
             print(f"Error with NLP API {str(e)}")
             continue
+
 
         result = {
             "stream_id": stream_id,
             "broadcaster_user_login": broadcaster_user_login,
             "chatter_user_login": chatter_user_login,
             "message_text": message_text,
-            "sentiment_score": sentiment_score,
-            "magnitude_score": magnitude_score,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "nlp_classification": nlp_classification
         }
 
         try:
@@ -95,6 +115,7 @@ def lambda_handler(event, context):
                     'body': f"Failed to insert data: {response.text}"
                 })
                 continue
+
         except Exception as e:
             print(f"Failed inserting data to RDS - {str(e)}")
             continue
@@ -106,8 +127,11 @@ def lambda_handler(event, context):
                 InvocationType="Event",
                 Payload=json.dumps(result)
             )
+
         except Exception as e:
             print(f"Failed starting: {lambda_send_back_name} - {str(e)}")
+
+        results.append(result)
 
     return {
         "statusCode": 200,
