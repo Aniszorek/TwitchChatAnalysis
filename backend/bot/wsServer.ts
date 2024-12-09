@@ -22,6 +22,7 @@ import {createTimestamp} from "../utilities/utilities";
 import {LogBackgroundColor, LogColor, logger, LogStyle} from "../utilities/logger";
 import {postStreamToApiGateway} from "../api_gateway_calls/stream/postStream";
 import {patchStreamToApiGateway} from "../api_gateway_calls/stream/patchStream";
+import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 const LOG_PREFIX = 'BACKEND_WS'
 
@@ -247,7 +248,7 @@ export const sendMessageToFrontendClient = (userId: string, message: any) => {
     const userData = frontendClients.get(userId);
     if (userData && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.send(JSON.stringify(message));
-        logger.debug(`Data send to FE client: ${JSON.stringify(message, null, 2)}`, LOG_PREFIX, {color: LogColor.CYAN});
+        logger.debug(`Data send to FE client: ${IS_DEBUG_ENABLED ? JSON.stringify(message, null, 2) : ""}`, LOG_PREFIX, {color: LogColor.CYAN});
     } else {
         logger.error(`WebSocket for user ID ${userId} is not available`, LOG_PREFIX);
     }

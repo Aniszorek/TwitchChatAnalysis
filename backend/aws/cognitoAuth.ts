@@ -3,6 +3,7 @@ import querystring from "querystring";
 import jwt, {JwtHeader, JwtPayload} from "jsonwebtoken";
 import jwksClient, {SigningKey} from "jwks-rsa";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
+import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 
 const LOG_PREFIX = `COGNITO_AUTH`;
@@ -89,7 +90,7 @@ async function refreshIdToken(refreshToken: string): Promise<CognitoTokenRespons
             }
         });
 
-        logger.info(`Token refreshed: ${JSON.stringify(response.data, null, 2)}`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
+        logger.info(`Token refreshed: ${IS_DEBUG_ENABLED ? JSON.stringify(response.data, null, 2) : ""}`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
 
         return await response.data;
     } catch (error: any) {

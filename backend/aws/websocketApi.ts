@@ -2,6 +2,7 @@ import WebSocket from "ws";
 import {frontendClients, incrementSentimentMessageCount, SentimentLabel} from "../bot/frontendClients";
 import {sendMessageToFrontendClient} from "../bot/wsServer";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
+import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 const LOG_PREFIX = `API_GATEWAY_WS`
 
@@ -54,7 +55,7 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
         awsWebSocket.on("message", (message: WebSocket.Data) => {
             try {
                 const data: WebSocketMessage = JSON.parse(message.toString());
-                logger.info(`Received message: ${JSON.stringify(data, null, 2)}`,LOG_PREFIX, {color: LogColor.YELLOW, style: LogStyle.BOLD});
+                logger.info(`Received message: ${IS_DEBUG_ENABLED ? JSON.stringify(data, null, 2) : ""}`,LOG_PREFIX, {color: LogColor.YELLOW, style: LogStyle.BOLD});
 
                 if (data.type === NLP_MESSAGE_WEBSOCKET_TYPE && data.data) {
                     //TODO handle processed messages on FE

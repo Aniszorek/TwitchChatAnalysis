@@ -21,6 +21,7 @@ import {
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
+import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 const LOG_PREFIX = 'TWITCH_WS'
 
@@ -220,7 +221,7 @@ function verifyRegisterResponse(response: AxiosResponse<VerifyResponseData>, reg
         logger.info(`Subscribed to ${registerType} [${response.data.data[0].id}]`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
     } else {
         logger.error(`Failed to subscribe to ${registerType}. Status code ${response.status}`, LOG_PREFIX);
-        logger.error(JSON.stringify(response.data, null, 2), LOG_PREFIX);
+        logger.error(IS_DEBUG_ENABLED ?JSON.stringify(response.data, null, 2) : "", LOG_PREFIX);
     }
 }
 

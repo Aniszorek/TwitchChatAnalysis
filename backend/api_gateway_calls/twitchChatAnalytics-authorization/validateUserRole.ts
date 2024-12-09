@@ -3,6 +3,7 @@ import {AxiosResponse} from "axios";
 import {isCognitoRoleValid} from "../../cognitoRoles";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
+import {IS_DEBUG_ENABLED} from "../../entryPoint";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
@@ -42,23 +43,23 @@ export async function validateUserRole(twitch_oauth_token: string, broadcaster_u
         const {statusCode, body} = response.data;
 
         if (!isCognitoRoleValid(body.role)) {
-            logger.error(`Unknown role: ${body.role} - Status: ${JSON.stringify(body, null ,2)}`, LOG_PREFIX);
+            logger.error(`Unknown role: ${body.role} - Status: ${IS_DEBUG_ENABLED ? JSON.stringify(body, null ,2) : ""}`, LOG_PREFIX);
             return undefined;
         }
 
         if (statusCode === 200) {
             logger.info(
-                `Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${JSON.stringify(body, null, 2)}`,
+                `Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${IS_DEBUG_ENABLED ? JSON.stringify(body, null, 2) : ""}`,
                 LOG_PREFIX
         );
             return {role: body.role, cognitoUsername: username};
         } else {
-            logger.error(`Failed authorization. Status: ${JSON.stringify(body, null, 2)}`, LOG_PREFIX);
+            logger.error(`Failed authorization. Status: ${IS_DEBUG_ENABLED ? JSON.stringify(body, null, 2) : ""}`, LOG_PREFIX);
             return undefined;
         }
 
     } catch (error: any) {
-        logger.error(`Error sending message to API Gateway: ${JSON.stringify(error, null, 2)}`, LOG_PREFIX);
+        logger.error(`Error sending message to API Gateway: ${IS_DEBUG_ENABLED ? JSON.stringify(error, null, 2): ""}`, LOG_PREFIX);
         return undefined;
     }
 }

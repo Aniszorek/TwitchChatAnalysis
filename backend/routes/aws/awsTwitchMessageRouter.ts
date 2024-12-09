@@ -50,7 +50,7 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
 /**
  * Extracts headers from the request and performs validation.
  */
-// todo remove and use more generic function from utilities
+// todo TCA-102 remove and use more generic function from utilities
 function extractHeaders(req: express.Request) {
     const broadcasterUsername = req.headers['broadcasteruserlogin'] as string | undefined;
     let cognitoIdToken = req.headers['authorization'] as string | undefined;
@@ -73,7 +73,7 @@ function extractHeaders(req: express.Request) {
 /**
  * Extracts query parameters from the request.
  */
-// todo remove and use more generic function from utilities
+// todo TCA-102 remove and use more generic function from utilities
 function extractQueryParams(req: express.Request) {
     const streamId = req.query.stream_id as string | undefined;
     const startTime = req.query.start_time as string | undefined;
@@ -163,7 +163,7 @@ function handleError(error: any, res: express.Response) {
 /**
  * Custom error class for handling errors with HTTP status codes.
  */
-// todo move to separate file
+// todo TCA-102 move to separate file
 export class ErrorWithStatus extends Error {
     status: number;
 
