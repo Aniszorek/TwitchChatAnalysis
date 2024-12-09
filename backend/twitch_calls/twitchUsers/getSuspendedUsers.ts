@@ -43,6 +43,8 @@ export async function getSuspendedUsers(queryParams: any): Promise<SuspendedUser
 /**
  * Private function to fetch all banned users with pagination.
  */
+// Requires a user access token that includes the moderation:read or moderator:manage:banned_users scope
+// broadcaster_id The ID of the broadcaster whose list of banned users you want to get. This ID must match the user ID in the access token.
 async function fetchAllBannedUsers(queryParams: any): Promise<SuspendedUser[]> {
     let allData: SuspendedUser[] = [];
     let cursor: string | undefined;

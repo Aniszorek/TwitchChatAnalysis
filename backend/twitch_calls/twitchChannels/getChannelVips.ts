@@ -8,7 +8,8 @@ export type VipUser = {
     user_login: string;
     user_name: string;
 }
-
+// Requires a user access token that includes the channel:read:vips scope.
+// broadcaster_id The ID of the broadcaster whose list of VIPs you want to get. This ID must match the user ID in the access token.
 export const getChannelVips = async (queryParams: any): Promise<VipUser[]> => {
     try {
 

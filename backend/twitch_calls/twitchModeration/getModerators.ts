@@ -9,6 +9,8 @@ export type ModUser = {
     user_name: string;
 }
 
+// Requires a user access token that includes the moderation:read scope.
+// broadcaster_id The ID of the broadcaster whose list of moderators you want to get. This ID must match the user ID in the access token.
 export const getChannelModerators = async (queryParams: any): Promise<ModUser[]> => {
     try {
 
