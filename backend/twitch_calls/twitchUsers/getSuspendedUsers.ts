@@ -24,10 +24,10 @@ export type SuspendedUsersResponse = {
 /**
  * Public function to get banned and timed-out users for a broadcaster.
  */
-export async function getSuspendedUsers(broadcasterId: string): Promise<SuspendedUsersResponse> {
+export async function getSuspendedUsers(queryParams: any): Promise<SuspendedUsersResponse> {
     try {
         // Fetch all banned users using pagination
-        const allUsers = await fetchAllBannedUsers(broadcasterId);
+        const allUsers = await fetchAllBannedUsers(queryParams);
 
         // Filter users into separate categories
         const bannedUsers = filterBannedUsers(allUsers);
@@ -43,14 +43,14 @@ export async function getSuspendedUsers(broadcasterId: string): Promise<Suspende
 /**
  * Private function to fetch all banned users with pagination.
  */
-async function fetchAllBannedUsers(broadcasterId: string): Promise<SuspendedUser[]> {
+async function fetchAllBannedUsers(queryParams: any): Promise<SuspendedUser[]> {
     let allData: SuspendedUser[] = [];
     let cursor: string | undefined;
 
     do {
         const response = await twitchApiClient.get('/moderation/banned', {
             params: {
-                broadcaster_id: broadcasterId,
+                ...queryParams,
                 after: cursor,
             },
         });
