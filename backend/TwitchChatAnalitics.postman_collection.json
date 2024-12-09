@@ -1,0 +1,477 @@
+{
+	"info": {
+		"_postman_id": "470062d7-c0ea-452b-a632-9f08f1b54322",
+		"name": "TwitchChatAnalitics",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28303728"
+	},
+	"item": [
+		{
+			"name": "stream",
+			"item": [
+				{
+					"name": "getStream",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiUlhqdWcxNHdvcWRwYUdWM0ZlemFLQSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImQ1MzEzODZkLWI3OGUtNGI1Ny1iMGM2LTdlYTBkYTMyNWNjNSIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6ImE4MGFlZDkyLWRlZmQtNDY1ZS1iNjFkLTkzZmJhZWI0ZmI4MyIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNDM4NDI0LCJleHAiOjE3MzM0NDIwMjQsImlhdCI6MTczMzQzODQyNCwianRpIjoiY2JiNTg3YmMtZTE4OS00NGRlLTk0NmYtMzFmNTAxN2ZjYWFiIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.tz3SsvQNJzNKirIBsWtQDfkaq1ZAv2_mL81lqyj1aKzye0zK0vAhgfgmdtxyBBtYEaBk8Sc-azp1szlc4X0HbRhG8rZh4JRIPgIqqg1uEBHcZr9qhPOM4Iw8EOY37oD8m-QLYofhnN3YZHLxauWJhdMRXbVOxfvH9vEfWDOXag1VqWf5II5suXv1I39nLik6obFxRDddPsW9mYXV-UR9HBYo6FvYIa2b1yxVtzRx_exBCS6xipfcs-60DW2SDCOpG34VqxA1LS0eb-YatqHwoqEKGb8iiUfn-7ypa5FVei5GDi3fHi2mALEdGu5IdDkfD1KQxyRuc5dLcEpWPnclHQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "BroadcasterUserLogin",
+								"value": "bartes2002",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/aws/stream",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"aws",
+								"stream"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getStreamById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiUlhqdWcxNHdvcWRwYUdWM0ZlemFLQSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImQ1MzEzODZkLWI3OGUtNGI1Ny1iMGM2LTdlYTBkYTMyNWNjNSIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6ImE4MGFlZDkyLWRlZmQtNDY1ZS1iNjFkLTkzZmJhZWI0ZmI4MyIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNDM4NDI0LCJleHAiOjE3MzM0NDIwMjQsImlhdCI6MTczMzQzODQyNCwianRpIjoiY2JiNTg3YmMtZTE4OS00NGRlLTk0NmYtMzFmNTAxN2ZjYWFiIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.tz3SsvQNJzNKirIBsWtQDfkaq1ZAv2_mL81lqyj1aKzye0zK0vAhgfgmdtxyBBtYEaBk8Sc-azp1szlc4X0HbRhG8rZh4JRIPgIqqg1uEBHcZr9qhPOM4Iw8EOY37oD8m-QLYofhnN3YZHLxauWJhdMRXbVOxfvH9vEfWDOXag1VqWf5II5suXv1I39nLik6obFxRDddPsW9mYXV-UR9HBYo6FvYIa2b1yxVtzRx_exBCS6xipfcs-60DW2SDCOpG34VqxA1LS0eb-YatqHwoqEKGb8iiUfn-7ypa5FVei5GDi3fHi2mALEdGu5IdDkfD1KQxyRuc5dLcEpWPnclHQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "BroadcasterUserLogin",
+								"value": "bartes2002",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/aws/stream?stream_id=45116566299",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"aws",
+								"stream"
+							],
+							"query": [
+								{
+									"key": "stream_id",
+									"value": "45116566299"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postStream (streamer only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiUlhqdWcxNHdvcWRwYUdWM0ZlemFLQSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImQ1MzEzODZkLWI3OGUtNGI1Ny1iMGM2LTdlYTBkYTMyNWNjNSIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6ImE4MGFlZDkyLWRlZmQtNDY1ZS1iNjFkLTkzZmJhZWI0ZmI4MyIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNDM4NDI0LCJleHAiOjE3MzM0NDIwMjQsImlhdCI6MTczMzQzODQyNCwianRpIjoiY2JiNTg3YmMtZTE4OS00NGRlLTk0NmYtMzFmNTAxN2ZjYWFiIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.tz3SsvQNJzNKirIBsWtQDfkaq1ZAv2_mL81lqyj1aKzye0zK0vAhgfgmdtxyBBtYEaBk8Sc-azp1szlc4X0HbRhG8rZh4JRIPgIqqg1uEBHcZr9qhPOM4Iw8EOY37oD8m-QLYofhnN3YZHLxauWJhdMRXbVOxfvH9vEfWDOXag1VqWf5II5suXv1I39nLik6obFxRDddPsW9mYXV-UR9HBYo6FvYIa2b1yxVtzRx_exBCS6xipfcs-60DW2SDCOpG34VqxA1LS0eb-YatqHwoqEKGb8iiUfn-7ypa5FVei5GDi3fHi2mALEdGu5IdDkfD1KQxyRuc5dLcEpWPnclHQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "BroadcasterUserLogin",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"stream_id\": \"dawdb2yqqwe12dwaklmdaw\",\r\n    \"broadcaster_username\": \"bartes2002\",\r\n    \"stream_title\": \"tytul\",\r\n    \"started_at\": \"2024-12-04T20:06:46+00:00\",\r\n    \"start_follows\": 1,\r\n    \"start_subs\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test/stream",
+							"protocol": "https",
+							"host": [
+								"t7pqmsv4x4",
+								"execute-api",
+								"eu-central-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"test",
+								"stream"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "patchStream (streamer only)",
+					"request": {
+						"method": "PATCH",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "stream-metadata",
+			"item": [
+				{
+					"name": "getStreamMetadataById",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "postStreamMetadata (streamer only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiUlhqdWcxNHdvcWRwYUdWM0ZlemFLQSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImQ1MzEzODZkLWI3OGUtNGI1Ny1iMGM2LTdlYTBkYTMyNWNjNSIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6ImE4MGFlZDkyLWRlZmQtNDY1ZS1iNjFkLTkzZmJhZWI0ZmI4MyIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNDM4NDI0LCJleHAiOjE3MzM0NDIwMjQsImlhdCI6MTczMzQzODQyNCwianRpIjoiY2JiNTg3YmMtZTE4OS00NGRlLTk0NmYtMzFmNTAxN2ZjYWFiIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.tz3SsvQNJzNKirIBsWtQDfkaq1ZAv2_mL81lqyj1aKzye0zK0vAhgfgmdtxyBBtYEaBk8Sc-azp1szlc4X0HbRhG8rZh4JRIPgIqqg1uEBHcZr9qhPOM4Iw8EOY37oD8m-QLYofhnN3YZHLxauWJhdMRXbVOxfvH9vEfWDOXag1VqWf5II5suXv1I39nLik6obFxRDddPsW9mYXV-UR9HBYo6FvYIa2b1yxVtzRx_exBCS6xipfcs-60DW2SDCOpG34VqxA1LS0eb-YatqHwoqEKGb8iiUfn-7ypa5FVei5GDi3fHi2mALEdGu5IdDkfD1KQxyRuc5dLcEpWPnclHQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "BroadcasterUserLogin",
+								"value": "bartes2002",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"stream_id\": \"123321\",\r\n    \"timestamp\": \"2024-11-27T17:22:06.685876+00:00\",\r\n    \"viewer_count\": 1,\r\n    \"category\": \"JustChatting\",\r\n    \"follower_count\": 1,\r\n    \"subscriber_count\": 2,\r\n    \"message_count\": 3,\r\n    \"positive_message_count\": 4,\r\n    \"negative_message_count\": 5,\r\n    \"neutral_message_count\": 6\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test/stream-metadata",
+							"protocol": "https",
+							"host": [
+								"t7pqmsv4x4",
+								"execute-api",
+								"eu-central-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"test",
+								"stream-metadata"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "twitch-message",
+			"item": [
+				{
+					"name": "getTwitchMessage",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiVlpUMVYzaG5PVXJpdUxFS1I0Rzg4ZyIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6Ijg0N2QwOWU4LTc3ZTktNGM0Mi04ZDRjLWE5YTVjMWM1OGFhNCIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6IjhiMTlhNTA2LThhNjEtNDdlMS04MzAwLTA2MmNhN2JlYWVkZSIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNDQwNjkzLCJleHAiOjE3MzM0NDQyOTMsImlhdCI6MTczMzQ0MDY5MywianRpIjoiMzQzYzc0ZjUtYjM0NS00ZDRiLWIwMzQtZGM3ZmIwN2Y1MzEyIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.i45XiUMl_w-5yXR-n5a1OmE1gCtPNMi8Ir7LpdZ8vna04WWKa0zos-brxKpKwY2ntKOLb1e-kcmsRQsOBT0EgoLWdoOWKLOgrvTC9rIVcF0CK7Zjq76LDOXYOZ3cTi6df_DtMqbr14jFl3M7_GtVkqhx4eS6aYLUs6EcF3iHkph_HO_T6eIMp5rCz983vwOeYEED2MW_DSNf78KFh4YJBI7CSY2Pp6OGGc6akL6aa0UEKJmiFnOWhn5Nfiw2wefK21xQlEKTT-T2Yj6ppOJSEUPjvII90XgV62_fBQmC9QS4XuJRr1argtXUzaetw4AclOy0LWPvphu5SvqJUKk_8A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "BroadcasterUserLogin",
+								"value": "aniszorek",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:3000/aws/twitch-message?chatter_user_login=bartes2002",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"aws",
+								"twitch-message"
+							],
+							"query": [
+								{
+									"key": "chatter_user_login",
+									"value": "bartes2002"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "postTwitchMessage (streamer only)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test/twitch-message",
+							"protocol": "https",
+							"host": [
+								"t7pqmsv4x4",
+								"execute-api",
+								"eu-central-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"test",
+								"twitch-message"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TwitchAPI",
+			"item": [
+				{
+					"name": "moderation",
+					"item": [
+						{
+							"name": "ban user",
+							"request": {
+								"method": "POST",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "unban user",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/bans?broadcaster_id=105353161&moderator_id=105353161&user_id=85129011",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"bans"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "moderator_id",
+											"value": "105353161"
+										},
+										{
+											"key": "user_id",
+											"value": "85129011"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "mod user",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/bans?broadcaster_id=105353161&user_id=85129011",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"bans"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "user_id",
+											"value": "85129011"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "unmod user",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/moderators?broadcaster_id=105353161&user_id=85129011",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"moderators"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "user_id",
+											"value": "85129011"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get moderators",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "delete message",
+							"request": {
+								"method": "DELETE",
+								"header": []
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "users",
+					"item": [
+						{
+							"name": "get suspended users",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "channel",
+					"item": [
+						{
+							"name": "add vip",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/channels/vips?broadcaster_id=105353161&user_id=85129011",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"channels",
+										"vips"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "user_id",
+											"value": "85129011"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "remove vip",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "get VIPs",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "get followers count",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
