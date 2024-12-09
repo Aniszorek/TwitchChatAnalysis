@@ -133,3 +133,10 @@ export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocke
     logger.info(`channel updated: title: ${data.payload.event?.title}, category ${data.payload.event?.category_name}`, LOG_PREFIX, {color: LogColor.MAGENTA})
 }
 
+export const channelChatDeleteMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const message_id = data.payload.event?.message_id
+    logger.info(`Received message delete event, message_id: ${message_id}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+    sendMessageToFrontendClient(cognitoUserId, message_id)
+
+}
+

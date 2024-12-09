@@ -12,6 +12,7 @@ import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {frontendClients} from "./frontendClients";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
+    channelChatDeleteMessageHandler,
     channelChatMessageHandler,
     channelFollowHandler,
     channelSubscribeHandler,
@@ -139,6 +140,11 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
                     channelUpdateHandler(cognitoUserId, data)
                     break;
                 }
+                case EventSubSubscriptionType.MESSAGE_DELETE:
+                {
+                    channelChatDeleteMessageHandler(cognitoUserId, data)
+                    break;
+                }
             }
             break;
         }
@@ -168,6 +174,10 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             broadcaster_user_id: broadcasterId
         }, headers)
 
+        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.MESSAGE_DELETE,{
+            broadcaster_user_id: broadcasterId,
+            user_id: viewerId
+        }, headers)
 
         // moderator role required
         if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow'))
@@ -177,6 +187,7 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             }, headers, '2')
         }
 
+        // streamer role required
         if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'Subscribe to channel subscription'))
         {
             // does not include resubscriptions

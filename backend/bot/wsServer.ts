@@ -247,6 +247,7 @@ export const sendMessageToFrontendClient = (userId: string, message: any) => {
     const userData = frontendClients.get(userId);
     if (userData && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.send(JSON.stringify(message));
+        logger.debug(`Data send to FE client: ${JSON.stringify(message, null, 2)}`, LOG_PREFIX, {color: LogColor.CYAN});
     } else {
         logger.error(`WebSocket for user ID ${userId} is not available`, LOG_PREFIX);
     }
