@@ -9,7 +9,7 @@ export type VipUser = {
     user_name: string;
 }
 
-export const getChannelVips = async (broadcasterId: string): Promise<VipUser[]> => {
+export const getChannelVips = async (queryParams: any): Promise<VipUser[]> => {
     try {
 
         let allData: VipUser[] = [];
@@ -18,7 +18,7 @@ export const getChannelVips = async (broadcasterId: string): Promise<VipUser[]> 
         do {
             const response = await twitchApiClient.get('/channels/vips', {
                 params: {
-                    broadcaster_id: broadcasterId,
+                    ...queryParams,
                     after: cursor,
                 },
             });

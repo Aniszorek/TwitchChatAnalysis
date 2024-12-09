@@ -7,11 +7,11 @@ export interface FollowersCountResponse {
     total: number;
 }
 
-export const getChannelFollowersCount = async (broadcasterId: string): Promise<number> => {
+export const getChannelFollowersCount = async (queryParams: any): Promise<number> => {
     try {
         const response = await twitchApiClient.get<FollowersCountResponse>('/channels/followers', {
             params: {
-                broadcaster_id: broadcasterId,
+                ...queryParams
             },
         });
 

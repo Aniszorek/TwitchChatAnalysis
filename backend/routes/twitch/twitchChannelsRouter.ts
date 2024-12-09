@@ -11,14 +11,10 @@ export const twitchChannelsRouter = express.Router();
 const LOG_PREFIX = 'TWITCH_API_CHANNELS';
 
 twitchChannelsRouter.get('/followers', async (req, res) => {
-    const broadcasterId = req.query.broadcaster_id as string;
-
-    if (!broadcasterId) {
-        return res.status(400).json({error: 'Missing required parameter: broadcaster_id'});
-    }
-
     try {
-        const result = await getChannelFollowersCount(broadcasterId);
+        const queryParams = extractQueryParams(req, ["broadcaster_id"]);
+        const result = await getChannelFollowersCount(queryParams);
+        logger.info(`Successfully get followers count`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
         res.json(result);
     } catch (error: any) {
         logger.error(`Error in /followers route: ${error.message}`, LOG_PREFIX);
@@ -27,18 +23,15 @@ twitchChannelsRouter.get('/followers', async (req, res) => {
 });
 
 twitchChannelsRouter.get('/vips', async (req, res) => {
-    const broadcasterId = req.query.broadcaster_id as string;
-
-    if (!broadcasterId) {
-        return res.status(400).json({error: 'Missing required parameter: broadcaster_id'});
-    }
-
     try {
-        const result = await getChannelVips(broadcasterId);
+        const queryParams = extractQueryParams(req, ["broadcaster_id"]);
+        const result = await getChannelVips(queryParams);
+        logger.info(`Successfully get vips for broadcaster_id: ${queryParams.broadcaster_id}`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+
         res.json(result);
     } catch (error: any) {
-        logger.error(`Error in /followers route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: 'Failed to fetch channel followers users'});
+        logger.error(`Error in /vips route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: 'Failed to fetch channel vip users'});
     }
 });
 
