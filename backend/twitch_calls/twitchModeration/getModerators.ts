@@ -9,7 +9,7 @@ export type ModUser = {
     user_name: string;
 }
 
-export const getChannelModerators = async (broadcasterId: string): Promise<ModUser[]> => {
+export const getChannelModerators = async (queryParams: any): Promise<ModUser[]> => {
     try {
 
         let allData: ModUser[] = [];
@@ -18,7 +18,7 @@ export const getChannelModerators = async (broadcasterId: string): Promise<ModUs
         do {
             const response = await twitchApiClient.get('/moderation/moderators', {
                 params: {
-                    broadcaster_id: broadcasterId,
+                    ...queryParams,
                     after: cursor,
                 },
             });
