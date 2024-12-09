@@ -127,8 +127,8 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
 
                         if(streamId && streamStartedAt && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
                         {
-                            const subCount = await getChannelSubscriptionsCount(twitchBroadcasterUserId)
-                            const followerCount = await getChannelFollowersCount(twitchBroadcasterUserId)
+                            const subCount = await getChannelSubscriptionsCount({broadcaster_id: twitchBroadcasterUserId})
+                            const followerCount = await getChannelFollowersCount({broadcaster_id: twitchBroadcasterUserId})
                             setStreamDataStartValues(userId, streamStartedAt, followerCount, subCount)
                         }
 
@@ -173,8 +173,8 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                 const streamId = frontendClients.get(userId)?.twitchData.streamId
                 if(broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
                 {
-                    const subCount = await getChannelSubscriptionsCount(broadcasterId)
-                    const followerCount = await getChannelFollowersCount(broadcasterId)
+                    const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
+                    const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
                     setStreamDataEndValues(userId,  createTimestamp(), followerCount, subCount)
                 }
 

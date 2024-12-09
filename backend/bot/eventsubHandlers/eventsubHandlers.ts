@@ -76,8 +76,8 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
 
     if(streamId && startedAt && verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
     {
-        const subCount = await getChannelSubscriptionsCount(broadcasterId)
-        const followerCount = await getChannelFollowersCount(broadcasterId)
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
         setStreamDataStartValues(cognitoUserId, startedAt, followerCount, subCount)
     }
 
@@ -92,8 +92,8 @@ export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWe
 
     if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
     {
-        const subCount = await getChannelSubscriptionsCount(broadcasterId)
-        const followerCount = await getChannelFollowersCount(broadcasterId)
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
         setStreamDataEndValues(cognitoUserId,  createTimestamp(), followerCount, subCount)
     }
 

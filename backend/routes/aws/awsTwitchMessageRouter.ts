@@ -136,14 +136,14 @@ async function buildResponse(
     const response: GetTwitchMessageResponse = { chatter_user_login: chatterUserLogin, messages };
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'get chatter data only for streamer access')) {
-        const suspendedLists = await getSuspendedUsers(broadcasterId);
+        const suspendedLists = await getSuspendedUsers({broadcaster_id: broadcasterId});
         response.is_banned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin);
         response.is_timeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin);
 
-        const vipList = await getChannelVips(broadcasterId);
+        const vipList = await getChannelVips({broadcaster_id: broadcasterId});
         response.is_vip = vipList?.some(user => user.user_login === chatterUserLogin);
 
-        const modList = await getChannelModerators(broadcasterId);
+        const modList = await getChannelModerators({broadcaster_id: broadcasterId});
         response.is_mod = modList?.some(user => user.user_login === chatterUserLogin);
     }
 

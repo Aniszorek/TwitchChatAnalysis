@@ -8,11 +8,11 @@ export interface SubscriptionsCountResponse {
 }
 // Requires a user access token that includes the channel:read:subscriptions scope.
 // broadcaster_id 	The broadcaster’s ID. This ID must match the user ID in the access token.
-export const getChannelSubscriptionsCount = async (broadcasterId: string): Promise<number> => {
+export const getChannelSubscriptionsCount = async (queryParams: any): Promise<number> => {
     try {
         const response = await twitchApiClient.get<SubscriptionsCountResponse>('/subscriptions', {
             params: {
-                broadcaster_id: broadcasterId,
+                ...queryParams
             },
         });
 
