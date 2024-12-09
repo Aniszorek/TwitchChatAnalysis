@@ -6,6 +6,7 @@ import {extractQueryParams} from "../../utilities/utilities";
 import {deleteBanUser} from "../../twitch_calls/twitchModeration/unbanUser";
 import {postAddModerator} from "../../twitch_calls/twitchModeration/modUser";
 import {deleteModerator} from "../../twitch_calls/twitchModeration/unmodUser";
+import {deleteMessage} from "../../twitch_calls/twitchModeration/deleteMessage";
 
 export const twitchModerationRouter = express.Router();
 
@@ -73,6 +74,19 @@ twitchModerationRouter.delete('/moderators', async (req, res) => {
     catch(error: any) {
         logger.error(`Error in delete /moderator route: ${error.message}`, LOG_PREFIX);
         res.status(500).json({error: `Failed to delete moderator`});
+    }
+})
+
+twitchModerationRouter.delete('/chat', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id", "moderator_id", "message_id"]);
+        const result= await deleteMessage(queryParams)
+        logger.info(`Successfully deleted message with id: ${queryParams.message_id}`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in delete /chat route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to delete chat message`});
     }
 })
 

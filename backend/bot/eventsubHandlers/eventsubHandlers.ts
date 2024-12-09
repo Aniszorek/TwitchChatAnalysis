@@ -37,7 +37,7 @@ export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWeb
         "messageId": data.payload.event!.message_id!,
         "messageTimestamp": data.metadata.message_timestamp!
     }
-    logger.info(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+    logger.info(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> <${msg.messageId}> ${msg.messageText}`, LOG_PREFIX, {color: LogColor.MAGENTA});
 
     incrementMessageCount(cognitoUserId)
 
