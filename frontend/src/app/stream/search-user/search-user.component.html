@@ -1,6 +1,6 @@
 <div class="search-container">
   <input [(ngModel)]="username" placeholder="Enter username" class="search-input"/>
-  <button [disabled]="loading || username.trim() == previous_username.trim() || username.trim().length == 0" (click)="searchUser()" class="search-button">Connect</button>
+  <button [disabled]="loading || username.trim() == previous_username.trim() || username.trim().length == 0 || !this.twitchService.loadingState$" (click)="searchUser()" class="search-button">Connect</button>
 </div>
 
 <div *ngIf="loading" class="loading-message">

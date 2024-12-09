@@ -2,11 +2,13 @@ import express, {NextFunction, Request, Response} from 'express';
 
 import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth';
 import {verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
-import {pendingWebSocketInitializations} from "../../bot/wsServer";
+import {handleWebSocketClose, pendingWebSocketInitializations} from "../../bot/wsServer";
 import {validateTwitchAuth} from "../../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../envConfig";
 import {validateUserRole} from "../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
-import {LogColor, logger} from "../../utilities/logger";
+import {LogBackgroundColor, LogColor, logger, LogStyle} from "../../utilities/logger";
+import {frontendClients} from "../../bot/frontendClients";
+import {waitForWebSocketClose} from "../../utilities/utilities";
 
 
 const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION`;
@@ -83,6 +85,13 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
         // we will use it to determine to which websocket connection messages should be forwarded
         const cognitoUserId = (await verifyToken(cognitoIdToken)).sub;
         await validateTwitchAuth();
+
+        const userData = frontendClients.get(cognitoUserId!);
+        if (userData) {
+            logger.info(`Removing previous cognito user connections for id ${cognitoUserId}`, LOG_PREFIX);
+            await waitForWebSocketClose(userData.ws, () => handleWebSocketClose(cognitoUserId!));
+        }
+
 
         // Connect to Twitch Websocket API
         const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);

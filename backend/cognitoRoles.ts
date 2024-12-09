@@ -7,7 +7,7 @@ export const COGNITO_ROLES = {
     VIEWER: "Viewer"
 };
 
-type CognitoRole = typeof COGNITO_ROLES[keyof typeof COGNITO_ROLES];
+export type CognitoRole = typeof COGNITO_ROLES[keyof typeof COGNITO_ROLES];
 
 
 interface UserData {

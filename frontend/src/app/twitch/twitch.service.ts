@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {urls} from '../app.config';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {BehaviorSubject, Subject, catchError, tap} from 'rxjs';
+import {BehaviorSubject, catchError, Subject, tap} from 'rxjs';
 import {AuthService} from "../auth/auth.service";
 
 export interface SearchUserState {
@@ -48,15 +48,13 @@ export class TwitchService {
   /**
    * Searches for a Twitch user and connects to their chat.
    */
-  searchUser(twitchUsername: string): void {
+  async searchUser(twitchUsername: string): Promise<void> {
     if (!twitchUsername) {
       this.searchUserState.next({success: false, errorMessage: 'Username cannot be empty.'});
       return;
     }
 
     const payload = this.createAuthPayload(twitchUsername);
-    this.disconnectWebSocket();
-
     this.startLoading();
     this.sendUsernameToBackend(payload, twitchUsername);
   }
@@ -72,6 +70,7 @@ export class TwitchService {
    * Sends the username to the backend API to set the Twitch username.
    */
   private sendUsernameToBackend(payload: any, twitchUsername: string): void {
+    this.chatMessages.next(null);
     this.http
       .post(`${this.backendUrl}/set-twitch-username`, payload, this.getHttpOptions())
       .pipe(
@@ -129,26 +128,31 @@ export class TwitchService {
     this.websocket.onopen = () => {
       const cognitoIdToken = this.authService.getIdToken();
       if (cognitoIdToken) {
-        this.websocket?.send(JSON.stringify({ type: 'auth', cognitoIdToken }));
+        this.websocket?.send(JSON.stringify({type: 'auth', cognitoIdToken}));
       } else {
         console.error('No ID token available to authenticate WebSocket connection');
         this.disconnectWebSocket();
       }
-      this.loadingState.next(false);
     };
 
     this.websocket.onmessage = (event) => {
       try {
         const rawMessage = JSON.parse(event.data);
-        const message: ChatMessage = this.mapRawMessage(rawMessage);
-        this.chatMessages.next(message);
+        console.log(rawMessage);
+        if (rawMessage.type == 'initComplete') {
+          console.log('WebSocket initialization completed');
+          this.loadingState.next(false);
+        } else {
+          const message: ChatMessage = this.mapRawMessage(rawMessage);
+          this.chatMessages.next(message);
+        }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
       }
     };
 
     this.websocket.onerror = (err) => console.error('WebSocket error:', err);
-    this.websocket.onclose = () => console.log('WebSocket connection closed');
+    this.websocket.onclose = () => console.log('WebSocket connection closed (on close)');
   }
 
   /**

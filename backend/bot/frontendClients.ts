@@ -43,6 +43,11 @@ export interface TwitchData {
     streamData: StreamData;
 }
 
+interface ReadinessState {
+    twitchReady: boolean;
+    awsReady: boolean;
+}
+
 export interface UserConnections {
     ws: WebSocket;
     twitchWs: WebSocket | null;
@@ -51,6 +56,7 @@ export interface UserConnections {
     cognito: CognitoData;
     twitchData: TwitchData;
     postStreamMetadataIntervalId: NodeJS.Timeout | undefined;
+    readiness: ReadinessState;
 }
 
 // TODO TCA-83 might be moved somewhere more related to sentiment analysis and AWS

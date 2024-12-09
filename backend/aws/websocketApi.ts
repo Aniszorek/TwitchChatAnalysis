@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import {frontendClients, incrementSentimentMessageCount, SentimentLabel} from "../bot/frontendClients";
-import {sendMessageToFrontendClient} from "../bot/wsServer";
+import {checkReadinessAndNotifyFrontend, sendMessageToFrontendClient} from "../bot/wsServer";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 
 const LOG_PREFIX = `API_GATEWAY_WS`
@@ -48,7 +48,11 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
                     clearInterval(interval);
                 }
             }, PING_INTERVAL);
-
+            const client = frontendClients.get(cognitoUserId);
+            if (client) {
+                client.readiness.awsReady = true;
+                checkReadinessAndNotifyFrontend(cognitoUserId);
+            }
         });
 
         awsWebSocket.on("message", (message: WebSocket.Data) => {
