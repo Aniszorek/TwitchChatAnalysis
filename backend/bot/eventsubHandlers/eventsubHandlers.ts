@@ -65,9 +65,13 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
         followersCount: oldMetadata?.followersCount,
         subscriberCount: oldMetadata?.subscriberCount,
         messageCount: oldMetadata?.messageCount,
-        positiveMessageCount: oldMetadata?.positiveMessageCount,
+        veryNegativeMessageCount: oldMetadata?.veryNegativeMessageCount,
         negativeMessageCount: oldMetadata?.negativeMessageCount,
-        neutralMessageCount: oldMetadata?.neutralMessageCount
+        slightlyNegativeMessageCount: oldMetadata?.slightlyNegativeMessageCount,
+        neutralMessageCount: oldMetadata?.neutralMessageCount,
+        slightlyPositiveMessageCount: oldMetadata?.slightlyPositiveMessageCount,
+        positiveMessageCount: oldMetadata?.positiveMessageCount,
+        veryPositiveMessageCount: oldMetadata?.veryPositiveMessageCount
     }
     setFrontendClientTwitchStreamMetadata(cognitoUserId,newMetadata)
 
@@ -125,9 +129,13 @@ export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocke
         followersCount: oldMetadata?.followersCount,
         subscriberCount: oldMetadata?.subscriberCount,
         messageCount: oldMetadata?.messageCount,
-        positiveMessageCount: oldMetadata?.positiveMessageCount,
+        veryNegativeMessageCount: oldMetadata?.veryNegativeMessageCount,
         negativeMessageCount: oldMetadata?.negativeMessageCount,
-        neutralMessageCount: oldMetadata?.neutralMessageCount
+        slightlyNegativeMessageCount: oldMetadata?.slightlyNegativeMessageCount,
+        neutralMessageCount: oldMetadata?.neutralMessageCount,
+        slightlyPositiveMessageCount: oldMetadata?.slightlyPositiveMessageCount,
+        positiveMessageCount: oldMetadata?.positiveMessageCount,
+        veryPositiveMessageCount: oldMetadata?.veryPositiveMessageCount
     }
     setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
     logger.info(`channel updated: title: ${data.payload.event?.title}, category ${data.payload.event?.category_name}`, LOG_PREFIX, {color: LogColor.MAGENTA})

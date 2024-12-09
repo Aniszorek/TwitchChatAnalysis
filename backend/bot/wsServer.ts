@@ -76,9 +76,13 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                                 followersCount: 0,
                                 subscriberCount: 0,
                                 messageCount: 0,
-                                positiveMessageCount: 0,
+                                veryNegativeMessageCount: 0,
                                 negativeMessageCount: 0,
-                                neutralMessageCount: 0
+                                slightlyNegativeMessageCount: 0,
+                                neutralMessageCount: 0,
+                                slightlyPositiveMessageCount: 0,
+                                positiveMessageCount: 0,
+                                veryPositiveMessageCount: 0
                             },
                             streamData:{
                                 startedAt: undefined,
@@ -114,9 +118,13 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             followersCount: 0,
                             subscriberCount: 0,
                             messageCount: 0,
-                            positiveMessageCount: 0,
+                            veryNegativeMessageCount: 0,
                             negativeMessageCount: 0,
-                            neutralMessageCount: 0
+                            slightlyNegativeMessageCount: 0,
+                            neutralMessageCount: 0,
+                            slightlyPositiveMessageCount: 0,
+                            positiveMessageCount: 0,
+                            veryPositiveMessageCount: 0
                         }
 
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);

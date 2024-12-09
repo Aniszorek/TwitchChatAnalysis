@@ -52,6 +52,7 @@ def lambda_handler(event, context):
             raw_timestamp = message_data['timestamp']
             try:
                 parsed_timestamp = parse_datetime(raw_timestamp)
+                print(parsed_timestamp, raw_timestamp)
             except ValueError as e:
                 print(f"Failed to parse timestamp: {raw_timestamp} | Error: {e}")
                 continue
@@ -62,9 +63,15 @@ def lambda_handler(event, context):
                 "follower_count": message_data.get('follower_count', 0),
                 "subscriber_count": message_data.get('subscriber_count', 0),
                 "message_count": message_data.get('message_count', 0),
-                "positive_message_count": message_data.get('positive_message_count', 0),
+                "very_negative_message_count": message_data.get('very_negative_message_count', 0),
                 "negative_message_count": message_data.get('negative_message_count', 0),
+                "slightly_negative_message_count": message_data.get('slightly_negative_message_count', 0),
                 "neutral_message_count": message_data.get('neutral_message_count', 0),
+                "slightly_positive_message_count": message_data.get('slightly_positive_message_count', 0),
+                "positive_message_count": message_data.get('positive_message_count', 0),
+                "very_positive_message_count": message_data.get('very_positive_message_count', 0),
+
+
             }
 
             metadata_json = json.dumps(metadata)

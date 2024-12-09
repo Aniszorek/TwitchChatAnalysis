@@ -46,17 +46,25 @@ def sign_request(url, data, region="eu-central-1", method="POST"):
 
 def classify_sentiment(score, magnitude):
     rules = [
-        (score < -0.65, "Clearly negative"),
-        (score < -0.3 and magnitude > 2, "Clearly negative"),
-        (score < -0.3, "Negative"),
-        (score < 0.35 and magnitude > 2, "Negative"),
-        (score < 0.35, "Neutral"),
+        (score < -0.8, "Very negative"),
+        (score < -0.6 and magnitude > 2, "Very negative"),
+        (score < -0.4 and magnitude > 4, "Very negative"),
+        (score < -0.6, "Negative"),
+        (score < -0.4 and magnitude > 2, "Negative"),
+        (score < -0.2 and magnitude > 4, "Negative"),
+        (score < -0.3, "Slightly Negative"),
+        (score < -0.1 and magnitude > 2, "Slightly Negative"),
+        (score < 0.1 and magnitude > 4, "Slightly Negative"),
+        (score < 0.2, "Neutral"),
+        (score < 0.3 and magnitude > 2, "Neutral"),
+        (score < 0.5, "Slightly Positive"),
+        (score < 0.7, "Positive"),
     ]
 
     for condition, label in rules:
         if condition:
             return label
-    return "Positive"
+    return "Very positive"
 
 
 def lambda_handler(event, context):
