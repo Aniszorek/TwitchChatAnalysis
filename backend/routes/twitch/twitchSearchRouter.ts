@@ -1,5 +1,4 @@
 import express from "express";
-import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUsers";
 import {LogColor, logger, LogStyle} from "../../utilities/logger";
 import {extractQueryParams} from "../../utilities/utilities";
 import {getSearchCategories} from "../../twitch_calls/twitchSearch/searchTwitchCategories";

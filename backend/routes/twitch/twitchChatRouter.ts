@@ -1,8 +1,6 @@
 import express from "express";
-import {getSuspendedUsers} from "../../twitch_calls/twitchUsers/getSuspendedUsers";
 import {LogColor, logger, LogStyle} from "../../utilities/logger";
 import {extractQueryParams} from "../../utilities/utilities";
-import {isBanUserPayload, postBanUser} from "../../twitch_calls/twitchModeration/banUser";
 import {isSendChatMessagePayload, postChatMessage} from "../../twitch_calls/twitchChat/sendChatMessage";
 import {IS_DEBUG_ENABLED} from "../../entryPoint";
 import {getChatSettings} from "../../twitch_calls/twitchChat/getChatSettings";

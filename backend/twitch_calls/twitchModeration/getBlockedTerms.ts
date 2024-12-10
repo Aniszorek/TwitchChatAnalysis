@@ -1,6 +1,5 @@
 import {twitchApiClient} from "../twitchApiConfig";
 import {logger} from "../../utilities/logger";
-import {ModUser} from "./getModerators";
 
 const LOG_PREFIX = 'TWITCH_API_MODERATION';
 

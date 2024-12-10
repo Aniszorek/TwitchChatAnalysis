@@ -5,12 +5,13 @@ import {getChannelVips} from "../../twitch_calls/twitchChannels/getChannelVips";
 import {extractQueryParams} from "../../utilities/utilities";
 import {postAddVip} from "../../twitch_calls/twitchChannels/vipUser";
 import {deleteVipUser} from "../../twitch_calls/twitchChannels/unvipUser";
-import {patchChatSettings} from "../../twitch_calls/twitchChat/patchChatSettings";
 import {
     isPatchChannelInformationPayload,
     patchChannelInformation
 } from "../../twitch_calls/twitchChannels/patchChannelInformation";
 import {isPostCreatePollPayload, postCreatePoll} from "../../twitch_calls/twitchChannels/postCreatePoll";
+import {postStartRaid} from "../../twitch_calls/twitchChannels/postStartRaid";
+import {deleteCancelRaid} from "../../twitch_calls/twitchChannels/deleteCancelRaid";
 
 export const twitchChannelsRouter = express.Router();
 
@@ -78,6 +79,32 @@ twitchChannelsRouter.post('/polls', async (req, res) => {
     catch(error: any) {
         logger.error(`Error in post /polls route: ${error.message}`, LOG_PREFIX);
         res.status(500).json({error: `Failed to create a poll`});
+    }
+})
+
+twitchChannelsRouter.post('/raids', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["from_broadcaster_id", "to_broadcaster_id"])
+        const result= await postStartRaid(queryParams)
+        logger.info(`Successfully started a raid to: ${queryParams.to_broadcaster_id}`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in post /raids route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to create a raid`});
+    }
+})
+
+twitchChannelsRouter.delete('/raids', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id"])
+        const result= await deleteCancelRaid(queryParams)
+        logger.info(`Successfully cancelled a raid`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in delete /raids route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to cancel a raid`});
     }
 })
 

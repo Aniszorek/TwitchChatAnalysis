@@ -1,6 +1,5 @@
 import {twitchApiClient} from "../twitchApiConfig";
 import {logger} from "../../utilities/logger";
-import {q} from "@noble/curves/pasta";
 
 const LOG_PREFIX = 'TWITCH_API_MODERATION';
 
