@@ -194,6 +194,12 @@ export class TwitchService {
     };
   }
 
+  resetLoadingAndState(): void {
+    this.searchUserState.next(null);
+    this.loadingState.next(false);
+  }
+
+
   /**
    * Returns default HTTP options for API requests.
    */

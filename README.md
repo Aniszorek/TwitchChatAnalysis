@@ -47,7 +47,7 @@ Current status:
 ## How to get Twitch account with bot privileges
 You can use your own Twitch account or create a new one.
 1. Login to your Twitch account.
-2. Go to this [link](https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=y3s6y3r4sxt83e3qc53jz5uqmun47g&redirect_uri=http%3A%2F%2Flocalhost&scope=user%3Abot%20user%3Aread%3Achat%20user%3Awrite%3Achat%20channel%3Aread%3Asubscriptions%20moderator%3Aread%3Afollowers) and authorize
+2. Go to this [link](https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=y3s6y3r4sxt83e3qc53jz5uqmun47g&redirect_uri=http%3A%2F%2Flocalhost&scope=user%3Abot%20user%3Aread%3Achat%20user%3Awrite%3Achat%20channel%3Aread%3Asubscriptions%20moderator%3Aread%3Afollowers%20user%3Aread%3Amoderated_channels) and authorize
 3. After successful authorization you will be redirected to `localhost` and your `access token` will be stored inside a query param
 4. This token will persist for 60 days
 5. Remember to set this access token in `.env` file as `TWITCH_BOT_OAUTH_TOKEN`

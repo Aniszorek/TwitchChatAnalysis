@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, Output} from '@angular/core';
+import {Component, EventEmitter, inject, OnInit, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {TwitchService} from '../twitch/twitch.service';
 import {NgIf} from '@angular/common';
@@ -14,7 +14,7 @@ import {Router} from '@angular/router';
   templateUrl: './search-user.component.html',
   styleUrl: './search-user.component.css'
 })
-export class SearchUserComponent {
+export class SearchUserComponent implements OnInit {
   twitchService = inject(TwitchService);
   router = inject(Router);
   previousUsername = '';
@@ -24,14 +24,17 @@ export class SearchUserComponent {
   loading = false;
   @Output() userSelected = new EventEmitter<string>();
 
-  constructor() {
+  ngOnInit(): void {
+    this.twitchService.resetLoadingAndState();
+    this.errorMessage = null;
+
     this.twitchService.searchUserState$.subscribe((state) => {
       if (state) {
         if (state.success) {
           this.errorMessage = null;
           this.successMessage = state.message ?? 'Operation successful.';
           this.twitchService.setTwitchUsername(this.username);
-          console.log("Redirecting");
+          console.log('Redirecting');
           this.router.navigate(['/stream']);
         } else {
           this.errorMessage = state.errorMessage ?? 'Unknown error occurred';

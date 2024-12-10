@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {AuthService} from '../auth/auth.service';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {NgClass, NgIf} from '@angular/common';
 import {TwitchService} from '../features/twitch/twitch.service';
 
@@ -9,7 +9,8 @@ import {TwitchService} from '../features/twitch/twitch.service';
   standalone: true,
   imports: [
     NgIf,
-    NgClass
+    NgClass,
+    RouterLink
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
