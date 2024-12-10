@@ -76,7 +76,7 @@ export async function exchangeCodeForToken(authCode: string): Promise<CognitoTok
 }
 
 
-async function refreshIdToken(refreshToken: string): Promise<CognitoTokenResponse> {
+export async function refreshIdToken(refreshToken: string): Promise<CognitoTokenResponse> {
     const params = new URLSearchParams();
     params.append('grant_type', 'refresh_token');
     params.append('client_id', COGNITO_CLIENT_ID);
@@ -89,30 +89,15 @@ async function refreshIdToken(refreshToken: string): Promise<CognitoTokenRespons
             }
         });
 
-        logger.info(`Token refreshed: ${JSON.stringify(response.data, null, 2)}`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
 
-        return await response.data;
+        let data = await response.data
+        data['expires_in'] = Date.now() + response.data['expires_in'] * 1000
+        logger.info(`Token refreshed: ${JSON.stringify(response.data, null, 2)}`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
+        return data;
     } catch (error: any) {
         throw new Error(`${LOG_PREFIX} Could not refresh access token: ${error.message}`);
     }
 }
-
-// todo trzeba przebudować to w taki sposób, aby przekazywany był request i tokeny były brane z requesta, a nie z tej struktury, bo już ich w tej strukturze nie ma
-// export async function refreshIdTokenIfExpired(cognitoUserId: string): Promise<CognitoTokenResponse | undefined> {
-//     const {cognitoRefreshToken, cognitoExpiryTime} = frontendClients.get(cognitoUserId)?.cognito || {};
-//
-//     if (!cognitoRefreshToken || !cognitoExpiryTime) {
-//         console.error(`${LOG_PREFIX} Missing Cognito data for user: ${cognitoUserId}`);
-//         return undefined;
-//     }
-//
-//     if (Date.now() >= cognitoExpiryTime) {
-//         console.log(`${LOG_PREFIX} ${cognitoUserId} Access token expired - refreshing`);
-//         const data: CognitoTokenResponse = await refreshIdToken(cognitoRefreshToken);
-//         setFrontendClientCognitoData(cognitoUserId, data.id_token, null, data.expires_in * 1000 + Date.now(), null);
-//         return data;
-//     }
-// }
 
 
 export async function refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken: string, cognitoTokenExpiryTime: number, twitchBroadcasterUsername: string): Promise<RefreshTokenResult> {

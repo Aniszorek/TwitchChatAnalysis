@@ -1,14 +1,16 @@
 import express, {NextFunction, Request, Response} from 'express';
 
-import {exchangeCodeForToken, generateAuthUrl, verifyToken} from '../../aws/cognitoAuth';
+import {exchangeCodeForToken, generateAuthUrl, refreshIdToken, verifyToken} from '../../aws/cognitoAuth';
 import {verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
 import {handleWebSocketClose, pendingWebSocketInitializations} from "../../bot/wsServer";
 import {validateTwitchAuth} from "../../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../envConfig";
+import {frontendClients} from "../../bot/frontendClients";
 import {validateUserRole} from "../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
 import {LogBackgroundColor, LogColor, logger, LogStyle} from "../../utilities/logger";
 import {frontendClients} from "../../bot/frontendClients";
 import {waitForWebSocketClose} from "../../utilities/utilities";
+
 
 
 const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION`;
@@ -155,5 +157,33 @@ authRouter.post('/verify-cognito', async (req, res) => {
     } catch (e: any) {
         logger.error(`Error during verify idToken: ${e.message}`, LOG_PREFIX );
         res.status(401).json({message: 'idToken not verified', error: e.message});
+    }
+})
+
+
+authRouter.post('/refresh-cognito-tokens', async (req, res) => {
+    console.log('refreshing tokens')
+    const {refreshToken} = req.body;
+    if (!refreshToken) {
+        return res.status(400).send('Cognito refresh token is required');
+    }
+
+    try{
+        const data = await refreshIdToken(refreshToken);
+        const decodedToken = await verifyToken(data.id_token);
+        const userId = decodedToken.sub!;
+
+        // refreshing the token will start as soon as frontend client logs in - meaning that it might not be in the frontend clients
+        const userData = frontendClients.get(userId);
+        if (userData){
+            userData.cognito.cognitoIdToken = data.id_token
+        }
+
+        res.status(200).send(data)
+
+
+    } catch (e: any) {
+        console.error(`${LOG_PREFIX} Error during refresh token:`, e.message);
+        res.status(500).send('Error refreshing token');
     }
 })

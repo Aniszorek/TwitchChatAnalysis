@@ -14,6 +14,7 @@ import {NgIf} from '@angular/common';
 })
 export class AppComponent implements OnInit {
   isLoading = true;
+
   constructor(private authService: AuthService) {
   }
 
@@ -23,5 +24,12 @@ export class AppComponent implements OnInit {
     });
 
     this.authService.initializeSession();
+
+
+    if (this.authService.isLoggedIn()) {
+      this.authService.startTokenAutoRefresh();
+    } else {
+      this.authService.stopTokenAutoRefresh();
+    }
   }
 }
