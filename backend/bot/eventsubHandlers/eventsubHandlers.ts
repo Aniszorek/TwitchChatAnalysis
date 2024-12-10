@@ -37,7 +37,7 @@ export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWeb
         "messageId": data.payload.event!.message_id!,
         "messageTimestamp": data.metadata.message_timestamp!
     }
-    logger.info(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> ${msg.messageText}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+    logger.info(`MSG #${msg.broadcasterUserLogin} <${msg.chatterUserLogin}> <${msg.messageId}> ${msg.messageText}`, LOG_PREFIX, {color: LogColor.MAGENTA});
 
     incrementMessageCount(cognitoUserId)
 
@@ -80,8 +80,8 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
 
     if(streamId && startedAt && verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
     {
-        const subCount = await getChannelSubscriptionsCount(broadcasterId)
-        const followerCount = await getChannelFollowersCount(broadcasterId)
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
         setStreamDataStartValues(cognitoUserId, startedAt, followerCount, subCount)
     }
 
@@ -96,8 +96,8 @@ export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWe
 
     if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
     {
-        const subCount = await getChannelSubscriptionsCount(broadcasterId)
-        const followerCount = await getChannelFollowersCount(broadcasterId)
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
         setStreamDataEndValues(cognitoUserId,  createTimestamp(), followerCount, subCount)
     }
 
@@ -139,5 +139,12 @@ export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocke
     }
     setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
     logger.info(`channel updated: title: ${data.payload.event?.title}, category ${data.payload.event?.category_name}`, LOG_PREFIX, {color: LogColor.MAGENTA})
+}
+
+export const channelChatDeleteMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const message_id = data.payload.event?.message_id
+    logger.info(`Received message delete event, message_id: ${message_id}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+    sendMessageToFrontendClient(cognitoUserId, message_id)
+
 }
 

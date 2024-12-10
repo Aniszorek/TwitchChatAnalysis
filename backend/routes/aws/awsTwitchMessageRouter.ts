@@ -50,6 +50,7 @@ awsTwitchMessageRouter.get('/', async (req, res) => {
 /**
  * Extracts headers from the request and performs validation.
  */
+// todo TCA-102 remove and use more generic function from utilities
 function extractHeaders(req: express.Request) {
     const broadcasterUsername = req.headers['broadcasteruserlogin'] as string | undefined;
     let cognitoIdToken = req.headers['authorization'] as string | undefined;
@@ -72,6 +73,7 @@ function extractHeaders(req: express.Request) {
 /**
  * Extracts query parameters from the request.
  */
+// todo TCA-102 remove and use more generic function from utilities
 function extractQueryParams(req: express.Request) {
     const streamId = req.query.stream_id as string | undefined;
     const startTime = req.query.start_time as string | undefined;
@@ -134,14 +136,14 @@ async function buildResponse(
     const response: GetTwitchMessageResponse = { chatter_user_login: chatterUserLogin, messages };
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'get chatter data only for streamer access')) {
-        const suspendedLists = await getSuspendedUsers(broadcasterId);
+        const suspendedLists = await getSuspendedUsers({broadcaster_id: broadcasterId});
         response.is_banned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin);
         response.is_timeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin);
 
-        const vipList = await getChannelVips(broadcasterId);
+        const vipList = await getChannelVips({broadcaster_id: broadcasterId});
         response.is_vip = vipList?.some(user => user.user_login === chatterUserLogin);
 
-        const modList = await getChannelModerators(broadcasterId);
+        const modList = await getChannelModerators({broadcaster_id: broadcasterId});
         response.is_mod = modList?.some(user => user.user_login === chatterUserLogin);
     }
 
@@ -161,7 +163,8 @@ function handleError(error: any, res: express.Response) {
 /**
  * Custom error class for handling errors with HTTP status codes.
  */
-class ErrorWithStatus extends Error {
+// todo TCA-102 move to separate file
+export class ErrorWithStatus extends Error {
     status: number;
 
     constructor(status: number, message: string) {

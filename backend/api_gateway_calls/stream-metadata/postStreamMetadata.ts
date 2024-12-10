@@ -9,6 +9,7 @@ import {createTimestamp} from "../../utilities/utilities";
 import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
+import {IS_DEBUG_ENABLED} from "../../entryPoint";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 const MINUTES = 5
@@ -101,7 +102,7 @@ export async function postMetadataToApiGateway(cognitoUserId: string) {
             } as CustomAxiosRequestConfig)
 
         if (response.status === 200) {
-            logger.info(`Metadata sent to API Gateway: ${JSON.stringify(metadata, null, 2)}`, LOG_PREFIX);
+            logger.info(`Metadata sent to API Gateway: ${IS_DEBUG_ENABLED ? JSON.stringify(metadata, null, 2) : ""}`, LOG_PREFIX);
 
         } else {
             logger.error(`Failed to send metadata to API Gateway. Status: ${response.status}`, LOG_PREFIX);

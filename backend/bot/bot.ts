@@ -1,16 +1,17 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
+import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {
     fetchTwitchStreamMetadata,
     fetchTwitchUserId,
     fetchTwitchUserIdFromOauthToken,
     TwitchStreamData
 } from "../twitch_calls/twitchAuth";
-import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
+    channelChatDeleteMessageHandler,
     channelChatMessageHandler,
     channelFollowHandler,
     channelSubscribeHandler,
@@ -20,6 +21,7 @@ import {
 } from "./eventsubHandlers/eventsubHandlers";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {frontendClients} from "./frontendClients";
+import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 const LOG_PREFIX = 'TWITCH_WS'
 
@@ -89,7 +91,6 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
             logger.info(`Twitch WebSocket connection opened for user ID: ${cognitoUserId}`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
         });
 
-
         twitchWebSocket.on("message", (data: WebSocket.Data) => {
             const parsedData: TwitchWebSocketMessage = JSON.parse(data.toString());
             handleWebSocketMessage(parsedData, cognitoUserId);
@@ -145,6 +146,11 @@ async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserI
                     channelUpdateHandler(cognitoUserId, data)
                     break;
                 }
+                case EventSubSubscriptionType.MESSAGE_DELETE:
+                {
+                    channelChatDeleteMessageHandler(cognitoUserId, data)
+                    break;
+                }
             }
             break;
         }
@@ -178,6 +184,10 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             broadcaster_user_id: broadcasterId
         }, headers)
 
+        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.MESSAGE_DELETE,{
+            broadcaster_user_id: broadcasterId,
+            user_id: viewerId
+        }, headers)
 
         // moderator role required
         if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow')) {
@@ -186,6 +196,7 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             }, headers, '2')
         }
 
+        // streamer role required
         if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'Subscribe to channel subscription'))
         {
             // does not include resubscriptions
@@ -216,7 +227,7 @@ function verifyRegisterResponse(response: AxiosResponse<VerifyResponseData>, reg
         logger.info(`Subscribed to ${registerType} [${response.data.data[0].id}]`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
     } else {
         logger.error(`Failed to subscribe to ${registerType}. Status code ${response.status}`, LOG_PREFIX);
-        logger.error(JSON.stringify(response.data, null, 2), LOG_PREFIX);
+        logger.error(IS_DEBUG_ENABLED ?JSON.stringify(response.data, null, 2) : "", LOG_PREFIX);
     }
 }
 

@@ -6,4 +6,5 @@ export enum EventSubSubscriptionType {
     CHANNEL_SUBSCRIBE = "channel.subscribe",
     CHANNEL_SUBSCRIPTION_MESSAGE = "channel.subscription.message",
     CHANNEL_UPDATE = "channel.update",
+    MESSAGE_DELETE = "channel.chat.message_delete"
 }

@@ -1,6 +1,7 @@
 import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
 import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
+import {IS_DEBUG_ENABLED} from "../../entryPoint";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
@@ -64,7 +65,7 @@ export async function postStreamToApiGateway(cognitoUserId: string) {
         } as CustomAxiosRequestConfig)
 
         if (response.status === 200) {
-            logger.info(`Stream sent to API Gateway: ${JSON.stringify(streamMessage, null, 2)}`, LOG_PREFIX);
+            logger.info(`Stream sent to API Gateway: ${IS_DEBUG_ENABLED ? JSON.stringify(streamMessage, null, 2): ""}`, LOG_PREFIX);
 
         } else {
             logger.error(`Failed to send stream to API Gateway. Status: ${response.status}`, LOG_PREFIX);

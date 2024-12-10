@@ -10,6 +10,9 @@ import {twitchChannelsRouter} from "./routes/twitch/twitchChannelsRouter";
 import {logger, LogLevel} from "./utilities/logger";
 import {initializeApiGatewayClient} from "./api_gateway_calls/apiGatewayConfig";
 import {awsRouter} from "./routes/aws/awsRouter";
+import {twitchModerationRouter} from "./routes/twitch/twitchModerationRouter";
+import {twitchChatRouter} from "./routes/twitch/twitchChatRouter";
+import {twitchSearchRouter} from "./routes/twitch/twitchSearchRouter";
 
 // INFO > WARN > ERROR
 // DEBUG LOGS CONSIDERED SEPARATELY WITH IS_DEBUG_ENABLED
@@ -32,6 +35,9 @@ app.use(cors({
 app.use("/", authRouter);
 app.use("/twitch/users", twitchUsersRouter);
 app.use("/twitch/channels", twitchChannelsRouter);
+app.use("/twitch/moderation",twitchModerationRouter)
+app.use("/twitch/chat", twitchChatRouter)
+app.use("/twitch/search", twitchSearchRouter)
 
 app.use('/aws', awsRouter)
 

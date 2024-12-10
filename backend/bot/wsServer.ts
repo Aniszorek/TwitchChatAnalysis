@@ -22,6 +22,7 @@ import {createTimestamp} from "../utilities/utilities";
 import {LogBackgroundColor, LogColor, logger, LogStyle} from "../utilities/logger";
 import {postStreamToApiGateway} from "../api_gateway_calls/stream/postStream";
 import {patchStreamToApiGateway} from "../api_gateway_calls/stream/patchStream";
+import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 const LOG_PREFIX = 'BACKEND_WS'
 
@@ -136,8 +137,8 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
 
                         if(streamId && streamStartedAt && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
                         {
-                            const subCount = await getChannelSubscriptionsCount(twitchBroadcasterUserId)
-                            const followerCount = await getChannelFollowersCount(twitchBroadcasterUserId)
+                            const subCount = await getChannelSubscriptionsCount({broadcaster_id: twitchBroadcasterUserId})
+                            const followerCount = await getChannelFollowersCount({broadcaster_id: twitchBroadcasterUserId})
                             setStreamDataStartValues(userId, streamStartedAt, followerCount, subCount)
                         }
 
@@ -239,6 +240,7 @@ export const sendMessageToFrontendClient = (userId: string, message: any) => {
     const userData = frontendClients.get(userId);
     if (userData && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.send(JSON.stringify(message));
+        logger.debug(`Data send to FE client: ${IS_DEBUG_ENABLED ? JSON.stringify(message, null, 2) : ""}`, LOG_PREFIX, {color: LogColor.CYAN});
     } else {
         logger.error(`WebSocket for user ID ${userId} is not available`, LOG_PREFIX);
     }
@@ -261,8 +263,8 @@ export async function handleWebSocketClose(userId: string | null): Promise<void>
     const streamId = userData.twitchData.streamId;
 
     if (broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API")) {
-        const subCount = await getChannelSubscriptionsCount(broadcasterId);
-        const followerCount = await getChannelFollowersCount(broadcasterId);
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId});
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId});
         setStreamDataEndValues(userId, createTimestamp(), followerCount, subCount);
     }
 

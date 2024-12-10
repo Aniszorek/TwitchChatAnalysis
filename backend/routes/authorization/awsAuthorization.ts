@@ -6,7 +6,7 @@ import {handleWebSocketClose, pendingWebSocketInitializations} from "../../bot/w
 import {validateTwitchAuth} from "../../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../envConfig";
 import {validateUserRole} from "../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
-import {LogBackgroundColor, LogColor, logger, LogStyle} from "../../utilities/logger";
+import {LogColor, logger} from "../../utilities/logger";
 import {frontendClients} from "../../bot/frontendClients";
 import {waitForWebSocketClose} from "../../utilities/utilities";
 

@@ -3,6 +3,7 @@ import querystring from "querystring";
 import jwt, {JwtHeader, JwtPayload} from "jsonwebtoken";
 import jwksClient, {SigningKey} from "jwks-rsa";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
+import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 
 const LOG_PREFIX = `COGNITO_AUTH`;
@@ -88,11 +89,9 @@ export async function refreshIdToken(refreshToken: string): Promise<CognitoToken
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-
-
         let data = await response.data
         data['expires_in'] = Date.now() + response.data['expires_in'] * 1000
-        logger.info(`Token refreshed: ${JSON.stringify(response.data, null, 2)}`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
+        logger.info(`Token refreshed: ${IS_DEBUG_ENABLED ? JSON.stringify(response.data, null, 2) : ""}`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT});
         return data;
     } catch (error: any) {
         throw new Error(`${LOG_PREFIX} Could not refresh access token: ${error.message}`);
