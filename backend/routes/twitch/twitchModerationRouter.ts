@@ -9,6 +9,9 @@ import {deleteModerator} from "../../twitch_calls/twitchModeration/unmodUser";
 import {deleteMessage} from "../../twitch_calls/twitchModeration/deleteMessage";
 import {getAutomodSettings} from "../../twitch_calls/twitchModeration/getAutomodSettings";
 import {isPutAutomodSettingsPayload, putAutomodSettings} from "../../twitch_calls/twitchModeration/putAutomodSettings";
+import {getBlockedTerms} from "../../twitch_calls/twitchModeration/getBlockedTerms";
+import {isPostBlockedTermPayload, postBlockedTerm} from "../../twitch_calls/twitchModeration/postBlockedTerm";
+import {deleteBlockedTerm} from "../../twitch_calls/twitchModeration/deleteBlockedTerm";
 
 export const twitchModerationRouter = express.Router();
 
@@ -117,6 +120,47 @@ twitchModerationRouter.put('/automod/settings', async (req, res) => {
     catch(error: any) {
         logger.error(`Error in put /automod/settings route: ${error.message}`, LOG_PREFIX);
         res.status(500).json({error: `Failed to put automod settings`});
+    }
+})
+
+twitchModerationRouter.get('/blocked_terms', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id", "moderator_id"]);
+        const result= await getBlockedTerms(queryParams)
+        logger.info(`Successfully get blocked terms`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in get /blocked_terms route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to get blocked terms`});
+    }
+})
+
+twitchModerationRouter.post('/blocked_terms', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id", "moderator_id"]);
+        const payload = req.body
+        isPostBlockedTermPayload(payload)
+        const result= await postBlockedTerm(queryParams, payload)
+        logger.info(`Successfully added blocked term`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in post /blocked_terms route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to add blocked term`});
+    }
+})
+
+twitchModerationRouter.delete('/blocked_terms', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id", "moderator_id", "id"]);
+        const result= await deleteBlockedTerm(queryParams)
+        logger.info(`Successfully deleted blocked term`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in delete /blocked_terms route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to delete blocked term`});
     }
 })
 
