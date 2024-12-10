@@ -5,6 +5,11 @@ import {getChannelVips} from "../../twitch_calls/twitchChannels/getChannelVips";
 import {extractQueryParams} from "../../utilities/utilities";
 import {postAddVip} from "../../twitch_calls/twitchChannels/vipUser";
 import {deleteVipUser} from "../../twitch_calls/twitchChannels/unvipUser";
+import {patchChatSettings} from "../../twitch_calls/twitchChat/patchChatSettings";
+import {
+    isPatchChannelInformationPayload,
+    patchChannelInformation
+} from "../../twitch_calls/twitchChannels/patchChannelInformation";
 
 export const twitchChannelsRouter = express.Router();
 
@@ -58,6 +63,21 @@ twitchChannelsRouter.delete('/vips', async (req, res) => {
     catch(error: any) {
         logger.error(`Error in delete /vips route: ${error.message}`, LOG_PREFIX);
         res.status(500).json({error: `Failed to delete VIP`});
+    }
+})
+
+twitchChannelsRouter.patch('/', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id"]);
+        const payload = req.body
+        isPatchChannelInformationPayload(payload)
+        const result= await patchChannelInformation(queryParams, payload)
+        logger.info(`Successfully patched stream settings`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in patch / route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to patch stream settings`});
     }
 })
 
