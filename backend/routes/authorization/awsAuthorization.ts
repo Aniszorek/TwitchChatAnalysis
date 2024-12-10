@@ -5,7 +5,6 @@ import {verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
 import {handleWebSocketClose, pendingWebSocketInitializations} from "../../bot/wsServer";
 import {validateTwitchAuth} from "../../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../envConfig";
-import {frontendClients} from "../../bot/frontendClients";
 import {validateUserRole} from "../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
 import {LogBackgroundColor, LogColor, logger, LogStyle} from "../../utilities/logger";
 import {frontendClients} from "../../bot/frontendClients";
