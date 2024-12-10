@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {NgIf} from '@angular/common';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 
@@ -11,11 +11,11 @@ import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
   ],
   styleUrls: ['./video.component.css']
 })
-export class VideoComponent {
+export class VideoComponent implements OnChanges {
   @Input() channelName: string | null = null;
   safeUrl: SafeResourceUrl | null = null;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private readonly sanitizer: DomSanitizer) {}
 
   ngOnChanges(): void {
     if (this.channelName) {

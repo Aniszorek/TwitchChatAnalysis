@@ -1,7 +1,8 @@
 import {Component, EventEmitter, inject, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {TwitchService} from '../../twitch/twitch.service';
+import {TwitchService} from '../twitch/twitch.service';
 import {NgIf} from '@angular/common';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-search-user',
@@ -15,13 +16,13 @@ import {NgIf} from '@angular/common';
 })
 export class SearchUserComponent {
   twitchService = inject(TwitchService);
-  previous_username = '';
+  router = inject(Router);
+  previousUsername = '';
   username = 'bartes2002';
   successMessage: string | null = null;
   errorMessage: string | null = null;
   loading = false;
   @Output() userSelected = new EventEmitter<string>();
-
 
   constructor() {
     this.twitchService.searchUserState$.subscribe((state) => {
@@ -29,7 +30,9 @@ export class SearchUserComponent {
         if (state.success) {
           this.errorMessage = null;
           this.successMessage = state.message ?? 'Operation successful.';
-          this.userSelected.emit(this.username);
+          this.twitchService.setTwitchUsername(this.username);
+          console.log("Redirecting");
+          this.router.navigate(['/stream']);
         } else {
           this.errorMessage = state.errorMessage ?? 'Unknown error occurred';
           this.successMessage = null;
@@ -44,9 +47,13 @@ export class SearchUserComponent {
 
   searchUser() {
     if (this.username) {
-      this.previous_username = this.username;
+      this.previousUsername = this.username;
       this.loading = true;
       this.twitchService.searchUser(this.username.toLowerCase());
     }
+  }
+
+  get isDisabled(): boolean {
+    return this.loading || this.username.trim() === this.previousUsername.trim() || this.username.trim().length === 0;
   }
 }

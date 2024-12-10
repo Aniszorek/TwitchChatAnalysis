@@ -1,0 +1,27 @@
+<div class="search-wrapper">
+  <div class="search-container">
+    <input
+      [disabled]="this.loading"
+      [(ngModel)]="username"
+      placeholder="Enter username" class="search-input"/>
+    <button
+      [disabled]="isDisabled"
+      (click)="searchUser()"
+      class="search-button">
+      Connect
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading-message">
+    <div class="spinner"></div>
+    Connecting...
+  </div>
+
+  <div *ngIf="successMessage && !loading" class="success-message">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage && !loading" class="error-message">
+    {{ errorMessage }}
+  </div>
+</div>

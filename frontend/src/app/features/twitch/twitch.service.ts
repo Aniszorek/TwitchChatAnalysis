@@ -1,8 +1,8 @@
 import {inject, Injectable} from '@angular/core';
-import {urls} from '../app.config';
+import {urls} from '../../app.config';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {BehaviorSubject, catchError, Subject, tap} from 'rxjs';
-import {AuthService} from "../auth/auth.service";
+import {AuthService} from '../../auth/auth.service';
 
 export interface SearchUserState {
   success: boolean;
@@ -29,20 +29,30 @@ export class TwitchService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   private readonly backendUrl = urls.backendUrl;
+  private readonly twitchUsername = new BehaviorSubject<string | null>(null);
+  user$ = this.twitchUsername.asObservable();
 
-  private chatMessages = new Subject<ChatMessage | null>();
+  private readonly chatMessages = new Subject<ChatMessage | null>();
   chatMessages$ = this.chatMessages.asObservable();
 
-  private searchUserState = new BehaviorSubject<SearchUserState | null>(null);
+  private readonly searchUserState = new BehaviorSubject<SearchUserState | null>(null);
   searchUserState$ = this.searchUserState.asObservable();
 
-  private loadingState = new BehaviorSubject<boolean>(false);
+  private readonly loadingState = new BehaviorSubject<boolean>(false);
   loadingState$ = this.loadingState.asObservable();
 
   private websocket: WebSocket | null = null;
 
   constructor() {
     this.authService.logout$.subscribe(() => this.disconnectWebSocket());
+  }
+
+  setTwitchUsername(user: string) {
+    this.twitchUsername.next(user);
+  }
+
+  getTwitchUsername() {
+    return this.twitchUsername.getValue();
   }
 
   /**

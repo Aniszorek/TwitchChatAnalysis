@@ -10,9 +10,9 @@ import {ActivatedRoute, Router} from "@angular/router";
   styleUrl: './auth-callback.component.css'
 })
 export class AuthCallbackComponent implements OnInit {
-  private authService = inject(AuthService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(params => this.handleAuthCallback(params));
@@ -47,7 +47,7 @@ export class AuthCallbackComponent implements OnInit {
   }, idToken: string, refreshToken: string, expireTime: string): void {
     if (response.message === 'verified') {
       this.authService.saveTokens(idToken, refreshToken, expireTime);
-      this.router.navigate(['/stream']);
+      this.router.navigate(['/stream-search']);
     } else {
       console.error("Invalid token");
       this.router.navigate(['/login']);

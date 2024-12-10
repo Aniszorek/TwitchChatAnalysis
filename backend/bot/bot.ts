@@ -9,7 +9,6 @@ import {
     TwitchStreamData
 } from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
-import {frontendClients} from "./frontendClients";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
     channelChatDeleteMessageHandler,
@@ -21,6 +20,7 @@ import {
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
+import {frontendClients} from "./frontendClients";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 const LOG_PREFIX = 'TWITCH_WS'

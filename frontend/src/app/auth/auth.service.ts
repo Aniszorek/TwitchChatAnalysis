@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {BehaviorSubject, catchError, interval, Observable, Subject, Subscription, tap} from 'rxjs';
 import { Router } from '@angular/router';
 import { config, urls } from "../app.config";
 
@@ -10,6 +10,13 @@ interface AuthTokens {
   expiryTime: string;
 }
 
+interface RefreshedAuthTokens {
+  id_token: string;
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -17,15 +24,18 @@ export class AuthService {
   isLoading = new BehaviorSubject<boolean>(true);
   isLoggedIn = signal(false);
 
-  private logoutSubject = new Subject<void>();
+  private readonly logoutSubject = new Subject<void>();
   logout$ = this.logoutSubject.asObservable();
+
+  private refreshSubscription?: Subscription;
+  private refreshTimeoutId?: any;
 
   private readonly backendUrl = urls.backendUrl;
   private readonly cognitoLogoutUrl = urls.cognitoLogoutUrl;
   private readonly clientId = config.cognitoClientId;
   private readonly redirectUri = urls.cognitoLougoutRedirectUrl;
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(private readonly router: Router, private readonly http: HttpClient) {}
 
   /**
    * Starts the login process by redirecting to the backend authorization URL.
@@ -42,6 +52,7 @@ export class AuthService {
     localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('expireTime', expiryTime);
     this.isLoggedIn.set(true);
+    this.startTokenAutoRefresh()
   }
 
   /**
@@ -50,6 +61,7 @@ export class AuthService {
   logout(): void {
     this.clearLocalSession();
     this.logoutSubject.next();
+    this.stopTokenAutoRefresh();
     window.location.href = this.getCognitoLogoutUrl();
   }
 
@@ -66,9 +78,16 @@ export class AuthService {
     }
 
     if (this.isTokenExpired(tokens.expiryTime)) {
-      console.log('Token has expired. Clearing session.');
-      this.clearLocalSession();
-      this.finishLoading();
+      console.log('Token has expired. Trying to refresh it.');
+      this.refreshCognitoTokens()
+        .then(() => {
+          this.router.navigate(['/stream']);
+          this.finishLoading();
+        })
+        .catch(() => {
+          this.clearLocalSession();
+          this.finishLoading();
+        });
       return;
     }
 
@@ -98,7 +117,7 @@ export class AuthService {
       : null;
   }
 
-    /**
+  /**
    * Gets the ID token from localStorage.
    */
   getIdToken(): string | null {
@@ -130,18 +149,120 @@ export class AuthService {
   }
 
   private isTokenExpired(expiryTime: string): boolean {
-    return new Date() >= new Date(expiryTime);
+    return Date.now() >= Number(expiryTime);
   }
 
   private getCognitoLogoutUrl(): string {
     return `${this.cognitoLogoutUrl}?client_id=${this.clientId}&logout_uri=${encodeURIComponent(this.redirectUri)}`;
   }
 
+  /**
+   * Starts token refresh interval.
+   */
+  startTokenAutoRefresh(): void {
+    if (this.refreshSubscription) {
+      return;
+    }
+
+    const refreshIntervalMs = 15 * 60 * 1000;
+    this.refreshSubscription = interval(refreshIntervalMs).subscribe(() => {
+      this.refreshCognitoTokens();
+    });
+
+    this.scheduleTokenRefresh();
+
+  }
+
+  /**
+   * Stops token refresh interval.
+   */
+  stopTokenAutoRefresh(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = undefined;
+    }
+
+    if (this.refreshTimeoutId) {
+      clearTimeout(this.refreshTimeoutId);
+      this.refreshTimeoutId = undefined;
+    }
+  }
+
+  /**
+   * Sets a timeout for token refresh.
+   */
+  private scheduleTokenRefresh(): void {
+    const tokens = this.getStoredTokens();
+    if (!tokens) {
+      return;
+    }
+
+    const expiryTime = parseInt(this.getExpiryDate()!);
+    const currentTime = Date.now();
+
+    const timeToRefresh = expiryTime - currentTime - 5 * 60 * 1000;
+
+    if (timeToRefresh <= 0) {
+      this.refreshCognitoTokens();
+      return;
+    }
+
+    this.refreshTimeoutId = setTimeout(() => {
+      this.refreshCognitoTokens();
+    }, timeToRefresh);
+  }
+
+  /**
+   * Sends a request to the backend with a refresh token expecting new id_token in response
+   */
+  refreshCognitoTokens(): Promise<RefreshedAuthTokens | null> {
+    const refreshToken = this.getRefreshToken();
+    const expiryDate = this.getExpiryDate();
+    if (!refreshToken || !expiryDate) {
+      console.warn('No refresh token or expiry date available.');
+      return Promise.resolve(null);
+    }
+
+
+    return new Promise((resolve, reject) => {
+      this.http
+        .post<RefreshedAuthTokens>(`${this.backendUrl}/refresh-cognito-tokens`, {refreshToken}, this.getHttpOptions())
+        .pipe(
+          tap((response) => {
+            console.log('Token refresh successful:', response);
+            this.saveTokens(response.id_token, refreshToken, response.expires_in.toString());
+            resolve(response);
+          }),
+          catchError((error) => {
+            const isTokenExpired = this.isTokenExpired(expiryDate);
+
+            if (isTokenExpired) {
+              console.warn('Refresh token has expired. Logging out.');
+              this.logout();
+            } else if (this.isNetworkError(error)) {
+              console.warn('Network issue during token refresh. Retrying later.');
+              setTimeout(() => this.refreshCognitoTokens(), 30000);
+            } else {
+              console.error('Token refresh failed due to server error. Logging out.', error);
+              this.logout();
+            }
+            reject(error);
+            throw error;
+          })
+        )
+        .subscribe();
+    });
+  }
+
+  private isNetworkError(error: any): boolean {
+    return error?.status === 0 || error?.status === undefined;
+  }
+
   private handleTokenValidation(response: { message: string }, tokens: AuthTokens): void {
     if (response.message === 'verified') {
-      console.log('Token is valid. Redirecting to /stream.');
+      console.log('Token is valid. Redirecting to /stream-search.');
       this.saveTokens(tokens.idToken, tokens.refreshToken, tokens.expiryTime);
-      this.router.navigate(['/stream']);
+      this.router.navigate(['/stream-search']);
     } else {
       console.log('Token validation failed. Clearing session.');
       this.clearLocalSession();
@@ -157,5 +278,9 @@ export class AuthService {
 
   private finishLoading(): void {
     this.isLoading.next(false);
+  }
+
+  private getHttpOptions(): { headers: HttpHeaders } {
+    return {headers: new HttpHeaders({'Content-Type': 'application/json'})};
   }
 }

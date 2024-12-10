@@ -8,7 +8,8 @@ header {
   top: 0;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  height: 5.75vh;
 }
 
 header img {
@@ -22,17 +23,49 @@ menu {
   align-items: center;
 }
 
+.nav-buttons {
+  flex: 1;
+  display: flex;
+  height: var(--header-height);
+  align-items: stretch;
+}
+
+.auth-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
 menu button {
   padding: 10px 20px;
   border: none;
-  background-color: var(--primary-color);
-  color: white;
+  background-color: transparent;
+  color: var(--dark-violet);
   font-size: 16px;
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.2s;
 }
 
-menu button:hover {
-  background-color: #0056b3;
+.nav-buttons button {
+  font-size: 1.5rem;
+  font-weight: 500;
+  height: 100%;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.nav-buttons button:hover {
+  background-color: var(--background-color);
+}
+
+.nav-buttons button.active {
+  background-color: var(--background-color);
+  font-weight: bold;
+}
+
+.auth-buttons button {
+  background-color: var(--primary-color);
+  color: white;
+  margin-left: 10px;
 }

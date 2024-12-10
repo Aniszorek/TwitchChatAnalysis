@@ -1,11 +1,21 @@
 <header>
-  <img Src="twitch_icon.png" href="App logo">
-  <menu>
-    @if (!this.authService.isLoggedIn()) {
-      <button (click)="login()"> Login</button>
-    } @else {
-      <button (click)="logout()"> Logout</button>
-    }
+  <a href="stream-search"><img alt="App logo" Src="twitch_icon.png" href="App logo"></a>
+<!--  todo dawać dostęp tylko jeśli ktoś jest przynajmniej moderatorem - -->
+  <menu *ngIf="authService.isLoggedIn() && twitchService.getTwitchUsername()!=null" class="nav-buttons">
+    <button
+      (click)="goToStream()"
+      [ngClass]="{'active': activeView === 'stream'}">
+      Stream
+    </button>
+    <button
+      (click)="goToCharts()"
+      [ngClass]="{'active': activeView === 'charts'}">
+      Charts
+    </button>
+  </menu>
 
+  <menu class="auth-buttons">
+    <button *ngIf="!authService.isLoggedIn()" (click)="login()">Login</button>
+    <button *ngIf="authService.isLoggedIn()" (click)="logout()">Logout</button>
   </menu>
 </header>
