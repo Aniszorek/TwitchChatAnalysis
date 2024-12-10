@@ -14,7 +14,7 @@ Current status:
  - Twitch account with bot privileges (see below how to get one)
 
 ## How to run
-1. **Generate access token for your bot Twitch account** - described [below](#How-to-get-Twitch-account-with-bot-priviledges)
+1. **Generate access token for your bot Twitch account** - described [below](#How-to-get-Twitch-account-with-bot-privileges)
 2. **Clone this repository**
    ```bash
    git clone https://github.com/barteknowak31l/TwitchChatAnalysis.git

@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
-import {COGNITO_ROLES, CognitoRole, verifyUserPermission} from "../cognitoRoles";
+import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {
     fetchTwitchStreamMetadata,
     fetchTwitchUserId,
