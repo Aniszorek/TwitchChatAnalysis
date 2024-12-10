@@ -1,13 +1,12 @@
 import {Component} from '@angular/core';
-import {SearchUserComponent} from "./search-user/search-user.component";
 import {ChatComponent} from "./chat/chat.component";
 import {VideoComponent} from './video/video.component';
+import {TwitchService} from '../twitch/twitch.service';
 
 @Component({
   selector: 'app-stream',
   standalone: true,
   imports: [
-    SearchUserComponent,
     ChatComponent,
     VideoComponent,
   ],
@@ -17,8 +16,7 @@ import {VideoComponent} from './video/video.component';
 export class StreamComponent {
   selectedUser: string | null = null;
 
-  onUserSelected(username: string) {
-    this.selectedUser = username;
-    console.log('Received username:', username);
+  constructor(twitchService: TwitchService) {
+    this.selectedUser = twitchService.getTwitchUsername();
   }
 }

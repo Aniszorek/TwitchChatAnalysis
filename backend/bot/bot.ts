@@ -1,15 +1,14 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
-import {COGNITO_ROLES, CognitoRole, verifyUserPermission} from "../cognitoRoles";
 import {
     fetchTwitchStreamMetadata,
     fetchTwitchUserId,
     fetchTwitchUserIdFromOauthToken,
     TwitchStreamData
 } from "../twitch_calls/twitchAuth";
+import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
-import {frontendClients} from "./frontendClients";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
     channelChatMessageHandler,
@@ -20,6 +19,7 @@ import {
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
+import {frontendClients} from "./frontendClients";
 
 const LOG_PREFIX = 'TWITCH_WS'
 
@@ -88,6 +88,7 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
         twitchWebSocket.on("open", () => {
             logger.info(`Twitch WebSocket connection opened for user ID: ${cognitoUserId}`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
         });
+
 
         twitchWebSocket.on("message", (data: WebSocket.Data) => {
             const parsedData: TwitchWebSocketMessage = JSON.parse(data.toString());

@@ -1,6 +1,6 @@
 import {Component, DestroyRef, inject, OnInit} from '@angular/core';
-import {ChatMessage, TwitchService} from '../../twitch/twitch.service';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import {ChatMessage, TwitchService} from '../../twitch/twitch.service';
 
 @Component({
   selector: 'app-stream-chat',
@@ -14,8 +14,8 @@ import {DatePipe, NgForOf, NgIf} from '@angular/common';
   styleUrl: './chat.component.css'
 })
 export class ChatComponent implements OnInit {
-  private twitchService = inject(TwitchService);
-  private destroyRef = inject(DestroyRef)
+  private readonly twitchService = inject(TwitchService);
+  private readonly destroyRef = inject(DestroyRef)
   messages: ChatMessage[] = [];
 
   ngOnInit() {
@@ -29,7 +29,7 @@ export class ChatComponent implements OnInit {
       }
     );
 
-    this.destroyRef.onDestroy(sub.unsubscribe)
+    this.destroyRef.onDestroy(() => sub.unsubscribe())
   }
 
 }

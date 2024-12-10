@@ -24,7 +24,7 @@ export class AuthService {
   isLoading = new BehaviorSubject<boolean>(true);
   isLoggedIn = signal(false);
 
-  private logoutSubject = new Subject<void>();
+  private readonly logoutSubject = new Subject<void>();
   logout$ = this.logoutSubject.asObservable();
 
   private refreshSubscription?: Subscription;
@@ -35,7 +35,7 @@ export class AuthService {
   private readonly clientId = config.cognitoClientId;
   private readonly redirectUri = urls.cognitoLougoutRedirectUrl;
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(private readonly router: Router, private readonly http: HttpClient) {}
 
   /**
    * Starts the login process by redirecting to the backend authorization URL.
@@ -260,9 +260,9 @@ export class AuthService {
 
   private handleTokenValidation(response: { message: string }, tokens: AuthTokens): void {
     if (response.message === 'verified') {
-      console.log('Token is valid. Redirecting to /stream.');
+      console.log('Token is valid. Redirecting to /stream-search.');
       this.saveTokens(tokens.idToken, tokens.refreshToken, tokens.expiryTime);
-      this.router.navigate(['/stream']);
+      this.router.navigate(['/stream-search']);
     } else {
       console.log('Token validation failed. Clearing session.');
       this.clearLocalSession();
