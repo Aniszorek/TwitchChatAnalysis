@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
-import {trackSubscription} from "./wsServer";
-import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
+import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
+import {COGNITO_ROLES, CognitoRole, verifyUserPermission} from "../cognitoRoles";
 import {
     fetchTwitchStreamMetadata,
     fetchTwitchUserId,
@@ -104,11 +104,16 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
 
 }
 
-function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: string): void {
+async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: string): Promise<void> {
     switch (data.metadata.message_type) {
         case 'session_welcome': {
             const websocketSessionID = data.payload.session!.id;
-            registerEventSubListeners(cognitoUserId, websocketSessionID);
+            await registerEventSubListeners(cognitoUserId, websocketSessionID);
+            const client = frontendClients.get(cognitoUserId);
+            if (client) {
+                client.readiness.twitchReady = true;
+                checkReadinessAndNotifyFrontend(cognitoUserId);
+            }
             break;
         }
 
@@ -119,11 +124,11 @@ function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: str
                     break;
                 }
                 case EventSubSubscriptionType.STREAM_ONLINE: {
-                    streamOnlineHandler(cognitoUserId, data)
+                    await streamOnlineHandler(cognitoUserId, data)
                     break;
                 }
                 case EventSubSubscriptionType.STREAM_OFFLINE: {
-                    streamOfflineHandler(cognitoUserId, data)
+                    await streamOfflineHandler(cognitoUserId, data)
                     break;
                 }
                 case EventSubSubscriptionType.CHANNEL_FOLLOW: {
@@ -163,6 +168,10 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
         const viewerId = await fetchTwitchUserIdFromOauthToken();
         const broadcasterId = frontendClients.get(cognitoUserId)?.twitchData.twitchBroadcasterUserId;
 
+        if (!broadcasterId) {
+            logger.error('No broadcaster found to subscribe to', LOG_PREFIX)
+        }
+
         await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_CHAT_MESSAGE, {
             broadcaster_user_id: broadcasterId, user_id: viewerId,
         }, headers)
@@ -181,8 +190,7 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
         }, headers)
 
         // moderator role required
-        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow'))
-        {
+        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow')) {
             await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_FOLLOW, {
                 broadcaster_user_id: broadcasterId, moderator_user_id: viewerId,
             }, headers, '2')
@@ -206,8 +214,6 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
         await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_UPDATE, {
             broadcaster_user_id: broadcasterId
         }, headers)
-
-
 
     } catch (error: any) {
         logger.error(`Error during subscription: ${error.response ? JSON.stringify(error.response.data, null, 2) : error.message}`, LOG_PREFIX);

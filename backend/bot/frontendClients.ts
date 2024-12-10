@@ -20,9 +20,13 @@ export interface TwitchStreamMetadata {
     followersCount: number | undefined;
     subscriberCount: number | undefined;
     messageCount: number | undefined;
-    positiveMessageCount: number| undefined;
+    veryNegativeMessageCount: number | undefined;
     negativeMessageCount: number | undefined;
+    slightlyNegativeMessageCount: number | undefined;
     neutralMessageCount: number | undefined;
+    slightlyPositiveMessageCount: number| undefined;
+    positiveMessageCount: number| undefined;
+    veryPositiveMessageCount: number| undefined;
 }
 
 export interface StreamData {
@@ -43,6 +47,11 @@ export interface TwitchData {
     streamData: StreamData;
 }
 
+interface ReadinessState {
+    twitchReady: boolean;
+    awsReady: boolean;
+}
+
 export interface UserConnections {
     ws: WebSocket;
     twitchWs: WebSocket | null;
@@ -51,20 +60,20 @@ export interface UserConnections {
     cognito: CognitoData;
     twitchData: TwitchData;
     postStreamMetadataIntervalId: NodeJS.Timeout | undefined;
+    readiness: ReadinessState;
 }
 
-// TODO TCA-83 might be moved somewhere more related to sentiment analysis and AWS
 export enum SentimentLabel {
-    POSITIVE,
-    NEGATIVE,
-    NEUTRAL
+    VERY_NEGATIVE = "Very negative",
+    NEGATIVE= "Negative",
+    SLIGHTLY_NEGATIVE = "Slightly Negative",
+    NEUTRAL = "Neutral",
+    SLIGHTLY_POSITIVE = "Slightly Positive",
+    POSITIVE = "Positive",
+    VERY_POSITIVE = "Very Positive"
 }
 
 export const frontendClients = new Map<string, UserConnections>();
-
-
-
-
 
 export const setFrontendClientCognitoData = (
     cognitoUserId: string,
@@ -152,14 +161,26 @@ export const incrementSentimentMessageCount = (cognitoUserId: string, label: Sen
     const client = frontendClients.get(cognitoUserId)
     if(client){
         switch (label) {
-            case SentimentLabel.POSITIVE:
-                incrementPositiveCount(client)
+            case SentimentLabel.VERY_NEGATIVE:
+                incrementVeryNegativeCount(client)
                 break
             case SentimentLabel.NEGATIVE:
                 incrementNegativeCount(client)
                 break
+            case SentimentLabel.SLIGHTLY_NEGATIVE:
+                incrementSlightlyNegativeCount(client)
+                break
             case SentimentLabel.NEUTRAL:
                 incrementNeutralCount(client)
+                break
+            case SentimentLabel.SLIGHTLY_POSITIVE:
+                incrementSlightlyPositiveCount(client)
+                break
+            case SentimentLabel.POSITIVE:
+                incrementPositiveCount(client)
+                break
+            case SentimentLabel.VERY_POSITIVE:
+                incrementVeryPositiveCount(client)
                 break
         }
     }
@@ -169,11 +190,11 @@ export const incrementSentimentMessageCount = (cognitoUserId: string, label: Sen
     }
 }
 
-const incrementPositiveCount = (client: UserConnections) => {
-    if(client.twitchData.streamMetadata.positiveMessageCount)
-        client.twitchData.streamMetadata.positiveMessageCount += 1
+const incrementVeryNegativeCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.veryNegativeMessageCount)
+        client.twitchData.streamMetadata.veryNegativeMessageCount += 1
     else
-        client.twitchData.streamMetadata.positiveMessageCount = 1
+        client.twitchData.streamMetadata.veryNegativeMessageCount = 1
 }
 
 const incrementNegativeCount = (client: UserConnections) => {
@@ -183,11 +204,39 @@ const incrementNegativeCount = (client: UserConnections) => {
         client.twitchData.streamMetadata.negativeMessageCount = 1
 }
 
+const incrementSlightlyNegativeCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.slightlyNegativeMessageCount)
+        client.twitchData.streamMetadata.slightlyNegativeMessageCount += 1
+    else
+        client.twitchData.streamMetadata.slightlyNegativeMessageCount = 1
+}
+
 const incrementNeutralCount = (client: UserConnections) => {
     if(client.twitchData.streamMetadata.neutralMessageCount)
         client.twitchData.streamMetadata.neutralMessageCount += 1
     else
         client.twitchData.streamMetadata.neutralMessageCount = 1
+}
+
+const incrementSlightlyPositiveCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.slightlyPositiveMessageCount)
+        client.twitchData.streamMetadata.slightlyPositiveMessageCount += 1
+    else
+        client.twitchData.streamMetadata.slightlyPositiveMessageCount = 1
+}
+
+const incrementPositiveCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.positiveMessageCount)
+        client.twitchData.streamMetadata.positiveMessageCount += 1
+    else
+        client.twitchData.streamMetadata.positiveMessageCount = 1
+}
+
+const incrementVeryPositiveCount = (client: UserConnections) => {
+    if(client.twitchData.streamMetadata.veryPositiveMessageCount)
+        client.twitchData.streamMetadata.veryPositiveMessageCount += 1
+    else
+        client.twitchData.streamMetadata.veryPositiveMessageCount = 1
 }
 
 export const incrementFollowersCount = (cognitoUserId: string)=> {

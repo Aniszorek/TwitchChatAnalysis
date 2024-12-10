@@ -77,9 +77,13 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                                 followersCount: 0,
                                 subscriberCount: 0,
                                 messageCount: 0,
-                                positiveMessageCount: 0,
+                                veryNegativeMessageCount: 0,
                                 negativeMessageCount: 0,
-                                neutralMessageCount: 0
+                                slightlyNegativeMessageCount: 0,
+                                neutralMessageCount: 0,
+                                slightlyPositiveMessageCount: 0,
+                                positiveMessageCount: 0,
+                                veryPositiveMessageCount: 0
                             },
                             streamData:{
                                 startedAt: undefined,
@@ -91,6 +95,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             }
                         },
                         postStreamMetadataIntervalId: undefined,
+                        readiness: {twitchReady: false, awsReady: false},
                     });
 
                     if (pendingWebSocketInitializations.has(userId)) {
@@ -114,9 +119,13 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             followersCount: 0,
                             subscriberCount: 0,
                             messageCount: 0,
-                            positiveMessageCount: 0,
+                            veryNegativeMessageCount: 0,
                             negativeMessageCount: 0,
-                            neutralMessageCount: 0
+                            slightlyNegativeMessageCount: 0,
+                            neutralMessageCount: 0,
+                            slightlyPositiveMessageCount: 0,
+                            positiveMessageCount: 0,
+                            veryPositiveMessageCount: 0
                         }
 
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
@@ -167,25 +176,8 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
             }
         });
 
-        ws.on('close', async () => {
-            logger.info(`Frontend client disconnected`, LOG_PREFIX, {color: LogColor.CYAN, backgroundColor: LogBackgroundColor.BG_BLACK, style: LogStyle.BOLD});
-            if (userId) {
-                const broadcasterId = frontendClients.get(userId)?.twitchData.twitchBroadcasterUserId
-                const streamId = frontendClients.get(userId)?.twitchData.streamId
-                if(broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
-                {
-                    const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
-                    const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
-                    setStreamDataEndValues(userId,  createTimestamp(), followerCount, subCount)
-                }
+        ws.on('close', () => handleWebSocketClose(userId));
 
-                if (streamId &&verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
-                    await patchStreamToApiGateway(userId)
-
-                await cleanupUserConnections(userId, frontendClients.get(userId)!.subscriptions);
-                frontendClients.delete(userId);
-            }
-        });
     });
 
     return wss;
@@ -253,3 +245,49 @@ export const sendMessageToFrontendClient = (userId: string, message: any) => {
         logger.error(`WebSocket for user ID ${userId} is not available`, LOG_PREFIX);
     }
 };
+
+
+export async function handleWebSocketClose(userId: string | null): Promise<void> {
+    logger.info(`Frontend client disconnected`, LOG_PREFIX, {
+        color: LogColor.CYAN,
+        backgroundColor: LogBackgroundColor.BG_BLACK,
+        style: LogStyle.BOLD,
+    });
+
+    if (!userId) return;
+
+    const userData = frontendClients.get(userId);
+    if (!userData) return;
+
+    const broadcasterId = userData.twitchData.twitchBroadcasterUserId;
+    const streamId = userData.twitchData.streamId;
+
+    if (broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API")) {
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId});
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId});
+        setStreamDataEndValues(userId, createTimestamp(), followerCount, subCount);
+    }
+
+    if (streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway")) {
+        await patchStreamToApiGateway(userId);
+    }
+
+    await cleanupUserConnections(userId, userData.subscriptions);
+    frontendClients.delete(userId);
+
+}
+
+
+export function checkReadinessAndNotifyFrontend(cognitoUserId: string): void {
+    const client = frontendClients.get(cognitoUserId);
+    if (!client) return;
+
+    const {readiness} = client;
+    if (readiness.twitchReady && readiness.awsReady) {
+        sendMessageToFrontendClient(cognitoUserId, {
+            type: 'initComplete',
+            message: "WebSocket initialization completed",
+        });
+        logger.info(`All WebSocket handlers executed for user ${cognitoUserId}`, LOG_PREFIX);
+    }
+}

@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import {frontendClients, incrementSentimentMessageCount, SentimentLabel} from "../bot/frontendClients";
-import {sendMessageToFrontendClient} from "../bot/wsServer";
+import {checkReadinessAndNotifyFrontend, sendMessageToFrontendClient} from "../bot/wsServer";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
 
@@ -49,7 +49,11 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
                     clearInterval(interval);
                 }
             }, PING_INTERVAL);
-
+            const client = frontendClients.get(cognitoUserId);
+            if (client) {
+                client.readiness.awsReady = true;
+                checkReadinessAndNotifyFrontend(cognitoUserId);
+            }
         });
 
         awsWebSocket.on("message", (message: WebSocket.Data) => {
@@ -61,8 +65,14 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
                     //TODO handle processed messages on FE
                     sendMessageToFrontendClient(cognitoUserId, data.data);
 
-                    // TODO TCA-83 sentiment label should be send by AWS, not hardcoded
-                    incrementSentimentMessageCount(cognitoUserId, SentimentLabel.POSITIVE)
+                    const nlpClassification = (data.data as any)?.nlp_classification;
+                    const convertedNlpClassification = Object.values(SentimentLabel).includes(nlpClassification as SentimentLabel) ? nlpClassification as SentimentLabel : undefined;
+                    if (convertedNlpClassification == undefined) {
+                        logger.error("Converted NLP Classification is undefined", LOG_PREFIX);
+                    }
+                    else{
+                        incrementSentimentMessageCount(cognitoUserId, convertedNlpClassification);
+                    }
 
                     logger.info(`Message sent to frontend client`, LOG_PREFIX, {color: LogColor.YELLOW});
                 }

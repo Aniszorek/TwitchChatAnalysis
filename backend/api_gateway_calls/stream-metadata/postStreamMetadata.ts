@@ -25,9 +25,13 @@ interface StreamMetadataMessage {
     follower_count?: number,
     subscriber_count?: number,
     message_count?: number,
-    positive_message_count?: number,
+    very_negative_message_count?: number,
     negative_message_count?: number,
+    slightly_negative_message_count?: number,
     neutral_message_count?: number
+    slightly_positive_message_count?: number
+    positive_message_count?: number,
+    very_positive_message_count?: number
 }
 
 export async function postMetadataToApiGateway(cognitoUserId: string) {
@@ -64,9 +68,13 @@ export async function postMetadataToApiGateway(cognitoUserId: string) {
                 followersCount: oldMetadata?.followersCount,
                 subscriberCount: oldMetadata?.subscriberCount,
                 messageCount: oldMetadata?.messageCount,
-                positiveMessageCount: oldMetadata?.positiveMessageCount,
+                veryNegativeMessageCount: oldMetadata?.veryNegativeMessageCount,
                 negativeMessageCount: oldMetadata?.negativeMessageCount,
-                neutralMessageCount: oldMetadata?.neutralMessageCount
+                slightlyNegativeMessageCount: oldMetadata?.slightlyNegativeMessageCount,
+                neutralMessageCount: oldMetadata?.neutralMessageCount,
+                slightlyPositiveMessageCount: oldMetadata?.slightlyPositiveMessageCount,
+                positiveMessageCount: oldMetadata?.positiveMessageCount,
+                veryPositiveMessageCount: oldMetadata?.veryPositiveMessageCount
             }
             setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
         }
@@ -79,9 +87,13 @@ export async function postMetadataToApiGateway(cognitoUserId: string) {
             follower_count: client.twitchData.streamMetadata.followersCount,
             subscriber_count: client.twitchData.streamMetadata.subscriberCount,
             message_count: client.twitchData.streamMetadata.messageCount,
-            positive_message_count: client.twitchData.streamMetadata.positiveMessageCount,
+            very_negative_message_count: client.twitchData.streamMetadata.veryNegativeMessageCount,
             negative_message_count: client.twitchData.streamMetadata.negativeMessageCount,
-            neutral_message_count: client.twitchData.streamMetadata.neutralMessageCount
+            slightly_negative_message_count: client.twitchData.streamMetadata.slightlyNegativeMessageCount,
+            neutral_message_count: client.twitchData.streamMetadata.neutralMessageCount,
+            slightly_positive_message_count: client.twitchData.streamMetadata.slightlyPositiveMessageCount,
+            positive_message_count: client.twitchData.streamMetadata.positiveMessageCount,
+            very_positive_message_count: client.twitchData.streamMetadata.veryPositiveMessageCount
         }
 
         const response = await apiGatewayClient.post('/stream-metadata', metadata, {
