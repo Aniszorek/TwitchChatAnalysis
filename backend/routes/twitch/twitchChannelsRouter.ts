@@ -10,6 +10,7 @@ import {
     isPatchChannelInformationPayload,
     patchChannelInformation
 } from "../../twitch_calls/twitchChannels/patchChannelInformation";
+import {isPostCreatePollPayload, postCreatePoll} from "../../twitch_calls/twitchChannels/postCreatePoll";
 
 export const twitchChannelsRouter = express.Router();
 
@@ -63,6 +64,20 @@ twitchChannelsRouter.delete('/vips', async (req, res) => {
     catch(error: any) {
         logger.error(`Error in delete /vips route: ${error.message}`, LOG_PREFIX);
         res.status(500).json({error: `Failed to delete VIP`});
+    }
+})
+
+twitchChannelsRouter.post('/polls', async (req, res) => {
+    try{
+        const payload = req.body;
+        isPostCreatePollPayload(payload)
+        const result= await postCreatePoll(payload)
+        logger.info(`Successfully started a poll`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in post /polls route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to create a poll`});
     }
 })
 
