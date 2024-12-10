@@ -33,7 +33,7 @@ export class SearchUserComponent implements OnInit {
         if (state.success) {
           this.errorMessage = null;
           this.successMessage = state.message ?? 'Operation successful.';
-          this.twitchService.setTwitchUsername(this.username);
+          this.twitchService.setTwitchUsername(this.username.toLowerCase());
           console.log('Redirecting');
           this.router.navigate(['/stream']);
         } else {
