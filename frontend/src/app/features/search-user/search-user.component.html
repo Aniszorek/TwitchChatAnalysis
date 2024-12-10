@@ -1,7 +1,7 @@
 <div class="search-wrapper">
   <div class="search-container">
     <input
-      [disabled]="isDisabled"
+      [disabled]="this.loading"
       [(ngModel)]="username"
       placeholder="Enter username" class="search-input"/>
     <button

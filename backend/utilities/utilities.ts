@@ -26,3 +26,7 @@ export function waitForWebSocketClose(ws: WebSocket, closeHandler: () => Promise
         ws.close();
     });
 }
+
+export function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

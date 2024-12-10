@@ -175,7 +175,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
             }
         });
 
-        ws.on('close', () => handleWebSocketClose(userId));
+        ws.on('close', async () => await handleWebSocketClose(userId));
 
     });
 
