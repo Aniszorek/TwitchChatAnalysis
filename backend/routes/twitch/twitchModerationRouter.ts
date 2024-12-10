@@ -7,6 +7,8 @@ import {deleteBanUser} from "../../twitch_calls/twitchModeration/unbanUser";
 import {postAddModerator} from "../../twitch_calls/twitchModeration/modUser";
 import {deleteModerator} from "../../twitch_calls/twitchModeration/unmodUser";
 import {deleteMessage} from "../../twitch_calls/twitchModeration/deleteMessage";
+import {getAutomodSettings} from "../../twitch_calls/twitchModeration/getAutomodSettings";
+import {isPutAutomodSettingsPayload, putAutomodSettings} from "../../twitch_calls/twitchModeration/putAutomodSettings";
 
 export const twitchModerationRouter = express.Router();
 
@@ -87,6 +89,34 @@ twitchModerationRouter.delete('/chat', async (req, res) => {
     catch(error: any) {
         logger.error(`Error in delete /chat route: ${error.message}`, LOG_PREFIX);
         res.status(500).json({error: `Failed to delete chat message`});
+    }
+})
+
+twitchModerationRouter.get('/automod/settings', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id", "moderator_id"]);
+        const result= await getAutomodSettings(queryParams)
+        logger.info(`Successfully get automod settings`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in get /automod/settings route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to get automod settings`});
+    }
+})
+
+twitchModerationRouter.put('/automod/settings', async (req, res) => {
+    try{
+        const queryParams = extractQueryParams(req, ["broadcaster_id", "moderator_id"]);
+        const payload = req.body
+        isPutAutomodSettingsPayload(payload)
+        const result= await putAutomodSettings(queryParams, payload)
+        logger.info(`Successfully put automod settings: ${queryParams.user_id}`, LOG_PREFIX, {color: LogColor.MAGENTA, style: LogStyle.DIM});
+        res.json(result);
+    }
+    catch(error: any) {
+        logger.error(`Error in put /automod/settings route: ${error.message}`, LOG_PREFIX);
+        res.status(500).json({error: `Failed to put automod settings`});
     }
 })
 
