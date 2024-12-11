@@ -17,7 +17,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiUlhqdWcxNHdvcWRwYUdWM0ZlemFLQSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImQ1MzEzODZkLWI3OGUtNGI1Ny1iMGM2LTdlYTBkYTMyNWNjNSIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6ImE4MGFlZDkyLWRlZmQtNDY1ZS1iNjFkLTkzZmJhZWI0ZmI4MyIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNDM4NDI0LCJleHAiOjE3MzM0NDIwMjQsImlhdCI6MTczMzQzODQyNCwianRpIjoiY2JiNTg3YmMtZTE4OS00NGRlLTk0NmYtMzFmNTAxN2ZjYWFiIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.tz3SsvQNJzNKirIBsWtQDfkaq1ZAv2_mL81lqyj1aKzye0zK0vAhgfgmdtxyBBtYEaBk8Sc-azp1szlc4X0HbRhG8rZh4JRIPgIqqg1uEBHcZr9qhPOM4Iw8EOY37oD8m-QLYofhnN3YZHLxauWJhdMRXbVOxfvH9vEfWDOXag1VqWf5II5suXv1I39nLik6obFxRDddPsW9mYXV-UR9HBYo6FvYIa2b1yxVtzRx_exBCS6xipfcs-60DW2SDCOpG34VqxA1LS0eb-YatqHwoqEKGb8iiUfn-7ypa5FVei5GDi3fHi2mALEdGu5IdDkfD1KQxyRuc5dLcEpWPnclHQ",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiSEZfVFA0WldVbURZQWFnM3pKUWZldyIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImMzYzNkN2I3LWNiYmMtNDNlMC1iMWY2LWIwNWIwNzc2ZWI5ZiIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6IjBjMjYxZTZmLTc0OTgtNDFmZi1iY2EwLWVmMTk1ZDRiOWI4MCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzODYzMTE5LCJleHAiOjE3MzM4NzM3ODQsImlhdCI6MTczMzg3MDE4NCwianRpIjoiNzFiMjMwZjgtMzFhYS00OGJhLWFjNjMtYzNkZWUzZjVhMTAyIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.Aen-8RCAqTcSNvcc5sya4q16TzbSBLbIDjJrL3q9rzxbSewOcOM4I2Lud1RC4ubnXM0MdyR845IYeCdFXWR3ROvzjWkN4BYMtPSSdwfbY3Ls-rRvhx1FlF7FPRNg-GHXECH32wltyO0ikXMQ_XFquoBCVJWJQQKE5c94jXJBI40U_LA5buWDbIFHF5lCLOes-SiE24CBTxtnmWk7gs0nbYmJihdh_7mnVty9Ktgom-1Th1TGD_NRtT1pmzGedWdbNNUp8O1_A2eCIao0RYyU5xDDWI0wlQpeSwPOmRi-ARsHJ8Zy9drVsgNiMap0hU7VyMYihpLHFB16nDyRYqiLcA",
 									"type": "string"
 								}
 							]
@@ -180,6 +180,29 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "delete stream",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://t7pqmsv4x4.execute-api.eu-central-1.amazonaws.com/test/stream",
+							"protocol": "https",
+							"host": [
+								"t7pqmsv4x4",
+								"execute-api",
+								"eu-central-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"test",
+								"stream"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"auth": {
@@ -226,7 +249,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiZkc5S1RKM0dkVmJSUm56MkxNdUZLZyIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6IjU2NmYzMWYxLTA1YmUtNDMzZC1iMjk3LTY2YTBhMGJlZDQ3MSIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTczMzY4ODA2MywiZXhwIjoxNzMzNjkxNjYzLCJpYXQiOjE3MzM2ODgwNjMsImp0aSI6ImY1NTg0ZDgxLWVlMWQtNDJiNC05MjdkLWExZmQ3YTE1OTgwZSIsImVtYWlsIjoiYmFydGVrbm93YWszMWxAZ21haWwuY29tIn0.nA-5EFxTlgGsJ8ZtPd_d1ov6pp77Oi5rpk_VfrjKlDqoL_o0n-2ER4XUfLlZDkJFNhmzKH_hyt3_M0OzO5nTXtvoXSGFrind__emq7PXxsI-l4xNIyTdg1noUGA6otPAn1YzMyEX59-wMA08LsC5ad2DbmmzIKG7Lx-Rty-1YkGx69QF1AzDzUjK5Su9ZH4oGhOkenIJVBOLYqlXj0wFMKhIc6A4AnGTch-YFF3B_1xCvOOEzqUbMbT-bfxGAvj1pwpJQWPhBJxqNJp7UgCLJszBv6OgH9XqyIhFgpsT1n_oH3TPBifwfyT3jJSKieDN7ZnO3zPEz3sx_gjq-0rwbw",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiSEZfVFA0WldVbURZQWFnM3pKUWZldyIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImMzYzNkN2I3LWNiYmMtNDNlMC1iMWY2LWIwNWIwNzc2ZWI5ZiIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6IjBjMjYxZTZmLTc0OTgtNDFmZi1iY2EwLWVmMTk1ZDRiOWI4MCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzODYzMTE5LCJleHAiOjE3MzM4NzM3ODQsImlhdCI6MTczMzg3MDE4NCwianRpIjoiNzFiMjMwZjgtMzFhYS00OGJhLWFjNjMtYzNkZWUzZjVhMTAyIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.Aen-8RCAqTcSNvcc5sya4q16TzbSBLbIDjJrL3q9rzxbSewOcOM4I2Lud1RC4ubnXM0MdyR845IYeCdFXWR3ROvzjWkN4BYMtPSSdwfbY3Ls-rRvhx1FlF7FPRNg-GHXECH32wltyO0ikXMQ_XFquoBCVJWJQQKE5c94jXJBI40U_LA5buWDbIFHF5lCLOes-SiE24CBTxtnmWk7gs0nbYmJihdh_7mnVty9Ktgom-1Th1TGD_NRtT1pmzGedWdbNNUp8O1_A2eCIao0RYyU5xDDWI0wlQpeSwPOmRi-ARsHJ8Zy9drVsgNiMap0hU7VyMYihpLHFB16nDyRYqiLcA",
 									"type": "string"
 								}
 							]
@@ -240,7 +263,7 @@
 							}
 						],
 						"url": {
-							"raw": "localhost:3000/aws/stream-metadata?stream_id=5262293390",
+							"raw": "localhost:3000/aws/stream-metadata?stream_id=43308815080",
 							"host": [
 								"localhost"
 							],
@@ -252,7 +275,7 @@
 							"query": [
 								{
 									"key": "stream_id",
-									"value": "5262293390"
+									"value": "43308815080"
 								}
 							]
 						}
@@ -320,7 +343,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiR1haN3VnTzRJbVZmVGNNMUt3c1M3QSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6IjJlYTI3YzBhLTc0ZGYtNGVlNy05NGUxLWUxNTUxODhhMWU1ZCIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6IjhjODhjNWU5LTExODktNGFlNy1hMTM3LWUyMDE0Y2M3ZmRiZCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNzYzOTM0LCJleHAiOjE3MzM3Njc1MzQsImlhdCI6MTczMzc2MzkzNCwianRpIjoiNGEzYjY0ZjItNDI2OS00NzQ0LTg5MmYtYzc1ZWFjNzllM2M4IiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.whj-VG7qt9MMf3dhdAfU4AopPmicfn24s8rrocDWeC2XP5GbO01Q2yiGhL7m8eGa60nrADPkamibu4SIj48DOFpAS1irXzVPJdfdc9Bgy4EHwrseEamCxK4_WnFE4cgcTuCPZAzJtBvxYoA-FOXqeX_067p8BfqvRS_yHafoOy0Cr_7Wm3N3C8wsFKN0vfSVQTBcKQsBZRHdVZwhVD5K9xEj8BvlD4nQiqlkuqIqRVmHCAA0712qcOrgZ9uvC90Onbe4ohO80OKp-CtpUPBug3GeRZdJrD2lRj-hdHhxIBNgPIcb0ShwA0GUh2QMgH-2AKgE8L51NPy8UkFvWwzEIg",
+									"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiSEZfVFA0WldVbURZQWFnM3pKUWZldyIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6ImMzYzNkN2I3LWNiYmMtNDNlMC1iMWY2LWIwNWIwNzc2ZWI5ZiIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6IjBjMjYxZTZmLTc0OTgtNDFmZi1iY2EwLWVmMTk1ZDRiOWI4MCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzODYzMTE5LCJleHAiOjE3MzM4NzM3ODQsImlhdCI6MTczMzg3MDE4NCwianRpIjoiNzFiMjMwZjgtMzFhYS00OGJhLWFjNjMtYzNkZWUzZjVhMTAyIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.Aen-8RCAqTcSNvcc5sya4q16TzbSBLbIDjJrL3q9rzxbSewOcOM4I2Lud1RC4ubnXM0MdyR845IYeCdFXWR3ROvzjWkN4BYMtPSSdwfbY3Ls-rRvhx1FlF7FPRNg-GHXECH32wltyO0ikXMQ_XFquoBCVJWJQQKE5c94jXJBI40U_LA5buWDbIFHF5lCLOes-SiE24CBTxtnmWk7gs0nbYmJihdh_7mnVty9Ktgom-1Th1TGD_NRtT1pmzGedWdbNNUp8O1_A2eCIao0RYyU5xDDWI0wlQpeSwPOmRi-ARsHJ8Zy9drVsgNiMap0hU7VyMYihpLHFB16nDyRYqiLcA",
 									"type": "string"
 								}
 							]
@@ -536,7 +559,25 @@
 							"name": "get moderators",
 							"request": {
 								"method": "GET",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/moderators?broadcaster_id=105353161",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"moderators"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -544,7 +585,33 @@
 							"name": "delete message",
 							"request": {
 								"method": "DELETE",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/chat?broadcaster_id=105353161&moderator_id=105353161&message_id=b911d3e9-d3c3-466b-b391-8aae85b12d7f",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"chat"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "moderator_id",
+											"value": "105353161"
+										},
+										{
+											"key": "message_id",
+											"value": "b911d3e9-d3c3-466b-b391-8aae85b12d7f"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -552,7 +619,30 @@
 							"name": "get automod settings",
 							"request": {
 								"method": "GET",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/automod/settings?broadcaster_id=105353161&moderator_id=105353161",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"automod",
+										"settings"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "moderator_id",
+											"value": "105353161"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -560,7 +650,39 @@
 							"name": "put automod settings",
 							"request": {
 								"method": "PUT",
-								"header": []
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"overall_level\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/automod/settings?broadcaster_id=105353161&moderator_id=105353161",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"automod",
+										"settings"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "moderator_id",
+											"value": "105353161"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -568,7 +690,29 @@
 							"name": "get blocked terms",
 							"request": {
 								"method": "GET",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/moderation/blocked_terms?broadcaster_id=105353161&moderator_id=105353161",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"moderation",
+										"blocked_terms"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "moderator_id",
+											"value": "105353161"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -577,6 +721,15 @@
 							"request": {
 								"method": "POST",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"text\": \"test blocked term\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "localhost:3000/twitch/moderation/blocked_terms?broadcaster_id=105353161&moderator_id=105353161",
 									"host": [
@@ -608,7 +761,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "localhost:3000/twitch/moderation/blocked_terms?broadcaster_id=105353161&moderator_id=105353161&id=d51f5f88-8c51-41f0-b19c-d529eb876fe8",
+									"raw": "localhost:3000/twitch/moderation/blocked_terms?broadcaster_id=105353161&moderator_id=105353161&id=1ee57ee2-1472-4c09-a24c-49d5b918b6dc",
 									"host": [
 										"localhost"
 									],
@@ -629,7 +782,7 @@
 										},
 										{
 											"key": "id",
-											"value": "d51f5f88-8c51-41f0-b19c-d529eb876fe8"
+											"value": "1ee57ee2-1472-4c09-a24c-49d5b918b6dc"
 										}
 									]
 								}
@@ -761,8 +914,36 @@
 						{
 							"name": "get followers count",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "p1ermmh1kz0r83f6tcl86tb1ro08zg",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/channels/followers?broadcaster_id=105353161",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"channels",
+										"followers"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -803,11 +984,27 @@
 						{
 							"name": "post create poll",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "hdrnypaes5tu3jhqhrtgihg8xgsp7e",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "Client-Id",
+										"value": "y3s6y3r4sxt83e3qc53jz5uqmun47g",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"broadcaster_id\":\"141981764\",\r\n  \"title\":\"Heads or Tails?\",\r\n  \"choices\":[{\r\n    \"title\":\"Heads\"\r\n  },\r\n  {\r\n    \"title\":\"Tails\"\r\n  }],\r\n  \"channel_points_voting_enabled\":true,\r\n  \"channel_points_per_vote\":100,\r\n  \"duration\":1800\r\n}",
+									"raw": "{\r\n    \"broadcaster_id\": \"105353161\",\r\n    \"title\": \"Heads or Tails?\",\r\n    \"choices\": [\r\n        {\r\n            \"title\": \"Heads\"\r\n        },\r\n        {\r\n            \"title\": \"Tails\"\r\n        }\r\n    ],\r\n    \"channel_points_voting_enabled\": false,\r\n    \"duration\": 60\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -833,7 +1030,29 @@
 							"name": "post start raid",
 							"request": {
 								"method": "POST",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/channels/raids?from_broadcaster_id=105353161&to_broadcaster_id=115025963",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"channels",
+										"raids"
+									],
+									"query": [
+										{
+											"key": "from_broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "to_broadcaster_id",
+											"value": "115025963"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -871,8 +1090,39 @@
 						{
 							"name": "send chat message",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiR1haN3VnTzRJbVZmVGNNMUt3c1M3QSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6IjJlYTI3YzBhLTc0ZGYtNGVlNy05NGUxLWUxNTUxODhhMWU1ZCIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6IjhjODhjNWU5LTExODktNGFlNy1hMTM3LWUyMDE0Y2M3ZmRiZCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzMzNzYzOTM0LCJleHAiOjE3MzM3Njc1MzQsImlhdCI6MTczMzc2MzkzNCwianRpIjoiNGEzYjY0ZjItNDI2OS00NzQ0LTg5MmYtYzc1ZWFjNzllM2M4IiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.whj-VG7qt9MMf3dhdAfU4AopPmicfn24s8rrocDWeC2XP5GbO01Q2yiGhL7m8eGa60nrADPkamibu4SIj48DOFpAS1irXzVPJdfdc9Bgy4EHwrseEamCxK4_WnFE4cgcTuCPZAzJtBvxYoA-FOXqeX_067p8BfqvRS_yHafoOy0Cr_7Wm3N3C8wsFKN0vfSVQTBcKQsBZRHdVZwhVD5K9xEj8BvlD4nQiqlkuqIqRVmHCAA0712qcOrgZ9uvC90Onbe4ohO80OKp-CtpUPBug3GeRZdJrD2lRj-hdHhxIBNgPIcb0ShwA0GUh2QMgH-2AKgE8L51NPy8UkFvWwzEIg",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
-								"header": []
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"broadcaster_id\": \"105353161\",\r\n    \"sender_id\": \"105353161\",\r\n    \"message\": \"send message works!\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:3000/twitch/chat/messages",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"chat",
+										"messages"
+									]
+								}
 							},
 							"response": []
 						},
@@ -880,7 +1130,29 @@
 							"name": "get chat settings",
 							"request": {
 								"method": "GET",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "localhost:3000/twitch/chat/settings?broadcaster_id=105353161&moderator_id=105353161",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"chat",
+										"settings"
+									],
+									"query": [
+										{
+											"key": "broadcaster_id",
+											"value": "105353161"
+										},
+										{
+											"key": "moderator_id",
+											"value": "105353161"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -889,6 +1161,15 @@
 							"request": {
 								"method": "PATCH",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"follower_mode\": false\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "localhost:3000/twitch/chat/settings?broadcaster_id=105353161&moderator_id=105353161",
 									"host": [
@@ -922,8 +1203,42 @@
 						{
 							"name": "search categories",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "hdrnypaes5tu3jhqhrtgihg8xgsp7e",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": []
+								"header": [
+									{
+										"key": "Client-Id",
+										"value": "y3s6y3r4sxt83e3qc53jz5uqmun47g",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "localhost:3000/twitch/search/categories?query=dark%3Bsouls",
+									"host": [
+										"localhost"
+									],
+									"port": "3000",
+									"path": [
+										"twitch",
+										"search",
+										"categories"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "dark%3Bsouls"
+										}
+									]
+								}
 							},
 							"response": []
 						}
