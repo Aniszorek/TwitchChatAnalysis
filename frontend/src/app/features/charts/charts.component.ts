@@ -10,6 +10,7 @@ import {AuthService} from '../../auth/auth.service';
 import {TwitchService} from '../twitch/twitch.service';
 import {KeysService} from './services/keys.service';
 import {ChartService} from './services/chart.service';
+import {AppState} from './models/chart-enums.model';
 
 
 // todo TCA-106 dodałabym opcje usuwania danych z jakiegoś streama bo teraz mamy nasrane pustymi wykresami
@@ -28,20 +29,19 @@ import {ChartService} from './services/chart.service';
 })
 export class ChartsComponent implements OnInit {
   private readonly timeFormatter: Intl.DateTimeFormat
-  protected isLoading: boolean = true;
-  isMetadataLoading: boolean = true;
-  isDataForStreamAvailable: boolean = true;
-  streams: any[] = [];
-  streamId: string = '';
+  protected AppState = AppState;
+  protected appState: AppState = AppState.streamDataLoading;
+  protected streams: any[] = [];
+  protected streamId: string = '';
   protected broadcasterUserLogin: string | null;
   protected authorization: string | null;
-  metadata: any = null;
-  selectedDataKeys: string[] = [];
-  availableDataKeys: string[] = [];
-  chartData: any = [];
+  protected metadata: any = null;
+  protected selectedDataKeys: string[] = [];
+  protected availableDataKeys: string[] = [];
+  protected chartData: any = [];
   protected selectedStream: any = null;
-  chartLabels: string[] = [];
-  chartOptions: ChartOptions<'line'> = {};
+  protected chartLabels: string[] = [];
+  protected chartOptions: ChartOptions<'line'> = {};
 
   protected selectedAggregationKeys: { [key: string]: boolean };
   protected readonly keyDisplayNames: { [key: string]: { displayName: string; tooltip: string } }
@@ -49,7 +49,7 @@ export class ChartsComponent implements OnInit {
   protected readonly relatedKeysMap: { [key: string]: string[] };
 
   constructor(
-    private readonly streamMetadataService: StreamService,
+    private readonly streamService: StreamService,
     private readonly authService: AuthService,
     private readonly twitchService: TwitchService,
     private readonly keysService: KeysService,
@@ -73,6 +73,14 @@ export class ChartsComponent implements OnInit {
 
   }
 
+  setAppState(state: AppState) {
+    this.appState = state;
+  }
+
+  getAppState() {
+    return this.appState;
+  }
+
   protected isMainKeySelected(key: string): boolean {
     return this.keysService.isMainKeySelected(key, this.selectedDataKeys);
   }
@@ -94,8 +102,7 @@ export class ChartsComponent implements OnInit {
   }
 
   selectStream(streamId: string) {
-    this.isDataForStreamAvailable = true;
-    this.isMetadataLoading = true;
+    this.setAppState(AppState.metadataLoading);
     this.streamId = streamId;
     this.loadStreamData(streamId);
   }
@@ -125,12 +132,11 @@ export class ChartsComponent implements OnInit {
     }
     this.selectedStream = this.streams.find((stream) => stream.stream_id === streamId);
 
-    this.streamMetadataService
+    this.streamService
       .getStreamMetadata(streamId, this.broadcasterUserLogin, this.authService.getIdToken())
       .subscribe((data) => {
         if (!data) {
-          this.isDataForStreamAvailable = false
-          this.isMetadataLoading = false;
+          this.setAppState(AppState.metadataNotAvailable)
           console.warn("No data available for stream");
           return
         }
@@ -138,9 +144,7 @@ export class ChartsComponent implements OnInit {
         this.metadata = data;
         this.availableDataKeys = this.keysService.getAvailableKeys(this.metadata);
         this.selectedDataKeys = this.keysService.getDefaultSelectedKeys(this.selectedDataKeys, this.availableDataKeys);
-        this.isMetadataLoading = false;
-        this.isDataForStreamAvailable = true;
-
+        this.setAppState(AppState.ready)
         this.updateChart();
       });
   }
@@ -159,9 +163,13 @@ export class ChartsComponent implements OnInit {
       return
     }
 
-    this.streamMetadataService
+    this.streamService
       .getStreams(this.broadcasterUserLogin, this.authorization)
       .subscribe((data: any[]) => {
+        if (!data) {
+          this.setAppState(AppState.streamDataNotAvailable);
+          return
+        }
         this.streams = [...data].sort((a, b) => {
           const timeA = new Date(a.started_at).getTime();
           const timeB = new Date(b.started_at).getTime();
@@ -170,7 +178,7 @@ export class ChartsComponent implements OnInit {
         this.selectFirstStream()
       });
 
-    this.isLoading = false;
+    this.setAppState(this.AppState.metadataLoading)
   }
 
   private selectFirstStream() {
@@ -220,4 +228,5 @@ export class ChartsComponent implements OnInit {
 
     return aggregatedData;
   }
+
 }

@@ -1,25 +1,32 @@
 <div>
-  <div *ngIf="!isLoading" class="page-container">
-    <div class="streams-list">
-      <h1>Transmission Analysis</h1>
-
-      <ul>
-        <li
-          *ngFor="let stream of streams"
-          (click)="selectStream(stream.stream_id)"
-          [class.selected]="stream.stream_id === streamId">
-          <h3>{{ stream.stream_title }}</h3>
-          <p>Data: {{ stream.started_at | date: 'short' }}</p>
-        </li>
-      </ul>
+  <div *ngIf="getAppState() === AppState.streamDataNotAvailable; else streamData" class="error-container">
+    <div class="error-message">
+      No streams available for user
     </div>
+  </div>
 
-    <div class="chart-area" *ngIf="selectedStream && isDataForStreamAvailable && !isMetadataLoading">
-      <h2>Wykres dla: {{ selectedStream.stream_title }}</h2>
+  <ng-template #streamData>
+    <div class="page-container">
+      <div class="streams-list">
+        <h1>Transmission Analysis</h1>
 
-      <div class="data-keys">
-        <h3>Wybierz dane:</h3>
-        <div class="tag-container">
+        <ul>
+          <li
+            *ngFor="let stream of streams"
+            (click)="selectStream(stream.stream_id)"
+            [class.selected]="stream.stream_id === streamId">
+            <h3>{{ stream.stream_title }}</h3>
+            <p>Data: {{ stream.started_at | date: 'short' }}</p>
+          </li>
+        </ul>
+      </div>
+
+      <div class="chart-area" *ngIf="selectedStream && getAppState() == AppState.ready">
+        <h2>Chart for: {{ selectedStream.stream_title }}</h2>
+
+        <div class="data-keys">
+          <h3>Select data:</h3>
+          <div class="tag-container">
           <span
             *ngFor="let key of availableDataKeys"
             class="tag"
@@ -28,24 +35,22 @@
             [title]="keyDisplayNames[key].tooltip">
             {{ keyDisplayNames[key].displayName || key }}
           </span>
+          </div>
+
         </div>
 
-      </div>
+        <div class="aggregation-section">
+          <div class="aggregation-description">
+            <p>
+              Select the appropriate subgroups for the selected data to obtain more detailed analysis. For example, by
+              selecting 'Negative Messages', you can view the subgroups 'Very Negative Messages' and 'Slightly Negative
+              Messages'
+            </p>
+          </div>
 
-      <div class="aggregation-section">
-        <!-- Opis tłumaczący czym są te podgrupy -->
-        <div class="aggregation-description">
-          <p>
-            Select the appropriate subgroups for the selected data to obtain more detailed analysis. For example, by
-            selecting 'Negative Messages', you can view the subgroups 'Very Negative Messages' and 'Slightly Negative
-            Messages'
-          </p>
-        </div>
-
-        <!-- Klucze agregacyjne -->
-        <div class="aggregation-keys-container">
-          <div *ngFor="let key of aggregationKeys">
-            <div *ngIf="isMainKeySelected(key)" class="aggregation-key">
+          <div class="aggregation-keys-container">
+            <div *ngFor="let key of aggregationKeys">
+              <div *ngIf="isMainKeySelected(key)" class="aggregation-key">
               <span
                 class="aggregation-key-tag"
                 [class.selected]="isKeySelectedForAggregation(key)"
@@ -53,35 +58,37 @@
                 [title]="keyDisplayNames[key].tooltip">
                 {{ keyDisplayNames[key].displayName || key }}
               </span>
+              </div>
             </div>
           </div>
+        </div>
+
+
+        <div class="chart-container">
+          <canvas
+            baseChart
+            [datasets]="chartData"
+            [labels]="chartLabels"
+            [type]="'line'"
+            [options]="chartOptions">
+          </canvas>
+
+        </div>
+      </div>
+
+      <div class="loading-container"
+           *ngIf="getAppState() == AppState.metadataLoading || getAppState() == AppState.metadataNotAvailable">
+        <div *ngIf="getAppState() == AppState.metadataLoading" class="loading-inner">
+          <div class="spinner"></div>
+          <span class="loading-message">Loading, please wait...</span>
+        </div>
+
+        <div *ngIf="getAppState() == AppState.metadataNotAvailable" class="error-message">
+          No metadata available for the stream.
         </div>
       </div>
 
 
-      <div class="chart-container">
-        <canvas
-          baseChart
-          [datasets]="chartData"
-          [labels]="chartLabels"
-          [type]="'line'"
-          [options]="chartOptions">
-        </canvas>
-
-      </div>
     </div>
-
-    <div class="loading-container">
-      <div *ngIf="isMetadataLoading && isDataForStreamAvailable" class="loading-inner">
-        <div class="spinner"></div>
-        <span class="loading-message">Loading, please wait...</span>
-      </div>
-
-      <div *ngIf="!isMetadataLoading && !isDataForStreamAvailable" class="error-message">
-        No data available for the stream.
-      </div>
-    </div>
-
-
-  </div>
+  </ng-template>
 </div>
