@@ -56,7 +56,6 @@ def classify_sentiment(score, magnitude):
         (score < -0.1 and magnitude > 2, "Slightly Negative"),
         (score < 0.1 and magnitude > 4, "Slightly Negative"),
         (score < 0.3, "Neutral"),
-        (score < 0.3 and magnitude > 2, "Neutral"),
         (score < 0.5, "Slightly Positive"),
         (score < 0.7, "Positive"),
     ]
