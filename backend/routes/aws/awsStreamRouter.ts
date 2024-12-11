@@ -1,10 +1,9 @@
 import express from "express";
-import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 import {logger} from "../../utilities/logger";
 import {getStreamsByBroadcasterUsernameFromApiGateway} from "../../api_gateway_calls/stream/getStreamByBroadcaster";
-import {verifyToken} from "../../aws/cognitoAuth";
 import {getStreamFromApiGateway, GetStreamMessage} from "../../api_gateway_calls/stream/getStream";
-import axios from "axios";
+import {extractHeaders, extractQueryParams} from "../../utilities/utilities";
+import {deleteStreamAndMetadataFromApiGateway} from "../../api_gateway_calls/stream/deleteStreamAndMetadata";
 
 export const awsStreamRouter = express.Router();
 
@@ -59,6 +58,43 @@ awsStreamRouter.get('/', async (req, res) => {
                 LOG_PREFIX
             );
             res.status(500).json({ error: `Failed to GET stream data: ${error.message || 'Unknown error'}` });
+        }
+    }
+
+});
+
+awsStreamRouter.delete('/', async (req, res) => {
+
+    const headers = extractHeaders(req, ["authorization", "broadcasteruserlogin"])
+    const broadcasterUsername = headers.broadcasteruserlogin as string
+    let cognitoIdToken = headers.authorization as string
+
+    const queryParams = extractQueryParams(req, ["stream_id"]);
+    const streamId = queryParams.stream_id as string
+
+    if (cognitoIdToken.startsWith('Bearer ')) {
+        cognitoIdToken = cognitoIdToken.slice(7);
+    }
+
+    try {
+        const result = await deleteStreamAndMetadataFromApiGateway(cognitoIdToken, streamId, broadcasterUsername)
+        res.status(result.status).send(result.data)
+
+    } catch (error: any) {
+
+        if(error.status && error.message) {
+            logger.error(
+                `Error in DELETE /aws/stream route: ${JSON.stringify(error.message)}, status: ${error.status}`,
+                LOG_PREFIX
+            );
+            res.status(error.status).json(error.message);
+        }
+        else {
+            logger.error(
+                `Unexpected error in DELETE /aws/stream route: ${error.message || 'Unknown error'}`,
+                LOG_PREFIX
+            );
+            res.status(500).json({ error: `Failed to DELETE stream data: ${error.message || 'Unknown error'}` });
         }
     }
 
