@@ -84,7 +84,7 @@ export class AuthService {
       console.log('Token has expired. Trying to refresh it.');
       this.refreshCognitoTokens()
         .then(() => {
-          this.router.navigate(['/stream']);
+          this.router.navigate(['/stream-search']);
           this.finishLoading();
         })
         .catch(() => {

@@ -15,6 +15,7 @@
   </menu>
 
   <menu class="auth-buttons">
+    <button *ngIf="authService.isLoggedIn()" (click)="goToProfile()">Profile</button> <!-- todo zmienić na jakiś img -->
     <button *ngIf="!authService.isLoggedIn()" (click)="login()">Login</button>
     <button *ngIf="authService.isLoggedIn()" (click)="logout()">Logout</button>
   </menu>
