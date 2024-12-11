@@ -15,6 +15,6 @@ twitchUsersRouter.get('/suspended', async (req, res) => {
         res.json(result);
     } catch (error: any) {
         logger.error(`Error in /banned-users route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: 'Failed to fetch banned users'});
+        res.status(error.response.status).json({error: `Failed to fetch banned users: ${error.response.data.message}`});
     }
 });

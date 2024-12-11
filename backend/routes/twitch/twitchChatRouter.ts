@@ -20,7 +20,7 @@ twitchChatRouter.post('/messages', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in post /messages route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to send chat message`});
+        res.status(error.response.status).json({error: `Failed to send chat message ${error.response.data.message}`});
     }
 });
 
@@ -33,7 +33,7 @@ twitchChatRouter.get('/settings', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in get /settings route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to fetch chat settings`});
+        res.status(error.response.status).json({error: `Failed to fetch chat settings ${error.response.data.message}`});
     }
 });
 
@@ -48,6 +48,6 @@ twitchChatRouter.patch('/settings', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in patch /settings route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to patch chat settings`});
+        res.status(error.response.status).json({error: `Failed to patch chat settings ${error.response.data.message}`});
     }
 });

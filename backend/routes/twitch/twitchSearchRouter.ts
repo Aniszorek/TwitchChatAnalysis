@@ -15,6 +15,6 @@ twitchSearchRouter.get('/categories', async (req, res) => {
         res.json(result);
     } catch (error: any) {
         logger.error(`Error in get /categories route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: 'Failed to search categories'});
+        res.status(error.response.status).json({error: `Failed to search categories: ${error.response.data.message}`});
     }
 });

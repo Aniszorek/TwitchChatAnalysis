@@ -25,7 +25,7 @@ twitchModerationRouter.get('/moderators', async (req, res) => {
         res.json(result);
     } catch (error: any) {
         logger.error(`Error in /followers route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: 'Failed to fetch channel followers users'});
+        res.status(error.response.status).json({error: `Failed to fetch channel followers users: ${error.response.data.message}`});
     }
 });
 
@@ -39,7 +39,7 @@ twitchModerationRouter.post('/bans', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in post /bans route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to ban user`});
+        res.status(error.response.status).json({error: `Failed to ban user: ${error.response.data.message}`});
     }
 })
 
@@ -52,7 +52,7 @@ twitchModerationRouter.delete('/bans', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in delete /bans route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to unban user`});
+        res.status(error.response.status).json({error: `Failed to unban user: ${error.response.data.message}`});
     }
 })
 
@@ -65,7 +65,7 @@ twitchModerationRouter.post('/moderators', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in post /moderator route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to add moderator`});
+        res.status(error.response.status).json({error: `Failed to add moderator: ${error.response.data.message}`});
     }
 })
 
@@ -78,7 +78,7 @@ twitchModerationRouter.delete('/moderators', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in delete /moderator route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to delete moderator`});
+        res.status(error.response.status).json({error: `Failed to delete moderator: ${error.response.data.message}`});
     }
 })
 
@@ -91,7 +91,7 @@ twitchModerationRouter.delete('/chat', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in delete /chat route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to delete chat message`});
+        res.status(error.response.status).json({error: `Failed to delete chat message: ${error.response.data.message}`});
     }
 })
 
@@ -104,7 +104,7 @@ twitchModerationRouter.get('/automod/settings', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in get /automod/settings route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to get automod settings`});
+        res.status(error.response.status).json({error: `Failed to get automod settings: ${error.response.data.message}`});
     }
 })
 
@@ -119,7 +119,7 @@ twitchModerationRouter.put('/automod/settings', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in put /automod/settings route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to put automod settings`});
+        res.status(error.response.status).json({error: `Failed to put automod settings: ${error.response.data.message}`});
     }
 })
 
@@ -132,7 +132,7 @@ twitchModerationRouter.get('/blocked_terms', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in get /blocked_terms route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to get blocked terms`});
+        res.status(error.response.status).json({error: `Failed to get blocked terms: ${error.response.data.message}`});
     }
 })
 
@@ -147,7 +147,7 @@ twitchModerationRouter.post('/blocked_terms', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in post /blocked_terms route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to add blocked term`});
+        res.status(error.response.status).json({error: `Failed to add blocked term: ${error.response.data.message}`});
     }
 })
 
@@ -160,7 +160,7 @@ twitchModerationRouter.delete('/blocked_terms', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in delete /blocked_terms route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to delete blocked term`});
+        res.status(error.response.status).json({error: `Failed to delete blocked term: ${error.response.data.message}`});
     }
 })
 

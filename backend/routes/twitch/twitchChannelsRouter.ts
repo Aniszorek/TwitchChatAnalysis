@@ -25,7 +25,7 @@ twitchChannelsRouter.get('/followers', async (req, res) => {
         res.json(result);
     } catch (error: any) {
         logger.error(`Error in /followers route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: 'Failed to fetch channel followers users'});
+        res.status(error.response.status).json({error: `Failed to fetch channel followers users: ${error.response.data.message}`});
     }
 });
 
@@ -38,7 +38,7 @@ twitchChannelsRouter.get('/vips', async (req, res) => {
         res.json(result);
     } catch (error: any) {
         logger.error(`Error in /vips route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: 'Failed to fetch channel vip users'});
+        res.status(error.response.status).json({error: `Failed to fetch channel vip users: ${error.response.data.message}`});
     }
 });
 
@@ -50,8 +50,9 @@ twitchChannelsRouter.post('/vips', async (req, res) => {
         res.json(result);
     }
     catch(error: any) {
+        // todo add error.response status to all res.status'es
         logger.error(`Error in post /vips route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to add VIP`});
+        res.status(error.response.status).json({error: `Failed to add VIP: ${error.response.data.message}`});
     }
 })
 
@@ -64,7 +65,7 @@ twitchChannelsRouter.delete('/vips', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in delete /vips route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to delete VIP`});
+        res.status(error.response.status).json({error: `Failed to delete VIP: ${error.response.data.message}`});
     }
 })
 
@@ -78,7 +79,7 @@ twitchChannelsRouter.post('/polls', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in post /polls route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to create a poll`});
+        res.status(error.response.status).json({error: `Failed to create a poll: ${error.response.data.message}`});
     }
 })
 
@@ -91,7 +92,7 @@ twitchChannelsRouter.post('/raids', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in post /raids route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to create a raid`});
+        res.status(error.response.status).json({error: `Failed to create a raid: ${error.response.data.message}`});
     }
 })
 
@@ -104,7 +105,7 @@ twitchChannelsRouter.delete('/raids', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in delete /raids route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to cancel a raid`});
+        res.status(error.response.status).json({error: `Failed to cancel a raid: ${error.response.data.message}`});
     }
 })
 
@@ -119,7 +120,7 @@ twitchChannelsRouter.patch('/', async (req, res) => {
     }
     catch(error: any) {
         logger.error(`Error in patch / route: ${error.message}`, LOG_PREFIX);
-        res.status(500).json({error: `Failed to patch stream settings`});
+        res.status(error.response.status).json({error: `Failed to patch stream settings: ${error.response.data.message}`});
     }
 })
 
