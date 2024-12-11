@@ -36,7 +36,7 @@ export async function getSuspendedUsers(queryParams: any): Promise<SuspendedUser
         return {banned_users: bannedUsers, timed_out_users: timedOutUsers};
     } catch (error: any) {
         logger.error(`Error in getBannedUsers: ${error.message}`, LOG_PREFIX);
-        throw new Error('Failed to retrieve banned users from Twitch API');
+        throw error
     }
 }
 
