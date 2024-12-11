@@ -110,7 +110,7 @@ def lambda_handler(event, context):
         )
 
         return {
-            "statusCode": 200,
+            "statusCode": 200 if len(messages) > 0 else 204,
             "body": json.dumps(messages)
         }
     except Exception as e:
