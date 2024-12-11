@@ -102,7 +102,7 @@ def lambda_handler(event, context):
         response_body = json.dumps(data, default=custom_serializer)
 
         return {
-            "statusCode": 200,
+            "statusCode": 200 if len(data) > 0 else 204,
             "body": response_body
         }
     except Exception as e:
