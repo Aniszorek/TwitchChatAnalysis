@@ -161,7 +161,7 @@ authRouter.post('/verify-cognito', async (req, res) => {
 
 
 authRouter.post('/refresh-cognito-tokens', async (req, res) => {
-    console.log('refreshing tokens')
+    logger.info('refreshing tokens', LOG_PREFIX, {color: LogColor.YELLOW})
     const {refreshToken} = req.body;
     if (!refreshToken) {
         return res.status(400).send('Cognito refresh token is required');
