@@ -64,7 +64,7 @@ export interface UserConnections {
 }
 
 export enum SentimentLabel {
-    VERY_NEGATIVE = "Very negative",
+    VERY_NEGATIVE = "Very Negative",
     NEGATIVE= "Negative",
     SLIGHTLY_NEGATIVE = "Slightly Negative",
     NEUTRAL = "Neutral",
