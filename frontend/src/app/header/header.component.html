@@ -1,6 +1,6 @@
 <header>
   <a [routerLink]="['/stream-search']"><img alt="App logo" Src="twitch_icon.png" href="App logo"></a>
-<!--  todo dawać dostęp tylko jeśli ktoś jest przynajmniej moderatorem - -->
+  <!--  todo dawać dostęp tylko jeśli ktoś jest przynajmniej moderatorem - -->
   <menu *ngIf="authService.isLoggedIn() && twitchService.getTwitchUsername()!=null" class="nav-buttons">
     <button
       (click)="goToStream()"

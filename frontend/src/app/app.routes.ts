@@ -6,6 +6,7 @@ import {authGuard} from "./auth/auth.guard";
 import {SearchUserComponent} from './features/search-user/search-user.component';
 import {ChartsComponent} from './features/charts/charts.component';
 import {authTwitchGuard} from './auth/auth.twitch.guard';
+import {StreamDataResolver} from './features/charts/stream-data.resolver';
 
 export const routes: Routes = [
   {
@@ -29,7 +30,8 @@ export const routes: Routes = [
   {
     path: 'charts',
     component: ChartsComponent,
-    canActivate: [authTwitchGuard]
+    canActivate: [authTwitchGuard],
+    resolve: {streamData: StreamDataResolver}
   },
   {
     path: '**',

@@ -1,31 +1,36 @@
-import {Component, OnInit} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { RouterOutlet} from '@angular/router';
+import { AuthService } from './auth/auth.service';
+import { LoadingService } from './shared/loading.service';
+import { Observable } from 'rxjs';
 import {HeaderComponent} from './header/header.component';
-import {AuthService} from './auth/auth.service';
-import {NgIf} from '@angular/common';
+import {AsyncPipe, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, NgIf],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  imports: [
+    HeaderComponent,
+    RouterOutlet,
+    AsyncPipe,
+    NgIf
+  ],
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  isLoading = true;
+  isLoading$: Observable<boolean>;
 
-
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly loadingService: LoadingService
+  ) {
+    this.isLoading$ = this.loadingService.loading$;
+    this.loadingService.setLoading('auth', true);
   }
 
   ngOnInit(): void {
-    this.authService.isLoading.subscribe((loading) => {
-      this.isLoading = loading;
-    });
-
     this.authService.initializeSession();
-
-
     if (this.authService.isLoggedIn()) {
       this.authService.startTokenAutoRefresh();
     } else {

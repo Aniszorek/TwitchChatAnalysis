@@ -1,6 +1,7 @@
 :root {
-  --background-color: #1f1f23;
-  --card-color: #2c2c30;
+  --background-color: #202020;
+  --card-color: #2D2D30;
+  --background-input-color: #262626;
   --primary-color: #9147ff;
   --dark-violet: #6441A5;
   --primary-color-hover: #5815bd;
@@ -8,6 +9,7 @@
   --border-radius: 8px;
   --font-family: 'Arial', sans-serif;
   --header-height: 5.75vh;
+  --header-z-index: 1000;
 }
 
 *,

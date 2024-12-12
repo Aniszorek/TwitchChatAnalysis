@@ -76,18 +76,18 @@
         </div>
       </div>
 
-      <div class="loading-container"
-           *ngIf="getAppState() == AppState.metadataLoading || getAppState() == AppState.metadataNotAvailable">
+      <div class="metadata-loading-container" *ngIf="getAppState() == AppState.metadataLoading">
         <div *ngIf="getAppState() == AppState.metadataLoading" class="loading-inner">
           <div class="spinner"></div>
           <span class="loading-message">Loading, please wait...</span>
         </div>
+      </div>
 
+      <div class="metadata-loading-container" *ngIf="getAppState() == AppState.metadataNotAvailable">
         <div *ngIf="getAppState() == AppState.metadataNotAvailable" class="error-message">
           No metadata available for the stream.
         </div>
       </div>
-
 
     </div>
   </ng-template>

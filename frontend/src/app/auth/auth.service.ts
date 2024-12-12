@@ -3,6 +3,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {BehaviorSubject, catchError, interval, Observable, Subject, Subscription, tap} from 'rxjs';
 import { Router } from '@angular/router';
 import { config, urls } from "../app.config";
+import {LoadingService} from '../shared/loading.service';
 
 interface AuthTokens {
   idToken: string;
@@ -22,6 +23,7 @@ interface RefreshedAuthTokens {
 })
 export class AuthService {
   isLoading = new BehaviorSubject<boolean>(true);
+  isLoading$ = this.isLoading.asObservable();
   isLoggedIn = signal(false);
 
   private readonly logoutSubject = new Subject<void>();
@@ -35,7 +37,7 @@ export class AuthService {
   private readonly clientId = config.cognitoClientId;
   private readonly redirectUri = urls.cognitoLougoutRedirectUrl;
 
-  constructor(private readonly router: Router, private readonly http: HttpClient) {}
+  constructor(private readonly router: Router, private readonly http: HttpClient, private readonly loadingService: LoadingService) {}
 
   /**
    * Starts the login process by redirecting to the backend authorization URL.
@@ -69,6 +71,7 @@ export class AuthService {
    * Initializes the user's session by validating tokens and navigating appropriately.
    */
   initializeSession(): void {
+    this.loadingService.setLoading('auth', true);
     const tokens = this.getStoredTokens();
 
     if (!tokens) {
@@ -277,7 +280,7 @@ export class AuthService {
   }
 
   private finishLoading(): void {
-    this.isLoading.next(false);
+    this.loadingService.setLoading('auth', false);
   }
 
   private getHttpOptions(): { headers: HttpHeaders } {

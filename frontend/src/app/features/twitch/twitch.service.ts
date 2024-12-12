@@ -30,7 +30,6 @@ export class TwitchService {
   private readonly authService = inject(AuthService);
   private readonly backendUrl = urls.backendUrl;
   private readonly twitchUsername = new BehaviorSubject<string | null>(null);
-  user$ = this.twitchUsername.asObservable();
 
   private readonly chatMessages = new Subject<ChatMessage | null>();
   chatMessages$ = this.chatMessages.asObservable();
@@ -47,7 +46,7 @@ export class TwitchService {
     this.authService.logout$.subscribe(() => this.disconnectWebSocket());
   }
 
-  setTwitchUsername(user: string) {
+  setTwitchUsername(user: string | null) {
     this.twitchUsername.next(user);
   }
 
@@ -195,6 +194,7 @@ export class TwitchService {
   }
 
   resetLoadingAndState(): void {
+    this.setTwitchUsername(null);
     this.searchUserState.next(null);
     this.loadingState.next(false);
   }
