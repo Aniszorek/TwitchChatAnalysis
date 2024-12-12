@@ -64,3 +64,22 @@ export function extractQueryParams<T extends Record<string, string | undefined>>
 export function sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function createHandlerWithContext(handler: Function) {
+    return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        try {
+            // This will unpack the context and pass it to the original handler
+            const context = {
+                queryParams: req.query, // Or any other context you want
+                headers: req.headers,
+                validatedBody: req.body, // Add validation here if necessary
+            };
+
+            // Call the original handler
+            await handler(req, res, next, context);
+        } catch (error) {
+            next(error);
+        }
+    };
+}
+
