@@ -948,13 +948,31 @@
 							"response": []
 						},
 						{
-							"name": "patch stream settings",
+							"name": "get channel information",
 							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "patch channel information",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJraWQiOiJKaWhGRVVsNDJkMDRtakNlb0dRTTVYWmlUXC9OZnF4U1wvS3pObmx6YjNTeEE9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiTmNCTW9DZm41X0pEc0JjNWpHVDQ0QSIsInN1YiI6ImIzYzRlODUyLWMwOTEtNzAzYi0zMzhkLTU1ZmUxZWIyY2UxMyIsImNvZ25pdG86Z3JvdXBzIjpbIlN0cmVhbWVyIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtY2VudHJhbC0xLmFtYXpvbmF3cy5jb21cL2V1LWNlbnRyYWwtMV9JelVrckVFc3IiLCJjb2duaXRvOnVzZXJuYW1lIjoiYm5vd2FrIiwib3JpZ2luX2p0aSI6IjVkYjc1M2UzLTZhNzMtNGJhZC04ZDBhLWJlMzQ1NzdkNTdjZiIsImNvZ25pdG86cm9sZXMiOlsiYXJuOmF3czppYW06OjE4MzYzMTM0NzM2MTpyb2xlXC90d2l0Y2hDaGF0QW5hbHl0aWNzLXN0cmVhbWVyLXJvbGUiXSwiYXVkIjoiNThlZm9odWhqZXByb2RjbzJmZDI3YWk5cHQiLCJldmVudF9pZCI6Ijk0ZjdkY2IyLTY0NTUtNDYwYi04OTY4LWQ2M2UzYjA4ZjE5YiIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzM0MDE3OTk0LCJleHAiOjE3MzQwMjE1OTQsImlhdCI6MTczNDAxNzk5NCwianRpIjoiNTY2M2QxZGQtZDI2Yi00MzU1LTgxZTgtYzA3ZDA5OGI2NjRmIiwiZW1haWwiOiJiYXJ0ZWtub3dhazMxbEBnbWFpbC5jb20ifQ.sQzkwrM0lUfm50TFAmeChg6rgwKw_0YPIpspPjl2fB7ijIk2c8QxTyrl-5wh5Q0YJ-3-b4UrAa1hJXqexbe1uvRckkFG6UYmhHCHdgcQz92XLNjI-BFemZlutnZur_4N1d-PK_QALLiRfzfefafImKikI0W4NklrHH0SXxPrSzLvo-QPLRTUcVcv5q1W5nSr8sfH8fTlg4P2MppBxOyje7YaYcv-mHoAkqo5M-JXQuBV64XsVzC3rPD9pfqv0gzeOx3Ehg8TaWhnkmWLRMVJZEBd9hMJFDPe3CF8mCTZnSwJvzJ2muNP078U_ugkEAhZT5og0R-slhTAKNj9WHGnSw",
+											"type": "string"
+										}
+									]
+								},
 								"method": "PATCH",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "\r\n{\r\n    \"game_id\": \"29433\",\r\n    \"title\": \"test\"\r\n}",
+									"raw": "\r\n{\r\n    \"game_id\": \"29433\",\r\n    \"title\": \"test\",\r\n    \"tags\": [\"a\",\"b\"]\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
