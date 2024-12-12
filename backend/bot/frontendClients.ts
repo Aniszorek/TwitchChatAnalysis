@@ -291,7 +291,7 @@ export const refreshStreamMetadataCounters = (cognitoUserId: string) => {
         client.twitchData.streamMetadata.veryPositiveMessageCount = 0
         client.twitchData.streamMetadata.negativeMessageCount = 0
         client.twitchData.streamMetadata.slightlyNegativeMessageCount = 0
-        client.twitchData.streamMetadata.negativeMessageCount = 0
+        client.twitchData.streamMetadata.veryNegativeMessageCount = 0
         client.twitchData.streamMetadata.neutralMessageCount = 0
     } else {
         throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
