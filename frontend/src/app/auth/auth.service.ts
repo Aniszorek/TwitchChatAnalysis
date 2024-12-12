@@ -83,10 +83,7 @@ export class AuthService {
     if (this.isTokenExpired(tokens.expiryTime)) {
       console.log('Token has expired. Trying to refresh it.');
       this.refreshCognitoTokens()
-        .then(() => {
-          this.router.navigate(['/stream-search']);
-          this.finishLoading();
-        })
+        .then(() => this.finishLoading())
         .catch(() => {
           this.clearLocalSession();
           this.finishLoading();
@@ -263,15 +260,16 @@ export class AuthService {
 
   private handleTokenValidation(response: { message: string }, tokens: AuthTokens): void {
     if (response.message === 'verified') {
-      console.log('Token is valid. Redirecting to /stream-search.');
+      console.log('Token is valid. Updating session state.');
       this.saveTokens(tokens.idToken, tokens.refreshToken, tokens.expiryTime);
-      this.router.navigate(['/stream-search']);
+      this.isLoggedIn.set(true);
     } else {
       console.log('Token validation failed. Clearing session.');
       this.clearLocalSession();
     }
     this.finishLoading();
   }
+
 
   private handleTokenValidationError(err: any): void {
     console.log('Token validation failed. Clearing session.', err);
