@@ -8,19 +8,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authTokens = authService.getStoredTokens();
     const twitchOauthToken = authService.getOauthToken();
 
-    let newReq = req.clone()
-    if (authTokens?.idToken) {
-        newReq = req.clone({
-            headers: req.headers.append('x-cognito-id-token', authTokens.idToken)
-        });
-    }
+  let updatedHeaders = req.headers;
 
-    if (twitchOauthToken) {
-      newReq = req.clone({
-        headers: req.headers.append('x-twitch-oauth-token', twitchOauthToken)
-      })
-    }
+  if (authTokens?.idToken) {
+    updatedHeaders = updatedHeaders.append('x-cognito-id-token', authTokens.idToken);
+  }
+
+  // if (twitchOauthToken) {
+  //   updatedHeaders = updatedHeaders.append('x-twitch-oauth-token', twitchOauthToken);
+  // }
+
+  const newReq = req.clone({ headers: updatedHeaders });
 
     console.log(newReq.url);
-    return next(req);
+    console.log(newReq.headers)
+    return next(newReq);
 };
