@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import {AxiosResponse} from "axios";
 import {isCognitoRoleValid} from "../../cognitoRoles";
-import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../../entryPoint";
+import {awsAuthorizationController} from "../../routes/aws/controller/awsAuthorizationController";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
@@ -23,22 +23,32 @@ interface ValidateUserRoleResponse {
  */
 export async function validateUserRole(twitch_oauth_token: string, broadcaster_user_login: string, client_id: string, cognitoIdToken: string) {
     try {
-        const decoded: CognitoIdTokenData | null = jwt.decode(cognitoIdToken) as CognitoIdTokenData | null;
+
+        let token = cognitoIdToken;
+        if (token.startsWith("Bearer"))
+        {
+            token = cognitoIdToken.split(' ')[1]
+        }
+
+        const decoded: CognitoIdTokenData | null = jwt.decode(token) as CognitoIdTokenData | null;
         if (!decoded?.["cognito:username"]) {
-            logger.error(`Invalid Cognito token`, LOG_PREFIX);
+            logger.error(`Invalid Cognito token ${cognitoIdToken}`, LOG_PREFIX);
             return undefined;
         }
         const username = decoded["cognito:username"];
 
-        const response: AxiosResponse<ValidateUserRoleResponse> = await apiGatewayClient.post('/twitchChatAnalytics-authorization',{
+        const requestBody = {
             oauth_token: twitch_oauth_token,
             cognito_username: username,
             broadcaster_user_login: broadcaster_user_login,
             client_id: client_id
-        },{
-            cognitoIdToken: cognitoIdToken,
-            broadcasterUserLogin: broadcaster_user_login,
-        } as CustomAxiosRequestConfig)
+        }
+        const headers = {
+            authorization: cognitoIdToken,
+            broadcasteruserlogin: broadcaster_user_login
+        }
+
+        const response: AxiosResponse<ValidateUserRoleResponse> = await awsAuthorizationController.authorizeRole(requestBody, headers)
 
         const {statusCode, body} = response.data;
 

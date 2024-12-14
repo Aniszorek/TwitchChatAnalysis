@@ -11,12 +11,14 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                                                                                                                                                        requiredHeaders,
                                                                                                                                                        bodyValidationFn,
                                                                                                                                                        requiredRole,
-                                                                                                                                                       actionDescription
+                                                                                                                                                       actionDescription,
+                                                                                                                                                       skipAuthorization
                                                                                                                                                    }: {
     requiredQueryParams?: (keyof TQueryParams)[];
     requiredHeaders?: (keyof THeaders)[];
     bodyValidationFn?: (body: any) => boolean;
-    requiredRole: CognitoRole;
+    requiredRole?: CognitoRole;
+    skipAuthorization?: boolean;
     actionDescription: string;
 }) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -43,25 +45,46 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                     validatedBody = body;
                 }
 
-                const authHeader = req.headers['authorization'];
-                if (!authHeader) {
-                    throw new Error('Authorization header is required');
+                if(!skipAuthorization && requiredRole)
+                {
+                    const authHeader = req.headers['authorization'];
+                    console.log(authHeader)
+                    if (!authHeader) {
+                        throw new Error('Authorization header is required');
+                    }
+
+                    const token = authHeader.split(' ')[1]; // Assuming Bearer token
+                    if (!token) {
+                        throw new Error('Invalid Authorization header format');
+                    }
+
+                    const cognitoUserId = (await verifyToken(token)).sub;
+                    if(!cognitoUserId) {
+                        throw new Error('bad cognitoIdToken');
+                    }
+
+                    if (!verifyUserPermission(cognitoUserId, requiredRole, actionDescription)) {
+                        throw new Error(`User does not have required role: ${requiredRole}`);
+                    }
+
+                    return originalHandler.apply(this, [
+                        req,
+                        res,
+                        next,
+                        {
+                            queryParams,
+                            headers,
+                            validatedBody,
+                            cognitoUserId
+                        }
+                    ]);
+                }
+                else if (!skipAuthorization && !requiredRole) {
+                    throw new Error(`If skipAuthorization is set to false, you must provide CognitoRole!`);
                 }
 
-                const token = authHeader.split(' ')[1]; // Assuming Bearer token
-                if (!token) {
-                    throw new Error('Invalid Authorization header format');
-                }
-
-                const cognitoUserId = (await verifyToken(token)).sub;
-                if(!cognitoUserId) {
-                    throw new Error('bad cognitoIdToken');
-                }
-
-                if (!verifyUserPermission(cognitoUserId, requiredRole, actionDescription)) {
-                    throw new Error(`User does not have required role: ${requiredRole}`);
-                }
-
+                // return unauthorized
+                logger.info(`got access without authorization: ${actionDescription}`, LOG_PREFIX, {color: LogColor.GREEN, style: LogStyle.BOLD})
                 return originalHandler.apply(this, [
                     req,
                     res,
@@ -69,7 +92,7 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                     {
                         queryParams,
                         headers,
-                        validatedBody
+                        validatedBody,
                     }
                 ]);
             } catch (error:any) {

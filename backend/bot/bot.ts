@@ -59,26 +59,6 @@ interface VerifyResponseData {
     data: { id: string }[];
 }
 
-
-export async function verifyTwitchUsernameAndStreamStatus(twitchUsername: string): Promise<{
-    success: boolean;
-    message: string;
-    streamStatus?: TwitchStreamData;
-    userId?: string
-}> {
-    const fetchResponse = await fetchTwitchUserId(twitchUsername);
-
-    if (!fetchResponse.found) {
-        return {success: false, message: `Streamer with username: ${twitchUsername} not found`};
-    }
-
-    const broadcasterId = fetchResponse.userId!;
-
-    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
-    return {success: true, message: "Twitch username validated and authorized", streamStatus, userId: broadcasterId};
-}
-
-
 export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId: string): Promise<WebSocket | null> {
     try {
         const twitchWebSocket = new WebSocket(EVENTSUB_WEBSOCKET_URL);

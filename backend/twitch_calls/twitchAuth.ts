@@ -19,7 +19,6 @@ export interface TwitchStreamData {
     category?: string;
 }
 
-
 /**
  * Fetches the Twitch User ID based on the user's nickname
  */
@@ -140,4 +139,22 @@ export async function fetchTwitchUserIdFromOauthToken(): Promise<string> {
         console.error(`${LOG_PREFIX} Error fetching username for OAuth token:`, error.message);
         throw error;
     }
+}
+
+export async function verifyTwitchUsernameAndStreamStatus(twitchUsername: string): Promise<{
+    success: boolean;
+    message: string;
+    streamStatus?: TwitchStreamData;
+    userId?: string
+}> {
+    const fetchResponse = await fetchTwitchUserId(twitchUsername);
+
+    if (!fetchResponse.found) {
+        return {success: false, message: `Streamer with username: ${twitchUsername} not found`};
+    }
+
+    const broadcasterId = fetchResponse.userId!;
+
+    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
+    return {success: true, message: "Twitch username validated and authorized", streamStatus, userId: broadcasterId};
 }

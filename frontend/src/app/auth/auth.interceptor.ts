@@ -9,7 +9,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
     if (authTokens?.idToken) {
         const newReq = req.clone({
-            headers: req.headers.append('x-cognito-id-token', authTokens.idToken)
+            headers: req.headers.append('authorization', `Bearer ${authTokens.idToken}`)
         });
         console.log(newReq.url);
         return next(newReq);
