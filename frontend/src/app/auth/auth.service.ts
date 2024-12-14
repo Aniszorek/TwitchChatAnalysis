@@ -142,6 +142,7 @@ export class AuthService {
     localStorage.removeItem('idToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('expireTime');
+    localStorage.removeItem('twitchOauth')
     this.isLoggedIn.set(false);
   }
 
@@ -276,6 +277,14 @@ export class AuthService {
 
   private finishLoading(): void {
     this.loadingService.setLoading('auth', false);
+  }
+
+  saveOuathToken(token: string): void {
+    localStorage.setItem('twitchOauth', token);
+  }
+
+  getOauthToken(): string|null {
+    return localStorage.getItem('twitchOauth');
   }
 
   private getHttpOptions(): { headers: HttpHeaders } {
