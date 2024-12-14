@@ -1,7 +1,7 @@
 import {DateTime} from "luxon";
 import express from "express";
-import {ErrorWithStatus} from "../routes/aws/awsTwitchMessageRouter";
 import {WebSocket} from "ws";
+import {ErrorWithStatus} from "./ErrorWithStatus";
 
 export const createTimestamp = (): string => {
     const now = DateTime.now().toUTC()

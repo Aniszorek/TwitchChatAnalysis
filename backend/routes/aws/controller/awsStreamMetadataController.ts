@@ -30,9 +30,7 @@ class AwsStreamMetadataController {
             res.status(error.response.status).json({
                 error: `Failed to fetch stream-metadata: ${JSON.stringify(error.response.data)}`,
             });
-
         }
-
     }
 }
 
