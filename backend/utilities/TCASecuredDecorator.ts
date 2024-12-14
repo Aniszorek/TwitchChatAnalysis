@@ -8,6 +8,7 @@ const LOG_PREFIX = "TCA SECURED"
 
 export function TCASecured<TQueryParams extends Record<string, string | undefined> = {}, THeaders extends Record<string, string | undefined> = {}>({
                                                                                                                                                        requiredQueryParams,
+                                                                                                                                                       optionalQueryParams,
                                                                                                                                                        requiredHeaders,
                                                                                                                                                        bodyValidationFn,
                                                                                                                                                        requiredRole,
@@ -15,6 +16,7 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                                                                                                                                                        skipAuthorization
                                                                                                                                                    }: {
     requiredQueryParams?: (keyof TQueryParams)[];
+    optionalQueryParams?: (keyof TQueryParams)[];
     requiredHeaders?: (keyof THeaders)[];
     bodyValidationFn?: (body: any) => boolean;
     requiredRole?: CognitoRole;
@@ -29,6 +31,11 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                 let queryParams: Partial<TQueryParams> = {};
                 if (requiredQueryParams) {
                     queryParams = extractQueryParams<TQueryParams>(req, requiredQueryParams);
+                }
+
+                let _optionalQueryParams: Partial<TQueryParams> = {};
+                if (optionalQueryParams) {
+                    _optionalQueryParams = extractQueryParams<TQueryParams>(req, optionalQueryParams, false);
                 }
 
                 let headers: Partial<THeaders> = {};
@@ -48,7 +55,6 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                 if(!skipAuthorization && requiredRole)
                 {
                     const authHeader = req.headers['authorization'];
-                    console.log(authHeader)
                     if (!authHeader) {
                         throw new Error('Authorization header is required');
                     }
@@ -73,6 +79,7 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                         next,
                         {
                             queryParams,
+                            optionalQueryParams: _optionalQueryParams,
                             headers,
                             validatedBody,
                             cognitoUserId
@@ -91,6 +98,7 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                     next,
                     {
                         queryParams,
+                        _optionalQueryParams,
                         headers,
                         validatedBody,
                     }
