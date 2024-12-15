@@ -22,7 +22,7 @@ export async function verifyCognitoTokenMiddleware(req: Request, res: Response, 
     const cognitoIdToken = req.headers["x-cognito-id-token"] as string | undefined;
 
     if (!cognitoIdToken) {
-        return res.status(404).send({message: 'Token is missing or invalid'});
+        return res.status(404).send({message: 'Cognito Token is missing'});
     }
 
     try {
@@ -30,7 +30,7 @@ export async function verifyCognitoTokenMiddleware(req: Request, res: Response, 
         next();
     } catch (error: any) {
         logger.error(`Token verification failed: ${error.message}`, LOG_PREFIX);
-        res.status(401).json({message: 'Token verification failed', error: error.message});
+        res.status(401).json({message: 'Cognito Token verification failed', error: error.message});
     }
 }
 
@@ -38,7 +38,7 @@ export async function verifyTwitchOauthTokenMiddleware(req: Request, res: Respon
     const twitchOauth = req.headers["x-twitch-oauth-token"] as string | undefined;
 
     if (!twitchOauth) {
-        return res.status(404).send({message: 'Token is missing or invalid'});
+        return res.status(404).send({message: 'Twitch Token is missing'});
     }
 
     try {
@@ -46,7 +46,7 @@ export async function verifyTwitchOauthTokenMiddleware(req: Request, res: Respon
         next();
     } catch (error: any) {
         logger.error(`Token verification failed: ${error.message}`, LOG_PREFIX);
-        res.status(401).json({message: 'Token verification failed', error: error.message});
+        res.status(401).json({message: 'Twitch Token verification failed', error: error.message});
     }
 }
 

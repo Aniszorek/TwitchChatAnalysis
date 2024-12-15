@@ -68,6 +68,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                         },
                         twitchData: {
                             twitchOauthToken: null,
+                            twitchApiClient: null,
                             twitchBroadcasterUsername: null,
                             twitchBroadcasterUserId: null,
                             twitchRole: null,
@@ -132,7 +133,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                         }
 
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
-                        setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
+                        setFrontendClientTwitchData(userId, twitchOauthToken, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
                         setFrontendClientTwitchStreamMetadata(userId, streamMetadata)
 
                         if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
