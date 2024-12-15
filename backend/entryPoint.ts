@@ -11,6 +11,8 @@ import {awsRouter} from "./routes/aws/awsRouter";
 import {twitchModerationRouter} from "./routes/twitch/twitchModerationRouter";
 import {twitchChatRouter} from "./routes/twitch/twitchChatRouter";
 import {twitchSearchRouter} from "./routes/twitch/twitchSearchRouter";
+import {initializeTwitchApiClient} from "./twitch_calls/twitchApiConfig";
+import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "./envConfig";
 
 // INFO > WARN > ERROR
 // DEBUG LOGS CONSIDERED SEPARATELY WITH IS_DEBUG_ENABLED
@@ -42,6 +44,8 @@ app.use('/aws', awsRouter)
 const server = http.createServer(app);
 
 initWebSocketServer(server);
+// todo [TCA-27] (https://twitchchatanalysis.atlassian.net/browse/TCA-27) Jak dane będą przychodzić w innym momencie niż na start apki, to będziemy musieli przenieść inicjalizację
+initializeTwitchApiClient(TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID)
 initializeApiGatewayClient()
 
 server.listen(port, () => {

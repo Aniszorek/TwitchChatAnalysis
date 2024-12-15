@@ -5,8 +5,6 @@ import {
     METADATA_SEND_INTERVAL,
     postMetadataToApiGateway
 } from "../api_gateway_calls/stream-metadata/postStreamMetadata";
-import {AxiosInstance} from "axios";
-import {createTwitchApiClient} from "../twitch_calls/twitchApiConfig";
 
 const LOG_PREFIX = 'FRONTEND_CLIENTS'
 
@@ -42,7 +40,6 @@ export interface StreamData {
 
 export interface TwitchData {
     twitchOauthToken: string | null;
-    twitchApiClient: AxiosInstance | null;
     twitchBroadcasterUsername: string | null;
     twitchBroadcasterUserId: string | null;
     twitchRole: string | null;
@@ -105,7 +102,6 @@ export const setFrontendClientTwitchData = (
     if (!userData) return;
 
     userData.twitchData.twitchOauthToken = twitchOauthToken;
-    userData.twitchData.twitchApiClient = createTwitchApiClient(twitchOauthToken);
     userData.twitchData.twitchBroadcasterUsername = twitchBroadcasterUsername;
     userData.twitchData.twitchBroadcasterUserId = twitchBroadcasterUserId;
     userData.twitchData.twitchRole = twitchRole;
