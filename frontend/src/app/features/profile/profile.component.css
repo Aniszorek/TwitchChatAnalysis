@@ -1,0 +1,62 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - var(--header-height));
+  text-align: center;
+}
+
+.twitch-button {
+  padding: 10px 20px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  transition: background-color 0.2s;
+  color: white;
+}
+
+.twitch-button:hover {
+  background-color: var(--primary-color-hover);
+}
+
+.text {
+  margin: 20px 0;
+  font-size: 18px;
+  color: var(--text-color);
+}
+
+.token-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.token-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid;
+  border-radius: 5px;
+  width: 200px;
+}
+
+.save-button {
+  background-color: #28a745;
+  color: white;
+  font-size: 16px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover {
+  background-color: #218838;
+}
+
+
+
+
+

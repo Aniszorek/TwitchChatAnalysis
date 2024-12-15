@@ -1,3 +1,10 @@
-<button (click)="generateToken()">
-  Connect with twitch
-</button>
+<div class="container">
+  <button class="twitch-button" (click)="generateToken()">
+    Connect with Twitch
+  </button>
+  <div class="text">or</div>
+  <div class="token-input-group">
+    <input type="text" class="token-input" placeholder="Insert token" [(ngModel)]="token" />
+    <button class="save-button" (click)="saveToken()">Save Token</button>
+  </div>
+</div>

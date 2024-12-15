@@ -46,6 +46,10 @@ menu button {
   transition: background-color 0.2s;
 }
 
+menu button:hover {
+  background-color: var(--primary-color-hover);
+}
+
 .nav-buttons button {
   font-size: 1.5rem;
   font-weight: 500;
