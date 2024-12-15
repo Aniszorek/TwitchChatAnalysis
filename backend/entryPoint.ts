@@ -5,7 +5,7 @@ import * as http from "node:http";
 import {initWebSocketServer} from "./bot/wsServer";
 import {initializeTwitchApiClient} from "./twitch_calls/twitchApiConfig";
 import {twitchUsersRouter} from "./routes/twitch/twitchUsersRouter";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "./envConfig";
+import {CLIENT_ID} from "./envConfig";
 import {twitchChannelsRouter} from "./routes/twitch/twitchChannelsRouter";
 import {logger, LogLevel} from "./utilities/logger";
 import {initializeApiGatewayClient} from "./api_gateway_calls/apiGatewayConfig";

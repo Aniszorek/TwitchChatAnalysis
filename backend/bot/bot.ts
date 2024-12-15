@@ -8,7 +8,7 @@ import {
     fetchTwitchUserIdFromOauthToken,
     TwitchStreamData
 } from "../twitch_calls/twitchAuth";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
+import {CLIENT_ID} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
     channelChatDeleteMessageHandler,
@@ -79,7 +79,7 @@ export async function verifyTwitchUsernameAndStreamStatus(twitchUsername: string
 }
 
 
-export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId: string): Promise<WebSocket | null> {
+export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId: string, twitchOuathToken: string): Promise<WebSocket | null> {
     try {
         const twitchWebSocket = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
@@ -93,7 +93,7 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
 
         twitchWebSocket.on("message", (data: WebSocket.Data) => {
             const parsedData: TwitchWebSocketMessage = JSON.parse(data.toString());
-            handleWebSocketMessage(parsedData, cognitoUserId);
+            handleWebSocketMessage(parsedData, cognitoUserId, twitchOuathToken);
         });
 
         return twitchWebSocket;
@@ -104,11 +104,11 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
 
 }
 
-async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: string): Promise<void> {
+async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: string, twitchOuathToken: string): Promise<void> {
     switch (data.metadata.message_type) {
         case 'session_welcome': {
             const websocketSessionID = data.payload.session!.id;
-            await registerEventSubListeners(cognitoUserId, websocketSessionID);
+            await registerEventSubListeners(cognitoUserId, websocketSessionID, twitchOuathToken);
             const client = frontendClients.get(cognitoUserId);
             if (client) {
                 client.readiness.twitchReady = true;
@@ -157,11 +157,11 @@ async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserI
     }
 }
 
-async function registerEventSubListeners(cognitoUserId: string, websocketSessionID: string): Promise<void> {
+async function registerEventSubListeners(cognitoUserId: string, websocketSessionID: string, twitchOuathToken: string): Promise<void> {
     try {
 
         const headers = {
-            'Authorization': `Bearer ${TWITCH_BOT_OAUTH_TOKEN}`,
+            'Authorization': `Bearer ${twitchOuathToken}`,
             'Client-Id': CLIENT_ID,
             'Content-Type': 'application/json'
         }

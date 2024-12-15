@@ -39,6 +39,7 @@ export interface StreamData {
 }
 
 export interface TwitchData {
+    twitchOauthToken: string | null;
     twitchBroadcasterUsername: string | null;
     twitchBroadcasterUserId: string | null;
     twitchRole: string | null;

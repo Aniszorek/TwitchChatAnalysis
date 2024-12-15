@@ -4,12 +4,11 @@ import {exchangeCodeForToken, generateAuthUrl, refreshIdToken, verifyToken} from
 import {verifyTwitchUsernameAndStreamStatus} from '../../bot/bot';
 import {handleWebSocketClose, pendingWebSocketInitializations} from "../../bot/wsServer";
 import {validateTwitchAuth} from "../../twitch_calls/twitchAuth";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../envConfig";
+import {CLIENT_ID} from "../../envConfig";
 import {validateUserRole} from "../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
 import {LogColor, logger} from "../../utilities/logger";
 import {frontendClients} from "../../bot/frontendClients";
 import {waitForWebSocketClose} from "../../utilities/utilities";
-
 
 
 const LOG_PREFIX = `ROUTE_AWS_AUTHORIZATION`;
@@ -19,7 +18,7 @@ interface SetTwitchUsernameRequestBody {
     twitchBroadcasterUsername: string;
 }
 
-export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction) {
+export async function verifyCognitoTokenMiddleware(req: Request, res: Response, next: NextFunction) {
     const cognitoIdToken = req.headers["x-cognito-id-token"] as string | undefined;
 
     if (!cognitoIdToken) {
@@ -35,7 +34,23 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
     }
 }
 
-// todo: powinniśmy rozdzielić te endpointy na różne pliki, bo nie każdy służy do autoryzacji
+export async function verifyTwitchOauthTokenMiddleware(req: Request, res: Response, next: NextFunction) {
+    const twitchOauth = req.headers["x-twitch-oauth-token"] as string | undefined;
+
+    if (!twitchOauth) {
+        return res.status(404).send({message: 'Token is missing or invalid'});
+    }
+
+    try {
+        await validateTwitchAuth(twitchOauth)
+        next();
+    } catch (error: any) {
+        logger.error(`Token verification failed: ${error.message}`, LOG_PREFIX);
+        res.status(401).json({message: 'Token verification failed', error: error.message});
+    }
+}
+
+
 export const authRouter = express.Router();
 
 authRouter.get('/auth-url', (req, res) => {
@@ -69,8 +84,9 @@ authRouter.get('/callback', async (req, res) => {
 })
 
 
-authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) => {
+authRouter.post('/set-twitch-username', verifyCognitoTokenMiddleware, verifyTwitchOauthTokenMiddleware, async (req, res) => {
     const cognitoIdToken = <string>req.headers["x-cognito-id-token"];
+    const twitchOauthToken = <string>req.headers["x-twitch-oauth-token"];
 
     let {
         twitchBroadcasterUsername
@@ -85,7 +101,6 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
         // sub is a part of jwt, and it can be used as identifier for Cognito user
         // we will use it to determine to which websocket connection messages should be forwarded
         const cognitoUserId = (await verifyToken(cognitoIdToken)).sub;
-        await validateTwitchAuth();
 
         const userData = frontendClients.get(cognitoUserId!);
         if (userData) {
@@ -103,7 +118,7 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
 
         // Validate role for user
         // todo move .toLowerCase to separate variable and use it everywhere (especially in pendingWebSocketInitializations)
-        const roleResponse = await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
+        const roleResponse = await validateUserRole(twitchOauthToken, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
 
         if (!roleResponse) {
             return res.status(500).send({message: 'Could not resolve role for this Twitch account'});
@@ -120,6 +135,7 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
         const cognitoUsername = roleResponse.cognitoUsername;
 
         pendingWebSocketInitializations.set(cognitoUserId!, {
+            twitchOauthToken,
             twitchBroadcasterUsername,
             twitchBroadcasterUserId,
             twitchRole,
@@ -129,7 +145,7 @@ authRouter.post('/set-twitch-username', verifyTokenMiddleware, async (req, res) 
             streamStartedAt,
             streamViewerCount,
             cognitoUsername,
-            cognitoIdToken,
+            cognitoIdToken
         });
 
         res.send({message: 'Streamer found and WebSocket connections can now be initialized'});
@@ -154,7 +170,7 @@ authRouter.post('/verify-cognito', async (req, res) => {
             idToken
         });
     } catch (e: any) {
-        logger.error(`Error during verify idToken: ${e.message}`, LOG_PREFIX );
+        logger.error(`Error during verify idToken: ${e.message}`, LOG_PREFIX);
         res.status(401).json({message: 'idToken not verified', error: e.message});
     }
 })
@@ -167,14 +183,14 @@ authRouter.post('/refresh-cognito-tokens', async (req, res) => {
         return res.status(400).send('Cognito refresh token is required');
     }
 
-    try{
+    try {
         const data = await refreshIdToken(refreshToken);
         const decodedToken = await verifyToken(data.id_token);
         const userId = decodedToken.sub!;
 
         // refreshing the token will start as soon as frontend client logs in - meaning that it might not be in the frontend clients
         const userData = frontendClients.get(userId);
-        if (userData){
+        if (userData) {
             userData.cognito.cognitoIdToken = data.id_token
         }
 

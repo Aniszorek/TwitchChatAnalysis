@@ -1,6 +1,5 @@
 import axios, {AxiosResponse} from 'axios';
 import {twitchApiClient} from "./twitchApiConfig";
-import {TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {LogColor, logger} from "../utilities/logger";
 
 const LOG_PREFIX = 'TWITCH_API_AUTH';
@@ -76,12 +75,11 @@ export async function fetchTwitchStreamMetadata(userId: string): Promise<TwitchS
 /**
  * Validates the OAuth token for the Twitch bot
  */
-export async function validateTwitchAuth() {
-    // todo czy wywołanie tej funkcji dla niepoprawnego tokenu zrobi cokolwiek poza errorem w konsoli? musi pojawić się jakiś return i if przy wywołaniu
+export async function validateTwitchAuth(twitchOauthToken: string) {
     try {
         const response: AxiosResponse = await axios.get(TWITCH_VALIDATE_AUTH_URL, {
             headers: {
-                Authorization: `OAuth ${TWITCH_BOT_OAUTH_TOKEN}`,
+                Authorization: `OAuth ${twitchOauthToken}`,
             },
         });
 
