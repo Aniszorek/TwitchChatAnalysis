@@ -21,7 +21,7 @@ import {LogColor, logger} from "../../utilities/logger";
 import {awsStreamController} from "../../routes/aws/controller/awsStreamController";
 import {TwitchMessage} from "../../routes/aws/model/twitchMessage";
 import {awsTwitchMessageController} from "../../routes/aws/controller/awsTwitchMessageController";
-import {verifyUserPermission} from "../../cognitoRoles";
+import {verifyUserPermission} from "../../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS"

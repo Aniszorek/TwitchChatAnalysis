@@ -14,7 +14,7 @@ import {TwitchMessage} from "../model/twitchMessage";
 import {PostTwitchMessagePayload} from "../model/postTwitchMessagePayload";
 import {postMessageToApiGateway} from "../../../api_gateway_calls/twitch-message/postTwitchMessage";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
-import {verifyUserPermission} from "../../../cognitoRoles";
+import {verifyUserPermission} from "../../../utilities/cognitoRoles";
 
 const LOG_PREFIX = "AWS_TWITCH_MESSAGE_CONTROLLER"
 

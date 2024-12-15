@@ -21,7 +21,7 @@ import {createTimestamp} from "../utilities/utilities";
 import {LogBackgroundColor, LogColor, logger, LogStyle} from "../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
 import {awsStreamController} from "../routes/aws/controller/awsStreamController";
-import {verifyUserPermission} from "../cognitoRoles";
+import {verifyUserPermission} from "../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = 'BACKEND_WS'

@@ -1,6 +1,6 @@
-import {frontendClients} from "./bot/frontendClients";
-import {LogColor, logger, LogStyle} from "./utilities/logger";
-import {COGNITO_ROLES, CognitoRole} from "./utilities/CognitoRoleEnum";
+import {frontendClients} from "../bot/frontendClients";
+import {LogColor, logger, LogStyle} from "./logger";
+import {COGNITO_ROLES, CognitoRole} from "./CognitoRoleEnum";
 
 interface UserData {
     twitchData: {

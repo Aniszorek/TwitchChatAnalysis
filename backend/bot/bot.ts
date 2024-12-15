@@ -16,7 +16,7 @@ import {
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {frontendClients} from "./frontendClients";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
-import {verifyUserPermission} from "../cognitoRoles";
+import {verifyUserPermission} from "../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = 'TWITCH_WS'

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import {AxiosResponse} from "axios";
-import {isCognitoRoleValid} from "../../cognitoRoles";
+import {isCognitoRoleValid} from "../../utilities/cognitoRoles";
 import {logger} from "../../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../../entryPoint";
 import {awsAuthorizationController} from "../../routes/aws/controller/awsAuthorizationController";

@@ -3,7 +3,7 @@ import {extractHeaders, extractQueryParams} from "./utilities";
 import {verifyToken} from "../aws/cognitoAuth";
 import {LogColor, logger, LogStyle} from "./logger";
 import {CognitoRole} from "./CognitoRoleEnum";
-import {verifyUserPermission} from "../cognitoRoles";
+import {verifyUserPermission} from "./cognitoRoles";
 
 const LOG_PREFIX = "TCA SECURED"
 
