@@ -1,6 +1,6 @@
 import {Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, interval, Observable, Subject, Subscription, tap} from 'rxjs';
+import {catchError, firstValueFrom, from, interval, map, Observable, of, Subject, Subscription, tap} from 'rxjs';
 import {config, urls} from "../app.config";
 import {LoadingService} from '../shared/loading.service';
 
@@ -286,6 +286,26 @@ export class AuthService {
   getOauthToken(): string|null {
     return localStorage.getItem('twitchOauth');
   }
+
+  validateOrRefreshTokenObservable(): Observable<boolean> {
+    const idToken = this.getIdToken();
+    if (!idToken) {
+      return of(false);
+    }
+
+    return this.validateToken(idToken).pipe(
+      map(() => true),
+      catchError(() =>
+        from(this.refreshCognitoTokens()).pipe(
+          map((tokens) => !!tokens),
+          catchError(() => of(false))
+        )
+      )
+    );
+  }
+
+
+
 
   private getHttpOptions(): { headers: HttpHeaders } {
     return {headers: new HttpHeaders({'Content-Type': 'application/json'})};

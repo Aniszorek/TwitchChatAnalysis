@@ -14,9 +14,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     updatedHeaders = updatedHeaders.append('x-cognito-id-token', authTokens.idToken);
   }
 
-  // if (twitchOauthToken) {
-  //   updatedHeaders = updatedHeaders.append('x-twitch-oauth-token', twitchOauthToken);
-  // }
+  if (twitchOauthToken) {
+    updatedHeaders = updatedHeaders.append('x-twitch-oauth-token', twitchOauthToken);
+  }
 
   const newReq = req.clone({ headers: updatedHeaders });
 

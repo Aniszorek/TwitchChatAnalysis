@@ -30,7 +30,6 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log("oninit")
     this.authService.initializeSession();
     if (this.authService.isLoggedIn()) {
       this.authService.startTokenAutoRefresh();
