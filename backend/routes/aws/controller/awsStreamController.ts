@@ -45,7 +45,7 @@ class AwsStreamController {
         const {queryParams, headers, validatedBody} = context;
         try {
             const result = await deleteStreamAndMetadataFromApiGateway(queryParams, headers)
-            res.status(result.status).send(result.data)
+            res.json(result)
 
         } catch (error: any) {
             logger.error(`Error in delete /stream: ${error.message}. ${IS_DEBUG_ENABLED ? JSON.stringify(error.response.data, null, 2) : ""}`, LOG_PREFIX);

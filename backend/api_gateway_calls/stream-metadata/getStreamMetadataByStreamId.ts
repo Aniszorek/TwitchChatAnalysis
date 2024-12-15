@@ -1,24 +1,8 @@
 import {apiGatewayClient} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
+import {GetStreamMetadataMessage} from "../../routes/aws/model/getStreamMetadataResponse";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
-
-export interface GetStreamMetadataMessage {
-    "stream_id": string,
-    "timestamp": string,
-    "metadata": StreamMetadata
-}
-
-interface StreamMetadata {
-    "category"?: string
-    "viewer_count"?: number
-    "message_count"?: number
-    "follower_count"?: number
-    "subscriber_count"?: number
-    "neutral_message_count"?: number
-    "negative_message_count"?: number
-    "positive_message_count"?: number
-}
 
 export async function getStreamMetadataByStreamIdFromApiGateway(queryParams: any, headers: any) {
     try {

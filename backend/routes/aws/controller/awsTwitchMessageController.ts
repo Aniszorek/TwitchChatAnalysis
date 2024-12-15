@@ -30,14 +30,14 @@ class AwsTwitchMessageController {
             const result = await getTwitchMessageFromApiGateway({...queryParams, ...optionalQueryParams}, headers);
 
             const response = await AwsTwitchMessageController.buildResponse(
-                result.data as TwitchMessageData[],
+                result,
                 broadcasterId,
                 cognitoUserId,
                 queryParams.chatter_user_login
             );
 
             logger.info("Successfully get twitch messages", LOG_PREFIX, { color: LogColor.YELLOW, style: LogStyle.DIM });
-            res.status(result.status).json(response);
+            res.status(200).json(response);
         }
         catch (error: any) {
 

@@ -1,19 +1,8 @@
 import {apiGatewayClient} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
+import {GetStreamMessage} from "../../routes/aws/model/getStreamMessageResponse";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
-
-interface GetStreamMessage {
-    "stream_id": string,
-    "broadcaster_username": string,
-    "stream_title": string,
-    "started_at": string,
-    "ended_at": string | null,
-    "start_follows": number,
-    "end_follows": string | null,
-    "start_subs": number,
-    "end_subs": string | null
-}
 
 export async function getStreamsByBroadcasterUsernameFromApiGateway(headers: any) {
     try {

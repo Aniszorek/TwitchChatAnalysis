@@ -1,12 +1,13 @@
 import {apiGatewayClient} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
+import {deleteStreamMetadataResponse} from "../../routes/aws/model/deleteStreamMetadataResponse";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
 
-export async function deleteStreamAndMetadataFromApiGateway(queryParams: any, headers: any) {
+export async function deleteStreamAndMetadataFromApiGateway(queryParams: any, headers: any):Promise<deleteStreamMetadataResponse> {
     try {
-        return await apiGatewayClient.delete('/stream', {
+        const response = await apiGatewayClient.delete('/stream', {
                 headers: {
                     ...headers,
                 },
@@ -14,6 +15,7 @@ export async function deleteStreamAndMetadataFromApiGateway(queryParams: any, he
                     ...queryParams
                 }
             })
+        return response.data
 
     } catch (error: any) {
         logger.error(`Error deleting stream data: ${error.message}`, LOG_PREFIX);
