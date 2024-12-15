@@ -1,4 +1,4 @@
-export interface deleteStreamMetadataResponse {
+export interface DeleteStreamMetadataResponse {
     message?: string;
     details?: {
         streams_deleted: number,

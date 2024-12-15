@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import {NextFunction, Request, Response} from "express";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
 import {getSuspendedUsers} from "../../../twitch_calls/twitchUsers/getSuspendedUsers";
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
-import {COGNITO_ROLES} from "../../../cognitoRoles";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = "TWITCH_USERS_CONTROLLER";
 

@@ -1,13 +1,7 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
-import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
-import {
-    fetchTwitchStreamMetadata,
-    fetchTwitchUserId,
-    fetchTwitchUserIdFromOauthToken,
-    TwitchStreamData
-} from "../twitch_calls/twitchAuth";
+import {fetchTwitchUserIdFromOauthToken} from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
@@ -22,6 +16,8 @@ import {
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {frontendClients} from "./frontendClients";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
+import {verifyUserPermission} from "../cognitoRoles";
+import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = 'TWITCH_WS'
 
@@ -170,7 +166,7 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
         }, headers)
 
         // moderator role required
-        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow')) {
+        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR , 'Subscribe to channel follow')) {
             await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_FOLLOW, {
                 broadcaster_user_id: broadcasterId, moderator_user_id: viewerId,
             }, headers, '2')

@@ -1,11 +1,11 @@
 import {apiGatewayClient} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
-import {deleteStreamMetadataResponse} from "../../routes/aws/model/deleteStreamMetadataResponse";
+import {DeleteStreamMetadataResponse} from "../../routes/aws/model/deleteStreamMetadataResponse";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
 
-export async function deleteStreamAndMetadataFromApiGateway(queryParams: any, headers: any):Promise<deleteStreamMetadataResponse> {
+export async function deleteStreamAndMetadataFromApiGateway(queryParams: any, headers: any):Promise<DeleteStreamMetadataResponse> {
     try {
         const response = await apiGatewayClient.delete('/stream', {
                 headers: {

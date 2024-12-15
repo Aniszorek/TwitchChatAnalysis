@@ -1,5 +1,4 @@
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
-import {COGNITO_ROLES, verifyUserPermission} from "../../../cognitoRoles";
 import express from "express";
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
@@ -10,6 +9,12 @@ import {getChannelVips} from "../../../twitch_calls/twitchChannels/getChannelVip
 import {getChannelModerators} from "../../../twitch_calls/twitchModeration/getModerators";
 import {GetTwitchMessageResponse, TwitchMessageData} from "../model/getTwitchMessageResponse";
 import {ErrorWithStatus} from "../../../utilities/ErrorWithStatus";
+import {getClientAndCognitoIdToken} from "../../../bot/frontendClients";
+import {TwitchMessage} from "../model/twitchMessage";
+import {PostTwitchMessagePayload} from "../model/postTwitchMessagePayload";
+import {postMessageToApiGateway} from "../../../api_gateway_calls/twitch-message/postTwitchMessage";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
+import {verifyUserPermission} from "../../../cognitoRoles";
 
 const LOG_PREFIX = "AWS_TWITCH_MESSAGE_CONTROLLER"
 
@@ -91,6 +96,37 @@ class AwsTwitchMessageController {
             throw new ErrorWithStatus(400, `Broadcaster with username: ${broadcasterUsername} does not exist`);
         }
         return response.userId;
+    }
+
+    // for internal use only
+    public async postTwitchMessage (msg: TwitchMessage, cognitoUserId: string) {
+        try {
+
+            const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
+            if (!cognitoIdToken) {
+                logger.error(`Cognito token missing for user: ${cognitoUserId}`, LOG_PREFIX);
+                return;
+            }
+
+            const streamId = client.twitchData?.streamId;
+
+            const payload: PostTwitchMessagePayload = {
+                chatter_user_login: msg.chatterUserLogin,
+                message_text: msg.messageText,
+                timestamp: msg.messageTimestamp,
+                stream_id: streamId,
+            }
+            const headers = {
+                broadcasteruserlogin: msg.broadcasterUserLogin,
+                authorization: 'Bearer ' + cognitoIdToken
+            }
+
+            const response = await postMessageToApiGateway(payload, headers)
+            logger.info(`Message sent to API Gateway: ${msg.messageText}`, LOG_PREFIX);
+            return response
+        } catch (error: any) {
+            logger.error(`Failed to fetch twitch messages from API Gateway: ${error.message}`, LOG_PREFIX);
+        }
     }
 
 }

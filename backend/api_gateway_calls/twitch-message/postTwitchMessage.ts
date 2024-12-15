@@ -1,6 +1,6 @@
-import {getClientAndCognitoIdToken} from "../../bot/frontendClients";
-import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {apiGatewayClient} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
+import {PostTwitchMessagePayload} from "../../routes/aws/model/postTwitchMessagePayload";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
@@ -19,34 +19,16 @@ interface TwitchMessage {
 /**
  * Forwards messages from Twitch EventSub to AWS ApiGateway
  */
-export async function postMessageToApiGateway(msg: TwitchMessage, cognitoUserId: string) {
+export async function postMessageToApiGateway(msg: PostTwitchMessagePayload, headers: any) {
     try {
 
-        const {client, cognitoIdToken} = getClientAndCognitoIdToken(cognitoUserId)
-        if (!cognitoIdToken) {
-            logger.error(`Cognito token missing for user: ${cognitoUserId}`, LOG_PREFIX);
-            return;
-        }
-
-        const streamId = client.twitchData?.streamId;
-
-        const response = await apiGatewayClient.post("/twitch-message",{
-                chatter_user_login: msg.chatterUserLogin,
-                message_text: msg.messageText,
-                timestamp: msg.messageTimestamp,
-                stream_id: streamId,
-            },{
-                broadcasterUserLogin: msg.broadcasterUserLogin,
-                cognitoIdToken: cognitoIdToken,
-            } as CustomAxiosRequestConfig
-        )
-
-        if (response.status === 200) {
-            logger.info(`Message sent to API Gateway: ${msg.messageText}`, LOG_PREFIX);
-        } else {
-            logger.error(`Failed to send message to API Gateway. Status: ${response.status}`, LOG_PREFIX);
-        }
+        return await apiGatewayClient.post("/twitch-message", msg, {
+            headers: {
+                ...headers
+            }
+        })
     } catch (error: any) {
         logger.error(`Error sending message to API Gateway: ${error.message}`, LOG_PREFIX);
+        throw error
     }
 }

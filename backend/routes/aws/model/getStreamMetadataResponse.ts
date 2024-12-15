@@ -1,4 +1,4 @@
-export interface GetStreamMetadataMessage {
+export interface GetStreamMetadataResponse {
     "stream_id": string,
     "timestamp": string,
     "metadata": StreamMetadata

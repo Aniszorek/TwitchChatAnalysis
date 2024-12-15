@@ -1,4 +1,4 @@
-export interface GetStreamMessage {
+export interface GetStreamResponse {
     "stream_id": string,
     "broadcaster_username": string,
     "stream_title": string,

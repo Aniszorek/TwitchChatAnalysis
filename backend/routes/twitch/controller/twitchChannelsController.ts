@@ -1,5 +1,4 @@
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
-import {COGNITO_ROLES} from "../../../cognitoRoles";
 import express from "express";
 import {getChannelFollowersCount} from "../../../twitch_calls/twitchChannels/getChannelFollowers";
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
@@ -13,6 +12,7 @@ import {
     isPatchChannelInformationPayload,
     patchChannelInformation
 } from "../../../twitch_calls/twitchChannels/patchChannelInformation";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = 'TWITCH_CHANNEL_CONTROLLER';
 
