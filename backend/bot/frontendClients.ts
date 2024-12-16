@@ -37,7 +37,6 @@ export interface StreamData {
 }
 
 export interface TwitchData {
-    twitchOauthToken: string | null;
     twitchBroadcasterUsername: string | null;
     twitchBroadcasterUserId: string | null;
     twitchRole: string | null;
@@ -90,7 +89,6 @@ export const setFrontendClientCognitoData = (
 
 export const setFrontendClientTwitchData = (
     cognitoUserId: string,
-    twitchOauthToken: string,
     twitchBroadcasterUsername: string,
     twitchBroadcasterUserId: string,
     twitchRole: string,
@@ -99,7 +97,6 @@ export const setFrontendClientTwitchData = (
     const userData = frontendClients.get(cognitoUserId);
     if (!userData) return;
 
-    userData.twitchData.twitchOauthToken = twitchOauthToken;
     userData.twitchData.twitchBroadcasterUsername = twitchBroadcasterUsername;
     userData.twitchData.twitchBroadcasterUserId = twitchBroadcasterUserId;
     userData.twitchData.twitchRole = twitchRole;

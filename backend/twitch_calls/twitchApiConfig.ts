@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {CLIENT_ID} from "../envConfig";
 
 export const twitchApiClient = axios.create({
     baseURL: 'https://api.twitch.tv/helix',
