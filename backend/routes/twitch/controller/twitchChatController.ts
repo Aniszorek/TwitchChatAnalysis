@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
 import {isSendChatMessagePayload, postChatMessage} from "../../../twitch_calls/twitchChat/sendChatMessage";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {getChatSettings} from "../../../twitch_calls/twitchChat/getChatSettings";
 import {isPatchChatSettingsPayload, patchChatSettings} from "../../../twitch_calls/twitchChat/patchChatSettings";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
-import {COGNITO_ROLES} from "../../../cognitoRoles";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = "TWITCH_CHAT_CONTROLLER";
 

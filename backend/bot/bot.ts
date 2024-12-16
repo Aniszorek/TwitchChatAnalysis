@@ -1,13 +1,6 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
-import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
-import {
-    fetchTwitchStreamMetadata,
-    fetchTwitchUserId,
-    fetchTwitchUserIdFromOauthToken,
-    TwitchStreamData
-} from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
@@ -22,6 +15,9 @@ import {
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {frontendClients} from "./frontendClients";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
+import {verifyUserPermission} from "../utilities/cognitoRoles";
+import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
+import {twitchUsersController} from "../routes/twitch/controller/twitchUsersController";
 
 const LOG_PREFIX = 'TWITCH_WS'
 
@@ -58,26 +54,6 @@ export interface TwitchWebSocketMessage {
 interface VerifyResponseData {
     data: { id: string }[];
 }
-
-
-export async function verifyTwitchUsernameAndStreamStatus(twitchUsername: string): Promise<{
-    success: boolean;
-    message: string;
-    streamStatus?: TwitchStreamData;
-    userId?: string
-}> {
-    const fetchResponse = await fetchTwitchUserId(twitchUsername);
-
-    if (!fetchResponse.found) {
-        return {success: false, message: `Streamer with username: ${twitchUsername} not found`};
-    }
-
-    const broadcasterId = fetchResponse.userId!;
-
-    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
-    return {success: true, message: "Twitch username validated and authorized", streamStatus, userId: broadcasterId};
-}
-
 
 export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId: string): Promise<WebSocket | null> {
     try {
@@ -165,8 +141,12 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             'Client-Id': CLIENT_ID,
             'Content-Type': 'application/json'
         }
-        const viewerId = await fetchTwitchUserIdFromOauthToken();
+        const viewerId = await twitchUsersController.fetchTwitchUserIdFromOauthToken();
         const broadcasterId = frontendClients.get(cognitoUserId)?.twitchData.twitchBroadcasterUserId;
+
+        if (!viewerId) {
+            logger.error('No viewer found with given oauth token', LOG_PREFIX)
+        }
 
         if (!broadcasterId) {
             logger.error('No broadcaster found to subscribe to', LOG_PREFIX)
@@ -190,7 +170,7 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
         }, headers)
 
         // moderator role required
-        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow')) {
+        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR , 'Subscribe to channel follow')) {
             await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_FOLLOW, {
                 broadcaster_user_id: broadcasterId, moderator_user_id: viewerId,
             }, headers, '2')

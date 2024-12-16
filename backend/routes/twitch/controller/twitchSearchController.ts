@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { LogColor, logger, LogStyle } from "../../../utilities/logger";
-import { getSearchCategories } from "../../../twitch_calls/twitchSearch/searchTwitchCategories";
+import {NextFunction, Request, Response} from "express";
+import {LogColor, logger, LogStyle} from "../../../utilities/logger";
+import {getSearchCategories} from "../../../twitch_calls/twitchSearch/searchTwitchCategories";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
-import {COGNITO_ROLES} from "../../../cognitoRoles";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = "TWITCH_SEARCH_CONTROLLER";
 
