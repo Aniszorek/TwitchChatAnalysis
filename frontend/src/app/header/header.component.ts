@@ -40,4 +40,8 @@ export class HeaderComponent {
     this.activeView = 'stream';
     this.router.navigate(['/stream']);
   }
+
+  goToProfile() {
+    this.router.navigate(['/profile']);
+  }
 }

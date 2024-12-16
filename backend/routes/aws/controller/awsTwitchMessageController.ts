@@ -23,22 +23,23 @@ class AwsTwitchMessageController {
     @TCASecured({
         requiredQueryParams: ["chatter_user_login"],
         optionalQueryParams: ["stream_id", "start_time", "end_time"],
-        requiredHeaders: ["authorization", "broadcasteruserlogin"],
+        requiredHeaders: ["authorization", "broadcasteruserlogin", "x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Get TwitchMessages"
     })
     public async getTwitchMessages(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
         const {queryParams, optionalQueryParams, headers, validatedBody, cognitoUserId} = context;
         try{
-
-            const broadcasterId = await AwsTwitchMessageController.getBroadcasterId(headers.broadcasteruserlogin);
+            const twitchOauthToken = headers["x-twitch-oauth-token"];
+            const broadcasterId = await AwsTwitchMessageController.getBroadcasterId(headers.broadcasteruserlogin, twitchOauthToken);
             const result = await getTwitchMessageFromApiGateway({...queryParams, ...optionalQueryParams}, headers);
 
             const response = await AwsTwitchMessageController.buildResponse(
                 result,
                 broadcasterId,
                 cognitoUserId,
-                queryParams.chatter_user_login
+                queryParams.chatter_user_login,
+                headers
             );
 
             logger.info("Successfully get twitch messages", LOG_PREFIX, { color: LogColor.YELLOW, style: LogStyle.DIM });
@@ -69,28 +70,29 @@ class AwsTwitchMessageController {
         messages: TwitchMessageData[],
         broadcasterId: string,
         cognitoUserId: string,
-        chatterUserLogin: string
+        chatterUserLogin: string,
+        headers: any
     ): Promise<GetTwitchMessageResponse> {
         const response: GetTwitchMessageResponse = { chatter_user_login: chatterUserLogin, messages };
 
         if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'get chatter data only for streamer access')) {
-            const suspendedLists = await getSuspendedUsers({broadcaster_id: broadcasterId});
+            const suspendedLists = await getSuspendedUsers({broadcaster_id: broadcasterId}, headers);
             response.is_banned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin);
             response.is_timeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin);
 
-            const vipList = await getChannelVips({broadcaster_id: broadcasterId});
+            const vipList = await getChannelVips({broadcaster_id: broadcasterId}, headers);
             response.is_vip = vipList?.some(user => user.user_login === chatterUserLogin);
 
-            const modList = await getChannelModerators({broadcaster_id: broadcasterId});
+            const modList = await getChannelModerators({broadcaster_id: broadcasterId}, headers);
             response.is_mod = modList?.some(user => user.user_login === chatterUserLogin);
         }
 
         return response;
     }
 
-    private static async getBroadcasterId (broadcasterUsername: string){
+    private static async getBroadcasterId (broadcasterUsername: string, twitchOauthToken: string){
 
-        const response = await twitchUsersController.fetchTwitchUserIdByNickname(broadcasterUsername);
+        const response = await twitchUsersController.fetchTwitchUserIdByNickname(broadcasterUsername, twitchOauthToken);
         if (!response.userId) {
 
             throw new ErrorWithStatus(400, `Broadcaster with username: ${broadcasterUsername} does not exist`);
@@ -125,7 +127,7 @@ class AwsTwitchMessageController {
             logger.info(`Message sent to API Gateway: ${msg.messageText}`, LOG_PREFIX);
             return response
         } catch (error: any) {
-            logger.error(`Failed to fetch twitch messages from API Gateway: ${error.message}`, LOG_PREFIX);
+            logger.error(`Failed to post twitch messages from API Gateway: ${error.message}`, LOG_PREFIX);
         }
     }
 

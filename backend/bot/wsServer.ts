@@ -26,6 +26,7 @@ import {twitchEventsubController} from "../routes/twitch/controller/twitchEvents
 const LOG_PREFIX = 'BACKEND_WS'
 
 export const pendingWebSocketInitializations = new Map<string, {
+    twitchOauthToken: string;
     twitchBroadcasterUsername: string;
     twitchBroadcasterUserId: string;
     twitchRole: string;
@@ -65,6 +66,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             cognitoUsername: null,
                         },
                         twitchData: {
+                            twitchOauthToken: null,
                             twitchBroadcasterUsername: null,
                             twitchBroadcasterUserId: null,
                             twitchRole: null,
@@ -99,6 +101,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
 
                     if (pendingWebSocketInitializations.has(userId)) {
                         const {
+                            twitchOauthToken,
                             twitchBroadcasterUsername,
                             twitchBroadcasterUserId,
                             twitchRole,
@@ -128,7 +131,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                         }
 
                         setFrontendClientCognitoData(userId, cognitoIdToken, cognitoUsername);
-                        setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId);
+                        setFrontendClientTwitchData(userId, twitchBroadcasterUsername, twitchBroadcasterUserId, twitchRole, streamId, twitchOauthToken);
                         setFrontendClientTwitchStreamMetadata(userId, streamMetadata)
 
                         if(streamId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "create post-stream-metadata-interval"))
@@ -136,8 +139,8 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
 
                         if(streamId && streamStartedAt && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
                         {
-                            const subCount = await getChannelSubscriptionsCount({broadcaster_id: twitchBroadcasterUserId})
-                            const followerCount = await getChannelFollowersCount({broadcaster_id: twitchBroadcasterUserId})
+                            const subCount = await getChannelSubscriptionsCount({broadcaster_id: twitchBroadcasterUserId}, {"x-twitch-oauth-token": frontendClients.get(userId)?.twitchData.twitchOauthToken })
+                            const followerCount = await getChannelFollowersCount({broadcaster_id: twitchBroadcasterUserId}, {"x-twitch-oauth-token": frontendClients.get(userId)?.twitchData.twitchOauthToken })
                             setStreamDataStartValues(userId, streamStartedAt, followerCount, subCount)
                         }
 
@@ -212,7 +215,7 @@ async function cleanupSubscriptions(userId: string, subscriptions: Set<string>) 
 
     for (const subscriptionId of subscriptions) {
         try {
-            const result = await twitchEventsubController.deleteTwitchSubscription(subscriptionId);
+            const result = await twitchEventsubController.deleteTwitchSubscription(subscriptionId, {"x-twitch-oauth-token": frontendClients.get(userId)?.twitchData.twitchOauthToken });
             if (result) {
                 subscriptions.delete(subscriptionId);
             }
@@ -262,8 +265,8 @@ export async function handleWebSocketClose(userId: string | null): Promise<void>
     const streamId = userData.twitchData.streamId;
 
     if (broadcasterId && verifyUserPermission(userId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API")) {
-        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId});
-        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId});
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId}, {"x-twitch-oauth-token": frontendClients.get(userId)?.twitchData.twitchOauthToken });
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId}, {"x-twitch-oauth-token": frontendClients.get(userId)?.twitchData.twitchOauthToken });
         setStreamDataEndValues(userId, createTimestamp(), followerCount, subCount);
     }
 

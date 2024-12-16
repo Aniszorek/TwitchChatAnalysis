@@ -20,10 +20,13 @@ export type PatchChatSettingsPayload = {
 // Requires a user access token that includes the moderator:manage:chat_settings scope.
 // moderator_id	The ID of a user that has permission to moderate the broadcaster’s chat room,
 // or the broadcaster’s ID if they’re making the update. This ID must match the user ID in the user access token.
-export const patchChatSettings = async (queryParams:any, payload: PatchChatSettingsPayload) => {
+export const patchChatSettings = async (queryParams:any, payload: PatchChatSettingsPayload, headers:any) => {
     try {
         const result = await twitchApiClient.patch('/chat/settings', payload, {
-            params: queryParams
+            params: queryParams,
+            headers: {
+                ...headers
+            }
         })
         return result.data
     } catch (error: any) {

@@ -1,8 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {BehaviorSubject, catchError, interval, Observable, Subject, Subscription, tap} from 'rxjs';
-import { Router } from '@angular/router';
-import { config, urls } from "../app.config";
+import {catchError, firstValueFrom, from, interval, map, Observable, of, Subject, Subscription, tap} from 'rxjs';
+import {config, urls} from "../app.config";
 import {LoadingService} from '../shared/loading.service';
 
 interface AuthTokens {
@@ -22,8 +21,6 @@ interface RefreshedAuthTokens {
   providedIn: 'root',
 })
 export class AuthService {
-  isLoading = new BehaviorSubject<boolean>(true);
-  isLoading$ = this.isLoading.asObservable();
   isLoggedIn = signal(false);
 
   private readonly logoutSubject = new Subject<void>();
@@ -37,7 +34,7 @@ export class AuthService {
   private readonly clientId = config.cognitoClientId;
   private readonly redirectUri = urls.cognitoLougoutRedirectUrl;
 
-  constructor(private readonly router: Router, private readonly http: HttpClient, private readonly loadingService: LoadingService) {}
+  constructor(private readonly http: HttpClient, private readonly loadingService: LoadingService) {}
 
   /**
    * Starts the login process by redirecting to the backend authorization URL.
@@ -83,10 +80,7 @@ export class AuthService {
     if (this.isTokenExpired(tokens.expiryTime)) {
       console.log('Token has expired. Trying to refresh it.');
       this.refreshCognitoTokens()
-        .then(() => {
-          this.router.navigate(['/stream']);
-          this.finishLoading();
-        })
+        .then(() => this.finishLoading())
         .catch(() => {
           this.clearLocalSession();
           this.finishLoading();
@@ -148,6 +142,7 @@ export class AuthService {
     localStorage.removeItem('idToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('expireTime');
+    localStorage.removeItem('twitchOauth')
     this.isLoggedIn.set(false);
   }
 
@@ -263,15 +258,16 @@ export class AuthService {
 
   private handleTokenValidation(response: { message: string }, tokens: AuthTokens): void {
     if (response.message === 'verified') {
-      console.log('Token is valid. Redirecting to /stream-search.');
+      console.log('Token is valid. Updating session state.');
       this.saveTokens(tokens.idToken, tokens.refreshToken, tokens.expiryTime);
-      this.router.navigate(['/stream-search']);
+      this.isLoggedIn.set(true);
     } else {
       console.log('Token validation failed. Clearing session.');
       this.clearLocalSession();
     }
     this.finishLoading();
   }
+
 
   private handleTokenValidationError(err: any): void {
     console.log('Token validation failed. Clearing session.', err);
@@ -282,6 +278,34 @@ export class AuthService {
   private finishLoading(): void {
     this.loadingService.setLoading('auth', false);
   }
+
+  saveOuathToken(token: string): void {
+    localStorage.setItem('twitchOauth', token);
+  }
+
+  getOauthToken(): string|null {
+    return localStorage.getItem('twitchOauth');
+  }
+
+  validateOrRefreshTokenObservable(): Observable<boolean> {
+    const idToken = this.getIdToken();
+    if (!idToken) {
+      return of(false);
+    }
+
+    return this.validateToken(idToken).pipe(
+      map(() => true),
+      catchError(() =>
+        from(this.refreshCognitoTokens()).pipe(
+          map((tokens) => !!tokens),
+          catchError(() => of(false))
+        )
+      )
+    );
+  }
+
+
+
 
   private getHttpOptions(): { headers: HttpHeaders } {
     return {headers: new HttpHeaders({'Content-Type': 'application/json'})};

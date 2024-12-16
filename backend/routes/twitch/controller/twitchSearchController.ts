@@ -9,13 +9,14 @@ const LOG_PREFIX = "TWITCH_SEARCH_CONTROLLER";
 export class TwitchSearchController {
     @TCASecured({
         requiredQueryParams:  ["query"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.VIEWER,
         actionDescription: "Search Categories"
     })
     public async searchCategories(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await getSearchCategories(queryParams);
+            const result = await getSearchCategories(queryParams, headers);
             logger.info(`Successfully searched categories`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {

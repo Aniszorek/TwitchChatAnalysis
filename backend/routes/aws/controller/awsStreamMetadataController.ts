@@ -55,6 +55,7 @@ class AwsStreamMetadataController {
             const timestamp = encodeURIComponent(createTimestamp())
             const broadcasterUserLogin = client.twitchData.twitchBroadcasterUsername
             const broadcasterId = client.twitchData.twitchBroadcasterUserId;
+            const twitchOuathToken = client.twitchData.twitchOauthToken;
 
 
             if (!stream_id) {
@@ -69,7 +70,7 @@ class AwsStreamMetadataController {
             }
 
             // fetch current streamStatus (category, title, viewerCount)
-            const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId);
+            const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId, twitchOuathToken!);
             if (streamStatus.stream_id === stream_id) {
                 const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
                 const newMetadata: TwitchStreamMetadata = {

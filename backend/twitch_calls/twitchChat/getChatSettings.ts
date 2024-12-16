@@ -24,10 +24,11 @@ export interface ChatSettingsResponse {
 // moderator_id The ID of the broadcaster or one of the broadcaster’s moderators.
 //   This field is required only if you want to include the non_moderator_chat_delay and non_moderator_chat_delay_duration settings in the response.
 //   If you specify this field, this ID must match the user ID in the user access token.
-export const getChatSettings = async (queryParams: any): Promise<ChatSettingsResponse> => {
+export const getChatSettings = async (queryParams: any, headers: any): Promise<ChatSettingsResponse> => {
     try {
         const result =  await twitchApiClient.get('/chat/settings', {
-            params: queryParams
+            params: queryParams,
+            headers: { ...headers }
         })
         return result.data;
 

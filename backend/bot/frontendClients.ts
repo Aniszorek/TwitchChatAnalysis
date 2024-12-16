@@ -37,10 +37,11 @@ export interface StreamData {
 }
 
 export interface TwitchData {
+    twitchOauthToken: string | null;
     twitchBroadcasterUsername: string | null;
     twitchBroadcasterUserId: string | null;
     twitchRole: string | null;
-    streamId: string | null;
+    streamId: string | null | undefined;
     streamMetadata: TwitchStreamMetadata;
     streamData: StreamData;
 }
@@ -92,27 +93,17 @@ export const setFrontendClientTwitchData = (
     twitchBroadcasterUsername: string,
     twitchBroadcasterUserId: string,
     twitchRole: string,
-    streamId: string | null
+    streamId: string | null | undefined,
+    twitchOauthToken: string,
 ) => {
     const userData = frontendClients.get(cognitoUserId);
     if (!userData) return;
-
+    userData.twitchData.twitchOauthToken = twitchOauthToken;
     userData.twitchData.twitchBroadcasterUsername = twitchBroadcasterUsername;
     userData.twitchData.twitchBroadcasterUserId = twitchBroadcasterUserId;
     userData.twitchData.twitchRole = twitchRole;
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId);
 }
-
-
-export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | null) => {
-    const client = frontendClients.get(cognitoUserId);
-    if (client) {
-        client.twitchData.streamId = streamId;
-    } else {
-        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
-    }
-
-};
 
 
 export const getFrontendClientTwitchStreamMetadata = (cognitoUserId: string): TwitchStreamMetadata | undefined => {
@@ -123,6 +114,17 @@ export const getFrontendClientTwitchStreamMetadata = (cognitoUserId: string): Tw
         throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
+
+
+export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | null | undefined) => {
+    const client = frontendClients.get(cognitoUserId);
+    if (client) {
+        client.twitchData.streamId = streamId;
+    } else {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
+};
 
 export const setFrontendClientTwitchStreamMetadata = (cognitoUserId: string, metadata: TwitchStreamMetadata) => {
     const client = frontendClients.get(cognitoUserId)

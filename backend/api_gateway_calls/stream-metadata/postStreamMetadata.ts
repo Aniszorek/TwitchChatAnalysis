@@ -7,7 +7,6 @@ const MINUTES = 5
 const SECONDS = 60
 const MILLISECONDS = 1000
 export const METADATA_SEND_INTERVAL = MINUTES * SECONDS * MILLISECONDS
-
 export async function postMetadataToApiGateway(metadata: PostStreamMetadataPayload, headers: any) {
 
     try {
