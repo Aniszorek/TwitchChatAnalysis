@@ -7,8 +7,6 @@ const LOG_PREFIX = `API_GATEWAY_REST`;
 
 export async function postStreamToApiGateway(streamMessage: PostStreamPayload, headers: any) {
 
-    console.log(headers)
-
     try {
         return await apiGatewayClient.post('/stream', streamMessage, {
             headers: {

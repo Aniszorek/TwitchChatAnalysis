@@ -3,7 +3,6 @@ import {TCASecured} from "../../../utilities/TCASecuredDecorator";
 import {exchangeCodeForToken, generateAuthUrl, refreshIdToken, verifyToken} from "../../../aws/cognitoAuth";
 import {LogColor, logger} from "../../../utilities/logger";
 import {handleWebSocketClose, pendingWebSocketInitializations} from "../../../bot/wsServer";
-import {validateTwitchAuth, verifyTwitchUsernameAndStreamStatus} from "../../../twitch_calls/twitchAuth";
 import {frontendClients} from "../../../bot/frontendClients";
 import {waitForWebSocketClose} from "../../../utilities/utilities";
 import {validateUserRole} from "../../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
@@ -16,6 +15,7 @@ import jwt from "jsonwebtoken";
 import {ValidateUserRolePayload} from "../model/validateUserRolePayload";
 import {isCognitoRoleValid} from "../../../utilities/cognitoRoles";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
+import {twitchAuthController} from "../../twitch/controller/twitchAuthController";
 
 const LOG_PREFIX = "AWS_AUTHORIZATION_CONTROLLER"
 
@@ -116,7 +116,7 @@ class AwsAuthorizationController {
         const twitchBroadcasterUsername = validatedBody.twitchBroadcasterUsername
 
         try {
-            await validateTwitchAuth();
+            await twitchAuthController.validateTwitchAuth();
             const cognitoUserId =  (await verifyToken(cognitoIdToken)).sub
             const userData = frontendClients.get(cognitoUserId!);
             if (userData) {
@@ -125,7 +125,7 @@ class AwsAuthorizationController {
             }
 
             // Check if streamer exists
-            const result = await verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
+            const result = await twitchAuthController.verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
             if (!result.success) {
                 return res.status(404).send({message: result.message});
             }

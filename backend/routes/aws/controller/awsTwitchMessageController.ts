@@ -2,7 +2,6 @@ import {TCASecured} from "../../../utilities/TCASecuredDecorator";
 import express from "express";
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
-import {fetchTwitchUserId} from "../../../twitch_calls/twitchAuth";
 import {getTwitchMessageFromApiGateway,} from "../../../api_gateway_calls/twitch-message/getTwitchMessage";
 import {getSuspendedUsers} from "../../../twitch_calls/twitchUsers/getSuspendedUsers";
 import {getChannelVips} from "../../../twitch_calls/twitchChannels/getChannelVips";
@@ -15,6 +14,7 @@ import {PostTwitchMessagePayload} from "../model/postTwitchMessagePayload";
 import {postMessageToApiGateway} from "../../../api_gateway_calls/twitch-message/postTwitchMessage";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 import {verifyUserPermission} from "../../../utilities/cognitoRoles";
+import {twitchUsersController} from "../../twitch/controller/twitchUsersController";
 
 const LOG_PREFIX = "AWS_TWITCH_MESSAGE_CONTROLLER"
 
@@ -90,7 +90,7 @@ class AwsTwitchMessageController {
 
     private static async getBroadcasterId (broadcasterUsername: string){
 
-        const response = await fetchTwitchUserId(broadcasterUsername);
+        const response = await twitchUsersController.fetchTwitchUserIdByNickname(broadcasterUsername);
         if (!response.userId) {
 
             throw new ErrorWithStatus(400, `Broadcaster with username: ${broadcasterUsername} does not exist`);

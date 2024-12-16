@@ -1,7 +1,6 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
-import {fetchTwitchUserIdFromOauthToken} from "../twitch_calls/twitchAuth";
 import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
@@ -18,6 +17,7 @@ import {frontendClients} from "./frontendClients";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
 import {verifyUserPermission} from "../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
+import {twitchUsersController} from "../routes/twitch/controller/twitchUsersController";
 
 const LOG_PREFIX = 'TWITCH_WS'
 
@@ -141,8 +141,12 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             'Client-Id': CLIENT_ID,
             'Content-Type': 'application/json'
         }
-        const viewerId = await fetchTwitchUserIdFromOauthToken();
+        const viewerId = await twitchUsersController.fetchTwitchUserIdFromOauthToken();
         const broadcasterId = frontendClients.get(cognitoUserId)?.twitchData.twitchBroadcasterUserId;
+
+        if (!viewerId) {
+            logger.error('No viewer found with given oauth token', LOG_PREFIX)
+        }
 
         if (!broadcasterId) {
             logger.error('No broadcaster found to subscribe to', LOG_PREFIX)

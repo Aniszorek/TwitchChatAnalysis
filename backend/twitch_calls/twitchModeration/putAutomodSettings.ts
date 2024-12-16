@@ -26,7 +26,6 @@ export const putAutomodSettings = async (queryParams:any, payload: PutAutomodSet
         })
         return result.data
     } catch (error: any) {
-        console.log(error)
         logger.error(`Error patching chat settings`, LOG_PREFIX);
         throw error;
     }

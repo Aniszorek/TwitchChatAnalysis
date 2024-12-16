@@ -2,8 +2,6 @@ import {WebSocket, WebSocketServer} from 'ws';
 import {verifyToken} from "../aws/cognitoAuth";
 import {startTwitchWebSocket} from "./bot";
 import {connectAwsWebSocket} from "../aws/websocketApi";
-import {deleteTwitchSubscription} from "../twitch_calls/twitchAuth";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
 import {
     createPostStreamMetadataInterval,
     deletePostStreamMetadataInterval,
@@ -23,6 +21,7 @@ import {IS_DEBUG_ENABLED} from "../entryPoint";
 import {awsStreamController} from "../routes/aws/controller/awsStreamController";
 import {verifyUserPermission} from "../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
+import {twitchEventsubController} from "../routes/twitch/controller/twitchEventsubController";
 
 const LOG_PREFIX = 'BACKEND_WS'
 
@@ -213,7 +212,7 @@ async function cleanupSubscriptions(userId: string, subscriptions: Set<string>) 
 
     for (const subscriptionId of subscriptions) {
         try {
-            const result = await deleteTwitchSubscription(subscriptionId, TWITCH_BOT_OAUTH_TOKEN, CLIENT_ID);
+            const result = await twitchEventsubController.deleteTwitchSubscription(subscriptionId);
             if (result) {
                 subscriptions.delete(subscriptionId);
             }

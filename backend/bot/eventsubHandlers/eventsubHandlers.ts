@@ -13,7 +13,6 @@ import {
     TwitchStreamMetadata
 } from "../frontendClients";
 import {sendMessageToFrontendClient} from "../wsServer";
-import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../../utilities/utilities";
@@ -23,6 +22,8 @@ import {TwitchMessage} from "../../routes/aws/model/twitchMessage";
 import {awsTwitchMessageController} from "../../routes/aws/controller/awsTwitchMessageController";
 import {verifyUserPermission} from "../../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../../utilities/CognitoRoleEnum";
+import {FetchTwitchStreamData} from "../../routes/twitch/model/fetchTwitchStreamDataResponse";
+import {twitchStreamsController} from "../../routes/twitch/controller/twitchStreamsController";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS"
 
@@ -55,7 +56,7 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
     logger.info(`Stream online. Stream ID: ${streamId}`, LOG_PREFIX, {color: LogColor.MAGENTA});
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
 
-    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
+    const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId);
     const startedAt = streamStatus?.started_at
 
     const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId);

@@ -13,10 +13,11 @@ import {
     TwitchStreamMetadata
 } from "../../../bot/frontendClients";
 import {createTimestamp} from "../../../utilities/utilities";
-import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../../twitch_calls/twitchAuth";
 import {PostStreamMetadataPayload} from "../model/postStreamMetadataPayload";
 import {postMetadataToApiGateway} from "../../../api_gateway_calls/stream-metadata/postStreamMetadata";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
+import {FetchTwitchStreamData} from "../../twitch/model/fetchTwitchStreamDataResponse";
+import {twitchStreamsController} from "../../twitch/controller/twitchStreamsController";
 
 const LOG_PREFIX = "AWS_STREAM_METADATA_CONTROLLER"
 
@@ -68,7 +69,7 @@ class AwsStreamMetadataController {
             }
 
             // fetch current streamStatus (category, title, viewerCount)
-            const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
+            const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId);
             if (streamStatus.stream_id === stream_id) {
                 const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId)
                 const newMetadata: TwitchStreamMetadata = {
