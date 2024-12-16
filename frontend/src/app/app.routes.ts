@@ -6,6 +6,8 @@ import {authGuard} from "./auth/auth.guard";
 import {SearchUserComponent} from './features/search-user/search-user.component';
 import {ChartsComponent} from './features/charts/charts.component';
 import {authTwitchGuard} from './auth/auth.twitch.guard';
+import {StreamDataResolver} from './features/charts/stream-data.resolver';
+import {ProfileComponent} from './features/profile/profile.component';
 
 export const routes: Routes = [
   {
@@ -24,12 +26,18 @@ export const routes: Routes = [
   {
     path: 'stream',
     component: StreamComponent,
-    canActivate: [authTwitchGuard]
+    canActivate: [authGuard, authTwitchGuard]
   },
   {
     path: 'charts',
     component: ChartsComponent,
-    canActivate: [authTwitchGuard]
+    canActivate: [authGuard, authTwitchGuard],
+    resolve: {streamData: StreamDataResolver}
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [authGuard]
   },
   {
     path: '**',

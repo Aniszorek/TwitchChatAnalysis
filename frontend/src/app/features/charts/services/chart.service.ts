@@ -60,7 +60,7 @@ export class ChartService {
   }
 
   private getDataForKey(key: string, aggregatedData: { [key: string]: number[] }, metadata: any[]): number[] {
-    if (['negative_message_count', 'positive_message_count', 'neutral_message_count'].includes(key)) {
+    if (['negative_message_count', 'positive_message_count'].includes(key)) {
       return aggregatedData[key];
     }
     return metadata.map((entry: any) => entry.metadata[key]);

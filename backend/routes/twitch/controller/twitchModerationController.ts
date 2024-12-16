@@ -1,18 +1,21 @@
-import { Request, Response, NextFunction } from "express";
-import { LogColor, logger, LogStyle } from "../../../utilities/logger";
-import { COGNITO_ROLES } from "../../../cognitoRoles";
-import { getChannelModerators } from "../../../twitch_calls/twitchModeration/getModerators";
-import { isBanUserPayload, postBanUser } from "../../../twitch_calls/twitchModeration/banUser";
-import { deleteBanUser } from "../../../twitch_calls/twitchModeration/unbanUser";
-import { postAddModerator } from "../../../twitch_calls/twitchModeration/modUser";
-import { deleteModerator } from "../../../twitch_calls/twitchModeration/unmodUser";
-import { deleteMessage } from "../../../twitch_calls/twitchModeration/deleteMessage";
-import { getAutomodSettings } from "../../../twitch_calls/twitchModeration/getAutomodSettings";
-import { isPutAutomodSettingsPayload, putAutomodSettings } from "../../../twitch_calls/twitchModeration/putAutomodSettings";
-import { getBlockedTerms } from "../../../twitch_calls/twitchModeration/getBlockedTerms";
-import { isPostBlockedTermPayload, postBlockedTerm } from "../../../twitch_calls/twitchModeration/postBlockedTerm";
-import { deleteBlockedTerm } from "../../../twitch_calls/twitchModeration/deleteBlockedTerm";
+import {NextFunction, Request, Response} from "express";
+import {LogColor, logger, LogStyle} from "../../../utilities/logger";
+import {getChannelModerators} from "../../../twitch_calls/twitchModeration/getModerators";
+import {isBanUserPayload, postBanUser} from "../../../twitch_calls/twitchModeration/banUser";
+import {deleteBanUser} from "../../../twitch_calls/twitchModeration/unbanUser";
+import {postAddModerator} from "../../../twitch_calls/twitchModeration/modUser";
+import {deleteModerator} from "../../../twitch_calls/twitchModeration/unmodUser";
+import {deleteMessage} from "../../../twitch_calls/twitchModeration/deleteMessage";
+import {getAutomodSettings} from "../../../twitch_calls/twitchModeration/getAutomodSettings";
+import {
+    isPutAutomodSettingsPayload,
+    putAutomodSettings
+} from "../../../twitch_calls/twitchModeration/putAutomodSettings";
+import {getBlockedTerms} from "../../../twitch_calls/twitchModeration/getBlockedTerms";
+import {isPostBlockedTermPayload, postBlockedTerm} from "../../../twitch_calls/twitchModeration/postBlockedTerm";
+import {deleteBlockedTerm} from "../../../twitch_calls/twitchModeration/deleteBlockedTerm";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = "TWITCH_MODERATION_CONTROLLER";
 
@@ -20,13 +23,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.STREAMER,
         actionDescription: "Get Channel Moderators"
     })
     public async getModerators(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await getChannelModerators(queryParams);
+            const result = await getChannelModerators(queryParams, headers);
             logger.info(`Successfully fetched moderators for broadcaster_id: ${queryParams.broadcaster_id}`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -37,6 +41,7 @@ export class TwitchModerationController {
 
     @TCASecured({
         bodyValidationFn: isBanUserPayload,
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Ban User"
     })
@@ -44,7 +49,7 @@ export class TwitchModerationController {
         const {queryParams, headers, validatedBody} = context;
         try {
             isBanUserPayload(validatedBody);
-            const result = await postBanUser(validatedBody);
+            const result = await postBanUser(validatedBody, headers);
             logger.info(`Successfully banned user with ID: ${validatedBody.data.user_id}`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -55,13 +60,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "user_id", "moderator_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Unban User"
     })
     public async unbanUser(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await deleteBanUser(queryParams);
+            const result = await deleteBanUser(queryParams, headers);
             logger.info(`Successfully unbanned user`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -72,13 +78,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "user_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.STREAMER,
         actionDescription: "Add Moderator"
     })
     public async addModerator(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await postAddModerator(queryParams);
+            const result = await postAddModerator(queryParams, headers);
             logger.info(`Successfully added moderator with user_id: ${queryParams.user_id}`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -89,13 +96,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "user_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.STREAMER,
         actionDescription: "Remove Moderator"
     })
     public async removeModerator(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await deleteModerator(queryParams);
+            const result = await deleteModerator(queryParams, headers);
             logger.info(`Successfully removed moderator with user_id: ${queryParams.user_id}`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -106,13 +114,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "moderator_id", "message_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Delete Chat Message"
     })
     public async deleteMessage(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await deleteMessage(queryParams);
+            const result = await deleteMessage(queryParams, headers);
             logger.info(`Successfully deleted message with id: ${queryParams.message_id}`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -123,13 +132,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "moderator_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Get Automod Settings"
     })
     public async getAutomodSettings(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await getAutomodSettings(queryParams);
+            const result = await getAutomodSettings(queryParams, headers);
             logger.info(`Successfully fetched automod settings`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -140,6 +150,7 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "moderator_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         bodyValidationFn: isPutAutomodSettingsPayload,
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Put Automod Settings"
@@ -147,7 +158,7 @@ export class TwitchModerationController {
     public async putAutomodSettings(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await putAutomodSettings(queryParams, validatedBody);
+            const result = await putAutomodSettings(queryParams, validatedBody, headers);
             logger.info(`Successfully updated automod settings`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -158,13 +169,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "moderator_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Get Blocked Terms"
     })
     public async getBlockedTerms(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await getBlockedTerms(queryParams);
+            const result = await getBlockedTerms(queryParams, headers);
             logger.info(`Successfully fetched blocked terms`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -175,6 +187,7 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "moderator_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         bodyValidationFn: isPostBlockedTermPayload,
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Add Blocked Term"
@@ -182,7 +195,7 @@ export class TwitchModerationController {
     public async addBlockedTerm(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await postBlockedTerm(queryParams, validatedBody);
+            const result = await postBlockedTerm(queryParams, validatedBody, headers);
             logger.info(`Successfully added blocked term`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
@@ -193,13 +206,14 @@ export class TwitchModerationController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id", "moderator_id", "id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Delete Blocked Term"
     })
     public async deleteBlockedTerm(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await deleteBlockedTerm(queryParams);
+            const result = await deleteBlockedTerm(queryParams, headers);
             logger.info(`Successfully deleted blocked term`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {

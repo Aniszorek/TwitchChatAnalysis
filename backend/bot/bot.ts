@@ -1,14 +1,7 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
-import {COGNITO_ROLES, verifyUserPermission} from "../cognitoRoles";
-import {
-    fetchTwitchStreamMetadata,
-    fetchTwitchUserId,
-    fetchTwitchUserIdFromOauthToken,
-    TwitchStreamData
-} from "../twitch_calls/twitchAuth";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
+import {CLIENT_ID} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
     channelChatDeleteMessageHandler,
@@ -22,6 +15,10 @@ import {
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {frontendClients} from "./frontendClients";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
+import {verifyUserPermission} from "../utilities/cognitoRoles";
+import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
+import {twitchUsersController} from "../routes/twitch/controller/twitchUsersController";
+import {twitchEventsubController} from "../routes/twitch/controller/twitchEventsubController";
 
 const LOG_PREFIX = 'TWITCH_WS'
 
@@ -55,29 +52,6 @@ export interface TwitchWebSocketMessage {
     };
 }
 
-interface VerifyResponseData {
-    data: { id: string }[];
-}
-
-
-export async function verifyTwitchUsernameAndStreamStatus(twitchUsername: string): Promise<{
-    success: boolean;
-    message: string;
-    streamStatus?: TwitchStreamData;
-    userId?: string
-}> {
-    const fetchResponse = await fetchTwitchUserId(twitchUsername);
-
-    if (!fetchResponse.found) {
-        return {success: false, message: `Streamer with username: ${twitchUsername} not found`};
-    }
-
-    const broadcasterId = fetchResponse.userId!;
-
-    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
-    return {success: true, message: "Twitch username validated and authorized", streamStatus, userId: broadcasterId};
-}
-
 
 export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId: string): Promise<WebSocket | null> {
     try {
@@ -105,10 +79,11 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
 }
 
 async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: string): Promise<void> {
+    const twitchOauthToken = frontendClients.get(cognitoUserId)!.twitchData.twitchOauthToken;
     switch (data.metadata.message_type) {
         case 'session_welcome': {
             const websocketSessionID = data.payload.session!.id;
-            await registerEventSubListeners(cognitoUserId, websocketSessionID);
+            await registerEventSubListeners(cognitoUserId, websocketSessionID, twitchOauthToken!);
             const client = frontendClients.get(cognitoUserId);
             if (client) {
                 client.readiness.twitchReady = true;
@@ -157,41 +132,45 @@ async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserI
     }
 }
 
-async function registerEventSubListeners(cognitoUserId: string, websocketSessionID: string): Promise<void> {
+async function registerEventSubListeners(cognitoUserId: string, websocketSessionID: string, twitchOauthToken: string): Promise<void> {
     try {
 
         const headers = {
-            'Authorization': `Bearer ${TWITCH_BOT_OAUTH_TOKEN}`,
+            'Authorization': `Bearer ${twitchOauthToken}`,
             'Client-Id': CLIENT_ID,
             'Content-Type': 'application/json'
         }
-        const viewerId = await fetchTwitchUserIdFromOauthToken();
+        const viewerId = await twitchUsersController.fetchTwitchUserIdFromOauthToken(twitchOauthToken);
         const broadcasterId = frontendClients.get(cognitoUserId)?.twitchData.twitchBroadcasterUserId;
+
+        if (!viewerId) {
+            logger.error('No viewer found with given oauth token', LOG_PREFIX)
+        }
 
         if (!broadcasterId) {
             logger.error('No broadcaster found to subscribe to', LOG_PREFIX)
         }
 
-        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_CHAT_MESSAGE, {
+        await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_CHAT_MESSAGE, {
             broadcaster_user_id: broadcasterId, user_id: viewerId,
         }, headers)
 
-        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.STREAM_ONLINE, {
+        await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.STREAM_ONLINE, {
             broadcaster_user_id: broadcasterId
         }, headers)
 
-        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.STREAM_OFFLINE, {
+        await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.STREAM_OFFLINE, {
             broadcaster_user_id: broadcasterId
         }, headers)
 
-        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.MESSAGE_DELETE,{
+        await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.MESSAGE_DELETE,{
             broadcaster_user_id: broadcasterId,
             user_id: viewerId
         }, headers)
 
         // moderator role required
-        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR, 'Subscribe to channel follow')) {
-            await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_FOLLOW, {
+        if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.MODERATOR , 'Subscribe to channel follow')) {
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_FOLLOW, {
                 broadcaster_user_id: broadcasterId, moderator_user_id: viewerId,
             }, headers, '2')
         }
@@ -200,50 +179,22 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
         if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'Subscribe to channel subscription'))
         {
             // does not include resubscriptions
-            await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIBE, {
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIBE, {
                 broadcaster_user_id: broadcasterId
             }, headers)
 
             // for resubscription events (according to Twitch documentation, didn't test it)
-            await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIPTION_MESSAGE, {
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_SUBSCRIPTION_MESSAGE, {
                 broadcaster_user_id: broadcasterId
             }, headers)
 
         }
 
-        await registerResponse(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_UPDATE, {
+        await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_UPDATE, {
             broadcaster_user_id: broadcasterId
         }, headers)
 
     } catch (error: any) {
         logger.error(`Error during subscription: ${error.response ? JSON.stringify(error.response.data, null, 2) : error.message}`, LOG_PREFIX);
     }
-}
-
-function verifyRegisterResponse(response: AxiosResponse<VerifyResponseData>, registerType: string, userId: string): void {
-    if (response.status === 202) {
-        const subscriptionId = response.data.data[0].id;
-        trackSubscription(userId, subscriptionId);
-        logger.info(`Subscribed to ${registerType} [${response.data.data[0].id}]`, LOG_PREFIX, {color: LogColor.MAGENTA_BRIGHT});
-    } else {
-        logger.error(`Failed to subscribe to ${registerType}. Status code ${response.status}`, LOG_PREFIX);
-        logger.error(IS_DEBUG_ENABLED ?JSON.stringify(response.data, null, 2) : "", LOG_PREFIX);
-    }
-}
-
-async function registerResponse(cognitoUserId: string, websocketSessionID: string, type:string, condition:any, headers:any, version:string = '1' ): Promise<void> {
-    const response = await axios.post(
-        EVENTSUB_SUBSCRIPTION_URL,
-        {
-            type,
-            version: version,
-            condition,
-            transport: {
-                method: 'websocket',
-                session_id: websocketSessionID,
-            },
-        },
-        { headers }
-    );
-    verifyRegisterResponse(response, type, cognitoUserId);
 }

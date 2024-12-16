@@ -1,13 +1,17 @@
 :root {
-  --background-color: #1f1f23;
-  --card-color: #2c2c30;
+  --background-color: #202020;
+  --card-color: #2D2D30;
+  --background-color-input: #262626;
   --primary-color: #9147ff;
   --dark-violet: #6441A5;
   --primary-color-hover: #5815bd;
   --text-color: #e5e5e5;
+  --placeholder-text-color: #aaaaaa;
   --border-radius: 8px;
   --font-family: 'Arial', sans-serif;
-  --header-height: 5.75vh;
+  --header-height: 5.5vh;
+  --app-height: calc(100vh - var(--header-height));
+  --header-z-index: 1000;
 }
 
 *,

@@ -1,27 +1,37 @@
-<div class="search-wrapper">
-  <div class="search-container">
+<div class="app-wrapper">
+  <div class="card-container">
+    <h2 class="card-title">Streamer</h2>
     <input
-      [disabled]="this.loading"
+      [disabled]="loading"
       [(ngModel)]="username"
-      placeholder="Enter username" class="search-input"/>
+      placeholder="Type streamer nickname..."
+      class="input"
+    />
+
+    <div *ngIf="successMessage && !loading" class="success-message">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage && !loading" class="error-message">
+      {{ errorMessage }}
+    </div>
+
     <button
-      [disabled]="isDisabled"
+      *ngIf="loading; else connectButton"
       (click)="searchUser()"
-      class="search-button">
-      Connect
+      [disabled]="true"
+      class="button">
+      <div class="spinner"></div>
+      Connecting...
     </button>
-  </div>
+    <ng-template #connectButton>
+      <button
+        [disabled]="isDisabled"
+        (click)="searchUser()"
+        class="button">
+        Connect
+      </button>
+    </ng-template>
 
-  <div *ngIf="loading" class="loading-message">
-    <div class="spinner"></div>
-    Connecting...
-  </div>
 
-  <div *ngIf="successMessage && !loading" class="success-message">
-    {{ successMessage }}
-  </div>
-
-  <div *ngIf="errorMessage && !loading" class="error-message">
-    {{ errorMessage }}
   </div>
 </div>

@@ -11,6 +11,7 @@ import {TwitchService} from '../twitch/twitch.service';
 import {KeysService} from './services/keys.service';
 import {ChartService} from './services/chart.service';
 import {AppState} from './models/chart-enums.model';
+import {ActivatedRoute} from '@angular/router';
 
 
 // todo TCA-106 dodałabym opcje usuwania danych z jakiegoś streama bo teraz mamy nasrane pustymi wykresami
@@ -53,7 +54,8 @@ export class ChartsComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly twitchService: TwitchService,
     private readonly keysService: KeysService,
-    private readonly chartService: ChartService
+    private readonly chartService: ChartService,
+    private readonly route: ActivatedRoute
   ) {
     this.authorization = this.authService.getIdToken();
     this.broadcasterUserLogin = this.twitchService.getTwitchUsername();
@@ -70,7 +72,6 @@ export class ChartsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStreams();
-
   }
 
   setAppState(state: AppState) {
@@ -162,23 +163,17 @@ export class ChartsComponent implements OnInit {
       console.warn("broadcasterUserLogin empty");
       return
     }
-
-    this.streamService
-      .getStreams(this.broadcasterUserLogin, this.authorization)
-      .subscribe((data: any[]) => {
-        if (!data) {
-          this.setAppState(AppState.streamDataNotAvailable);
-          return
-        }
-        this.streams = [...data].sort((a, b) => {
-          const timeA = new Date(a.started_at).getTime();
-          const timeB = new Date(b.started_at).getTime();
-          return timeB - timeA;
-        });
-        this.selectFirstStream()
+    this.streams = this.route.snapshot.data['streamData'];
+    if (this.streams && this.streams.length > 0) {
+      this.streams = [...this.streams].sort((a, b) => {
+        const timeA = new Date(a.started_at).getTime();
+        const timeB = new Date(b.started_at).getTime();
+        return timeB - timeA;
       });
-
-    this.setAppState(this.AppState.metadataLoading)
+      this.selectFirstStream();
+    } else {
+      this.setAppState(AppState.streamDataNotAvailable);
+    }
   }
 
   private selectFirstStream() {
@@ -219,11 +214,9 @@ export class ChartsComponent implements OnInit {
     this.metadata.forEach((entry: any) => {
       const negativeSum = this.keysService.calculateSum(entry, 'negative_message_count', this.selectedAggregationKeys);
       const positiveSum = this.keysService.calculateSum(entry, 'positive_message_count', this.selectedAggregationKeys);
-      const neutralSum = this.keysService.getSingleValue(entry, 'neutral_message_count', this.selectedAggregationKeys);
 
       aggregatedData['negative_message_count'].push(negativeSum);
       aggregatedData['positive_message_count'].push(positiveSum);
-      aggregatedData['neutral_message_count'].push(neutralSum);
     });
 
     return aggregatedData;

@@ -1,30 +1,24 @@
-import {apiGatewayClient, CustomAxiosRequestConfig} from "../apiGatewayConfig";
+import {apiGatewayClient} from "../apiGatewayConfig";
 import {logger} from "../../utilities/logger";
-import axios from "axios";
+import {DeleteStreamMetadataResponse} from "../../routes/aws/model/deleteStreamMetadataResponse";
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
 
-export async function deleteStreamAndMetadataFromApiGateway(cognitoIdToken: string, stream_id: string, broadcasterUsername: string) {
+export async function deleteStreamAndMetadataFromApiGateway(queryParams: any, headers: any):Promise<DeleteStreamMetadataResponse> {
     try {
-
-        return await apiGatewayClient.delete('/stream', {
-                broadcasterUserLogin: broadcasterUsername,
-                cognitoIdToken: cognitoIdToken,
+        const response = await apiGatewayClient.delete('/stream', {
+                headers: {
+                    ...headers,
+                },
                 params: {
-                    stream_id: stream_id
+                    ...queryParams
                 }
-            } as CustomAxiosRequestConfig)
+            })
+        return response.data
 
-    }catch (error: any) {
-
-        if(axios.isAxiosError(error) && error.response) {
-            logger.error(`DELETE /stream FAILED: ${error.message}`, LOG_PREFIX);
-            throw {status: error.response.status, message: error.response.data}
-
-        } else {
-            logger.error(`DELETE /stream FAILED: unexpected error:  ${error.message}`, LOG_PREFIX);
-            throw {status: 500, message: error.message};
-        }
+    } catch (error: any) {
+        logger.error(`Error deleting stream data: ${error.message}`, LOG_PREFIX);
+        throw error;
     }
 }

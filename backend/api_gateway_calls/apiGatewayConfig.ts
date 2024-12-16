@@ -11,18 +11,15 @@ export const apiGatewayClient = axios.create({
 
 export function initializeApiGatewayClient() {
     apiGatewayClient.interceptors.request.use((config: CustomAxiosRequestConfig) => {
-        const { cognitoIdToken, broadcasterUserLogin } = config;
+        const { authorization, broadcasteruserlogin } = config.headers;
 
-        if (!config.headers) {
-            config.headers = new AxiosHeaders();
+        if (authorization && broadcasteruserlogin) {
+            delete config.headers['authorization'];
+            delete config.headers['broadcasteruserlogin'];
+
+            config.headers['Authorization'] = authorization;
+            config.headers['BroadcasterUserLogin'] = broadcasteruserlogin;
         }
-
-        if (cognitoIdToken && broadcasterUserLogin) {
-            config.headers.set('Authorization', `Bearer ${cognitoIdToken}`);
-            config.headers.set('BroadcasterUserLogin', broadcasterUserLogin);
-        }
-
-        config.headers.set('Content-Type', 'application/json');
 
         return config;
     });

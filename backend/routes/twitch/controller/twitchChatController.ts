@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
 import {isSendChatMessagePayload, postChatMessage} from "../../../twitch_calls/twitchChat/sendChatMessage";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {getChatSettings} from "../../../twitch_calls/twitchChat/getChatSettings";
 import {isPatchChatSettingsPayload, patchChatSettings} from "../../../twitch_calls/twitchChat/patchChatSettings";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
-import {COGNITO_ROLES} from "../../../cognitoRoles";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = "TWITCH_CHAT_CONTROLLER";
 
@@ -14,12 +14,13 @@ export class TwitchChatController {
     @TCASecured({
         requiredQueryParams: ['broadcaster_id', 'moderator_id'],
         requiredRole: COGNITO_ROLES.VIEWER,
+        requiredHeaders: ["x-twitch-oauth-token"],
         actionDescription: "Get Chat Settings"
     })
     public async getChatSettings(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await getChatSettings(queryParams);
+            const result = await getChatSettings(queryParams, headers);
             logger.info(
                 `Successfully fetched chat settings: ${IS_DEBUG_ENABLED ? JSON.stringify(result, null, 2) : ""}`,
                 LOG_PREFIX,
@@ -36,6 +37,7 @@ export class TwitchChatController {
 
     @TCASecured({
         requiredQueryParams: ['broadcaster_id', 'moderator_id'],
+        requiredHeaders: ["x-twitch-oauth-token"],
         bodyValidationFn: isPatchChatSettingsPayload,
         requiredRole: COGNITO_ROLES.MODERATOR,
         actionDescription: "Patch Chat Settings"
@@ -43,7 +45,7 @@ export class TwitchChatController {
     public async patchChatSettings(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await patchChatSettings(queryParams, validatedBody);
+            const result = await patchChatSettings(queryParams, validatedBody, headers);
             logger.info(
                 `Successfully patched chat settings: ${IS_DEBUG_ENABLED ? JSON.stringify(result, null, 2) : ""}`,
                 LOG_PREFIX,
@@ -59,6 +61,7 @@ export class TwitchChatController {
     }
 
     @TCASecured({
+        requiredHeaders: ["x-twitch-oauth-token"],
         bodyValidationFn: isSendChatMessagePayload,
         requiredRole: COGNITO_ROLES.VIEWER,
         actionDescription: "Send Chat Message"
@@ -66,7 +69,7 @@ export class TwitchChatController {
     public async sendChatMessage(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await postChatMessage(validatedBody);
+            const result = await postChatMessage(validatedBody, headers);
             logger.info(
                 `Successfully sent chat message: ${IS_DEBUG_ENABLED ? JSON.stringify(result.data, null, 2) : ""}`,
                 LOG_PREFIX,

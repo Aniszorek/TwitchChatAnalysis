@@ -12,10 +12,11 @@ export interface ChannelInformationResponse {
 }
 
 // Requires an app access token or user access token.
-export const getChannelInformation = async (queryParams: any): Promise<ChannelInformationResponse> => {
+export const getChannelInformation = async (queryParams: any, headers: any): Promise<ChannelInformationResponse> => {
     try {
         const result =  await twitchApiClient.get('/channels', {
-            params: queryParams
+            params: queryParams,
+            headers: { ...headers }
         })
         return result.data;
 

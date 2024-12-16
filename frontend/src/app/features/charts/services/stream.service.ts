@@ -14,7 +14,6 @@ export class StreamService {
     return this.http.get<any>(`${this.apiUrl}/stream-metadata`, {
       headers: {
         broadcasterUserLogin: broadcasterUserLogin,
-        Authorization: 'Bearer ' + authorization,
       },
       params: {
         stream_id: streamId,
@@ -26,7 +25,6 @@ export class StreamService {
     return this.http.get<any>(`${this.apiUrl}/stream`, {
       headers: {
         broadcasterUserLogin: broadcasterUserLogin,
-        Authorization: 'Bearer ' + authorization,
       }
     });
   }
