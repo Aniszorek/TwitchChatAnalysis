@@ -113,7 +113,7 @@ export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWe
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
         await awsStreamController.patchStream(cognitoUserId)
 
-    setFrontendClientTwitchDataStreamId(cognitoUserId, null)
+    setFrontendClientTwitchDataStreamId(cognitoUserId, undefined)
 
     if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "delete post-stream-metadata-interval"))
         deletePostStreamMetadataInterval(cognitoUserId)

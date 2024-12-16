@@ -127,7 +127,7 @@ class AwsTwitchMessageController {
             logger.info(`Message sent to API Gateway: ${msg.messageText}`, LOG_PREFIX);
             return response
         } catch (error: any) {
-            logger.error(`Failed to fetch twitch messages from API Gateway: ${error.message}`, LOG_PREFIX);
+            logger.error(`Failed to post twitch messages from API Gateway: ${error.message}`, LOG_PREFIX);
         }
     }
 

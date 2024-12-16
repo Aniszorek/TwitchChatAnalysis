@@ -41,7 +41,7 @@ export interface TwitchData {
     twitchBroadcasterUsername: string | null;
     twitchBroadcasterUserId: string | null;
     twitchRole: string | null;
-    streamId: string | null;
+    streamId: string | null | undefined;
     streamMetadata: TwitchStreamMetadata;
     streamData: StreamData;
 }
@@ -93,7 +93,7 @@ export const setFrontendClientTwitchData = (
     twitchBroadcasterUsername: string,
     twitchBroadcasterUserId: string,
     twitchRole: string,
-    streamId: string | null,
+    streamId: string | null | undefined,
     twitchOauthToken: string,
 ) => {
     const userData = frontendClients.get(cognitoUserId);
@@ -106,17 +106,6 @@ export const setFrontendClientTwitchData = (
 }
 
 
-export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | null) => {
-    const client = frontendClients.get(cognitoUserId);
-    if (client) {
-        client.twitchData.streamId = streamId;
-    } else {
-        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
-    }
-
-};
-
-
 export const getFrontendClientTwitchStreamMetadata = (cognitoUserId: string): TwitchStreamMetadata | undefined => {
     const client = frontendClients.get(cognitoUserId)
     if (client) {
@@ -125,6 +114,17 @@ export const getFrontendClientTwitchStreamMetadata = (cognitoUserId: string): Tw
         throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
+
+
+export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | null | undefined) => {
+    const client = frontendClients.get(cognitoUserId);
+    if (client) {
+        client.twitchData.streamId = streamId;
+    } else {
+        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
+    }
+
+};
 
 export const setFrontendClientTwitchStreamMetadata = (cognitoUserId: string, metadata: TwitchStreamMetadata) => {
     const client = frontendClients.get(cognitoUserId)
