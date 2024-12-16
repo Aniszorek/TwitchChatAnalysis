@@ -1,18 +1,21 @@
-import { Request, Response, NextFunction } from "express";
-import { LogColor, logger, LogStyle } from "../../../utilities/logger";
-import { COGNITO_ROLES } from "../../../cognitoRoles";
-import { getChannelModerators } from "../../../twitch_calls/twitchModeration/getModerators";
-import { isBanUserPayload, postBanUser } from "../../../twitch_calls/twitchModeration/banUser";
-import { deleteBanUser } from "../../../twitch_calls/twitchModeration/unbanUser";
-import { postAddModerator } from "../../../twitch_calls/twitchModeration/modUser";
-import { deleteModerator } from "../../../twitch_calls/twitchModeration/unmodUser";
-import { deleteMessage } from "../../../twitch_calls/twitchModeration/deleteMessage";
-import { getAutomodSettings } from "../../../twitch_calls/twitchModeration/getAutomodSettings";
-import { isPutAutomodSettingsPayload, putAutomodSettings } from "../../../twitch_calls/twitchModeration/putAutomodSettings";
-import { getBlockedTerms } from "../../../twitch_calls/twitchModeration/getBlockedTerms";
-import { isPostBlockedTermPayload, postBlockedTerm } from "../../../twitch_calls/twitchModeration/postBlockedTerm";
-import { deleteBlockedTerm } from "../../../twitch_calls/twitchModeration/deleteBlockedTerm";
+import {NextFunction, Request, Response} from "express";
+import {LogColor, logger, LogStyle} from "../../../utilities/logger";
+import {getChannelModerators} from "../../../twitch_calls/twitchModeration/getModerators";
+import {isBanUserPayload, postBanUser} from "../../../twitch_calls/twitchModeration/banUser";
+import {deleteBanUser} from "../../../twitch_calls/twitchModeration/unbanUser";
+import {postAddModerator} from "../../../twitch_calls/twitchModeration/modUser";
+import {deleteModerator} from "../../../twitch_calls/twitchModeration/unmodUser";
+import {deleteMessage} from "../../../twitch_calls/twitchModeration/deleteMessage";
+import {getAutomodSettings} from "../../../twitch_calls/twitchModeration/getAutomodSettings";
+import {
+    isPutAutomodSettingsPayload,
+    putAutomodSettings
+} from "../../../twitch_calls/twitchModeration/putAutomodSettings";
+import {getBlockedTerms} from "../../../twitch_calls/twitchModeration/getBlockedTerms";
+import {isPostBlockedTermPayload, postBlockedTerm} from "../../../twitch_calls/twitchModeration/postBlockedTerm";
+import {deleteBlockedTerm} from "../../../twitch_calls/twitchModeration/deleteBlockedTerm";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
+import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 
 const LOG_PREFIX = "TWITCH_MODERATION_CONTROLLER";
 

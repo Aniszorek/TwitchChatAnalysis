@@ -12,21 +12,23 @@ import {
     setStreamDataStartValues,
     TwitchStreamMetadata
 } from "../frontendClients";
-import {COGNITO_ROLES, verifyUserPermission} from "../../cognitoRoles";
 import {sendMessageToFrontendClient} from "../wsServer";
-import {fetchTwitchStreamMetadata, TwitchStreamData} from "../../twitch_calls/twitchAuth";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../../utilities/utilities";
 import {LogColor, logger} from "../../utilities/logger";
-import {postMessageToApiGateway} from "../../api_gateway_calls/twitch-message/postTwitchMessage";
-import {postStreamToApiGateway} from "../../api_gateway_calls/stream/postStream";
-import {patchStreamToApiGateway} from "../../api_gateway_calls/stream/patchStream";
+import {awsStreamController} from "../../routes/aws/controller/awsStreamController";
+import {TwitchMessage} from "../../routes/aws/model/twitchMessage";
+import {awsTwitchMessageController} from "../../routes/aws/controller/awsTwitchMessageController";
+import {verifyUserPermission} from "../../utilities/cognitoRoles";
+import {COGNITO_ROLES} from "../../utilities/CognitoRoleEnum";
+import {FetchTwitchStreamData} from "../../routes/twitch/model/fetchTwitchStreamDataResponse";
+import {twitchStreamsController} from "../../routes/twitch/controller/twitchStreamsController";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS"
 
 export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
-    const msg = {
+    const msg:TwitchMessage = {
         "broadcasterUserId": data.payload.event!.broadcaster_user_id!,
         "broadcasterUserLogin": data.payload.event!.broadcaster_user_login!,
         "broadcasterUserName": data.payload.event!.broadcaster_user_name!,
@@ -42,7 +44,7 @@ export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWeb
     incrementMessageCount(cognitoUserId)
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send twitch message to aws")) {
-        postMessageToApiGateway(msg, cognitoUserId);
+        awsTwitchMessageController.postTwitchMessage(msg, cognitoUserId);
     }
 
     sendMessageToFrontendClient(cognitoUserId, msg);
@@ -54,7 +56,7 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
     logger.info(`Stream online. Stream ID: ${streamId}`, LOG_PREFIX, {color: LogColor.MAGENTA});
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
 
-    const streamStatus: TwitchStreamData = await fetchTwitchStreamMetadata(broadcasterId);
+    const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId);
     const startedAt = streamStatus?.started_at
 
     const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId);
@@ -86,7 +88,13 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
     }
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send POST /stream to api gateway"))
-        await postStreamToApiGateway(cognitoUserId)
+    {
+        // sometimes twitch /get-streams endpoint is not ready at the moment of getting this event
+        // so we wait a moment
+        setTimeout(() => {
+                awsStreamController.postStream(cognitoUserId);
+        }, 3000)
+    }
 }
 
 export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWebSocketMessage) => {
@@ -102,7 +110,7 @@ export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWe
     }
 
     if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "send PATCH /stream to api gateway"))
-        await patchStreamToApiGateway(cognitoUserId)
+        await awsStreamController.patchStream(cognitoUserId)
 
     setFrontendClientTwitchDataStreamId(cognitoUserId, null)
 

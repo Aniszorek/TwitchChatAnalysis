@@ -1,3 +1,19 @@
-<app-stream-video [channelName]="selectedUser"></app-stream-video>
-<app-stream-chat></app-stream-chat>
+<div class="stream-container">
+  <div class="left-column">
+    <div class="video-section">
+      <app-stream-video [channelName]="selectedUser"></app-stream-video>
+    </div>
+    <div class="stream-management">
+      <app-management></app-management>
+    </div>
+  </div>
 
+  <div class="right-column">
+    <div class="chat-section">
+      <app-stream-chat></app-stream-chat>
+    </div>
+    <div class="suspicious-messages">
+      <app-suspicious-messages></app-suspicious-messages>
+    </div>
+  </div>
+</div>

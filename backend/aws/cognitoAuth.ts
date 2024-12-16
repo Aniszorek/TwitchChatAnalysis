@@ -98,20 +98,6 @@ export async function refreshIdToken(refreshToken: string): Promise<CognitoToken
     }
 }
 
-
-export async function refreshIdTokenIfExpiredAndNotConnectedToFE(cognitoRefreshToken: string, cognitoTokenExpiryTime: number, twitchBroadcasterUsername: string): Promise<RefreshTokenResult> {
-    if (Date.now() >= cognitoTokenExpiryTime) {
-        logger.info(`new connection for ${twitchBroadcasterUsername}: Access token expired - refreshing`, LOG_PREFIX, {color: LogColor.YELLOW_BRIGHT,style: LogStyle.BOLD});
-        const data = await refreshIdToken(cognitoRefreshToken);
-        return {
-            newIdToken: data.id_token,
-            newExpiryTime: data.expires_in,
-        };
-    }
-    return { newIdToken: undefined, newExpiryTime: undefined };
-}
-
-
 async function getSigningKey(kid: string): Promise<string> {
     const key: SigningKey = await cognitoClient.getSigningKey(kid);
     return key.getPublicKey();
@@ -122,7 +108,7 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
     const decodedHeader = jwt.decode(token, { complete: true })?.header as DecodedTokenHeader | undefined;
 
     if (!decodedHeader?.kid) {
-        throw new Error("Invalid token structure");
+        throw new Error(`Invalid token structure ${token}`);
     }
 
     const signingKey = await getSigningKey(decodedHeader.kid);

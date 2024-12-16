@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import {authRouter} from "./routes/authorization/awsAuthorization";
+import {authRouter} from "./routes/aws/awsAuthorization";
 import * as http from "node:http";
 import {initWebSocketServer} from "./bot/wsServer";
 import {twitchUsersRouter} from "./routes/twitch/twitchUsersRouter";

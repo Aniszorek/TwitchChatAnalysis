@@ -2,6 +2,8 @@ import {Component} from '@angular/core';
 import {ChatComponent} from "./chat/chat.component";
 import {VideoComponent} from './video/video.component';
 import {TwitchService} from '../twitch/twitch.service';
+import {SuspiciousMessagesComponent} from './suspicious-messages/suspicious-messages.component';
+import {ManagementComponent} from './managment/management.component';
 
 @Component({
   selector: 'app-stream',
@@ -9,6 +11,8 @@ import {TwitchService} from '../twitch/twitch.service';
   imports: [
     ChatComponent,
     VideoComponent,
+    SuspiciousMessagesComponent,
+    ManagementComponent
   ],
   templateUrl: './stream.component.html',
   styleUrl: './stream.component.css'

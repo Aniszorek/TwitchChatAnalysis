@@ -6,12 +6,12 @@ import {AuthService} from "./auth.service";
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const authTokens = authService.getStoredTokens();
-    const twitchOauthToken = authService.getOauthToken();
+  const twitchOauthToken = authService.getOauthToken();
 
   let updatedHeaders = req.headers;
 
   if (authTokens?.idToken) {
-    updatedHeaders = updatedHeaders.append('x-cognito-id-token', authTokens.idToken);
+    updatedHeaders = updatedHeaders.append('authorization', `Bearer ${authTokens.idToken}`);
   }
 
   if (twitchOauthToken) {
@@ -20,7 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const newReq = req.clone({ headers: updatedHeaders });
 
-    console.log(newReq.url);
-    console.log(newReq.headers)
-    return next(newReq);
+  console.log(newReq.url);
+  console.log(newReq.headers)
+  return next(newReq);
 };

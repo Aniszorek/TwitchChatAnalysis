@@ -14,7 +14,7 @@ export class StreamService {
     return this.http.get<any>(`${this.apiUrl}/stream-metadata`, {
       headers: {
         broadcasterUserLogin: broadcasterUserLogin,
-        Authorization: 'Bearer ' + authorization,
+        //Authorization: 'Bearer ' + authorization, // todo niepotrzebne, teraz header authorization jest ustawiany w interceptorze
       },
       params: {
         stream_id: streamId,
@@ -26,7 +26,7 @@ export class StreamService {
     return this.http.get<any>(`${this.apiUrl}/stream`, {
       headers: {
         broadcasterUserLogin: broadcasterUserLogin,
-        Authorization: 'Bearer ' + authorization,
+        //Authorization: 'Bearer ' + authorization, // todo te same uwagi co wyzej
       }
     });
   }

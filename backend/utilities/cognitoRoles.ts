@@ -1,14 +1,6 @@
-import {frontendClients} from "./bot/frontendClients";
-import {LogColor, logger, LogStyle} from "./utilities/logger";
-
-export const COGNITO_ROLES = {
-    STREAMER: "Streamer",
-    MODERATOR: "Moderator",
-    VIEWER: "Viewer"
-};
-
-export type CognitoRole = typeof COGNITO_ROLES[keyof typeof COGNITO_ROLES];
-
+import {frontendClients} from "../bot/frontendClients";
+import {LogColor, logger, LogStyle} from "./logger";
+import {COGNITO_ROLES, CognitoRole} from "./CognitoRoleEnum";
 
 interface UserData {
     twitchData: {
