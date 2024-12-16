@@ -1,4 +1,3 @@
-import {apiGatewayClient} from "../../../api_gateway_calls/apiGatewayConfig";
 import express from "express";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
 import {exchangeCodeForToken, generateAuthUrl, refreshIdToken, verifyToken} from "../../../aws/cognitoAuth";
@@ -12,6 +11,11 @@ import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../../envConfig";
 import {isSetTwitchUsernamePayload} from "../model/setTwitchUsernamePayload";
 import {isRefreshCognitoTokenPayload} from "../model/refreshCognitoTokenPayload";
 import {isVerifyCognitoPayload} from "../model/verifyCognitoPayload";
+import {CognitoIdTokenData} from "../model/validateUserRoleResponse";
+import jwt from "jsonwebtoken";
+import {ValidateUserRolePayload} from "../model/validateUserRolePayload";
+import {isCognitoRoleValid} from "../../../utilities/cognitoRoles";
+import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 
 const LOG_PREFIX = "AWS_AUTHORIZATION_CONTROLLER"
 
@@ -20,14 +24,44 @@ const LOG_PREFIX = "AWS_AUTHORIZATION_CONTROLLER"
 class AwsAuthorizationController {
 
     // for internal use only
-    public async authorizeRole(requestBody: any, headers: any) {
-        return await apiGatewayClient.post('/twitchChatAnalytics-authorization', {
-            ...requestBody,
-        }, {
-            headers: {
-                ...headers
+    public async authorizeRole(twitch_oauth_token: string, broadcaster_user_login: string, client_id: string, cognitoIdToken: string) {
+
+        try {
+            const decoded: CognitoIdTokenData | null = jwt.decode(cognitoIdToken) as CognitoIdTokenData | null;
+            if (!decoded?.["cognito:username"]) {
+                logger.error(`Invalid Cognito token ${cognitoIdToken}`, LOG_PREFIX);
+                return undefined;
             }
-        })
+            const username = decoded["cognito:username"];
+
+            const requestBody:ValidateUserRolePayload = {
+                oauth_token: twitch_oauth_token,
+                cognito_username: username,
+                broadcaster_user_login: broadcaster_user_login,
+                client_id: client_id
+            }
+            const headers = {
+                authorization: cognitoIdToken,
+                broadcasteruserlogin: broadcaster_user_login
+            }
+
+
+            const response =  await validateUserRole(requestBody, headers)
+
+            if (!isCognitoRoleValid(response.body.role)) {
+                logger.error(`Unknown role: ${response.body.role} - Status: ${IS_DEBUG_ENABLED ? JSON.stringify(response.body, null ,2) : ""}`, LOG_PREFIX);
+                return undefined;
+            }
+            logger.info(
+                `Data sent to API Gateway: ${broadcaster_user_login} ${username}. Response: ${IS_DEBUG_ENABLED ? JSON.stringify(response.body, null, 2) : ""}`,
+                LOG_PREFIX)
+            return {role: response.body.role, cognitoUsername: username};
+        } catch (error:any) {
+            logger.error(`Error with cognito role authorization: ${IS_DEBUG_ENABLED ? JSON.stringify(error, null, 2): ""}`, LOG_PREFIX);
+
+        }
+
+
     }
 
     @TCASecured({
@@ -98,7 +132,7 @@ class AwsAuthorizationController {
 
             // Validate role for user
             // todo move .toLowerCase to separate variable and use it everywhere (especially in pendingWebSocketInitializations)
-            const roleResponse = await validateUserRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
+            const roleResponse = await awsAuthorizationController.authorizeRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
 
             if (!roleResponse) {
                 return res.status(500).send({message: 'Could not resolve role for this Twitch account'});
