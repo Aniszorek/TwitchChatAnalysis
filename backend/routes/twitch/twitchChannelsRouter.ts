@@ -11,4 +11,5 @@ twitchChannelsRouter.delete('/vips', createHandlerWithContext(twitchChannelContr
 twitchChannelsRouter.post('/polls', createHandlerWithContext(twitchChannelController.createPoll));
 twitchChannelsRouter.post('/raids', createHandlerWithContext(twitchChannelController.startRaid));
 twitchChannelsRouter.delete('/raids', createHandlerWithContext(twitchChannelController.cancelRaid));
+twitchChannelsRouter.get('/', createHandlerWithContext(twitchChannelController.getChannelInfo));
 twitchChannelsRouter.patch('/', createHandlerWithContext(twitchChannelController.patchChannelInfo));
