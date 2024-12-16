@@ -6,10 +6,11 @@ const LOG_PREFIX = 'TWITCH_API_USERS';
 /**
  * Fetches the Twitch User ID based on the user's nickname
  */
-export async function fetchTwitchUserIdByNickname(queryParams: any) {
+export async function fetchTwitchUserIdByNickname(queryParams: any, headers: any) {
     try {
         return await twitchApiClient.get('/users', {
             params: { ...queryParams },
+            headers: { ...headers },
         });
 
     } catch (error: any) {

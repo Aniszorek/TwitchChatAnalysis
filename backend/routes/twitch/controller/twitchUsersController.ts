@@ -13,13 +13,14 @@ export class TwitchUsersController {
 
     @TCASecured({
         requiredQueryParams: ["broadcaster_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.STREAMER,
         actionDescription: "Get Suspended Users"
     })
     public async getSuspended(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         try {
-            const result = await getSuspendedUsers(queryParams);
+            const result = await getSuspendedUsers(queryParams, headers);
             logger.info(
                 `Successfully retrieved suspended users for broadcaster_id: ${queryParams.broadcaster_id}`,
                 LOG_PREFIX,
@@ -35,13 +36,16 @@ export class TwitchUsersController {
     }
 
     // for internal use only
-    public async fetchTwitchUserIdByNickname(nickname: string):Promise<FetchTwitchUserIdResponse> {
+    public async fetchTwitchUserIdByNickname(nickname: string, twitchOauthToken: string):Promise<FetchTwitchUserIdResponse> {
         try {
 
             const queryParams = {
                 login: nickname
             }
-            const response = await fetchTwitchUserIdByNickname(queryParams)
+            const headers = {
+                Authorization: `Bearer ${twitchOauthToken}`
+            }
+            const response = await fetchTwitchUserIdByNickname(queryParams, headers)
             const userId = response.data.data[0]?.id;
             if (!userId) {
                 return {found: false, userId: null};
@@ -55,9 +59,13 @@ export class TwitchUsersController {
         }
     }
 
-    public async fetchTwitchUserIdFromOauthToken() {
+    // for internal use only
+    public async fetchTwitchUserIdFromOauthToken(twitchOauthToken: string) {
         try {
-            const response = await fetchTwitchUserIdFromOauthToken()
+            const headers = {
+                Authorization: `Bearer ${twitchOauthToken}`
+            }
+            const response = await fetchTwitchUserIdFromOauthToken(headers)
 
             const user = response.data.data[0];
             if (!user) {
@@ -66,7 +74,7 @@ export class TwitchUsersController {
             return user['id'];
 
         } catch (error: any) {
-            console.error(`${LOG_PREFIX} Error fetching username for OAuth token:`, error.message);
+            logger.error(`Error fetching username for OAuth token: ${error.message}`, LOG_PREFIX);
             return undefined;
         }
     }

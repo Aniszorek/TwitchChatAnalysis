@@ -6,7 +6,7 @@ import {handleWebSocketClose, pendingWebSocketInitializations} from "../../../bo
 import {frontendClients} from "../../../bot/frontendClients";
 import {waitForWebSocketClose} from "../../../utilities/utilities";
 import {validateUserRole} from "../../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../../../envConfig";
+import {CLIENT_ID} from "../../../envConfig";
 import {isSetTwitchUsernamePayload} from "../model/setTwitchUsernamePayload";
 import {isRefreshCognitoTokenPayload} from "../model/refreshCognitoTokenPayload";
 import {isVerifyCognitoPayload} from "../model/verifyCognitoPayload";
@@ -106,7 +106,7 @@ class AwsAuthorizationController {
     @TCASecured({
         skipAuthorization: true,
         actionDescription: "setTwitchUsername",
-        requiredHeaders: ["authorization"],
+        requiredHeaders: ["authorization", "x-twitch-oauth-token"],
         bodyValidationFn: isSetTwitchUsernamePayload
     })
     public async setTwitchUsername(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
@@ -114,9 +114,9 @@ class AwsAuthorizationController {
         const authHeader = headers.authorization;
         const cognitoIdToken = authHeader.split(' ')[1];
         const twitchBroadcasterUsername = validatedBody.twitchBroadcasterUsername
+        const twitchOauthToken = headers['x-twitch-oauth-token'];
 
         try {
-            await twitchAuthController.validateTwitchAuth();
             const cognitoUserId =  (await verifyToken(cognitoIdToken)).sub
             const userData = frontendClients.get(cognitoUserId!);
             if (userData) {
@@ -125,14 +125,14 @@ class AwsAuthorizationController {
             }
 
             // Check if streamer exists
-            const result = await twitchAuthController.verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername);
+            const result = await twitchAuthController.verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername, twitchOauthToken);
             if (!result.success) {
                 return res.status(404).send({message: result.message});
             }
 
             // Validate role for user
             // todo move .toLowerCase to separate variable and use it everywhere (especially in pendingWebSocketInitializations)
-            const roleResponse = await awsAuthorizationController.authorizeRole(TWITCH_BOT_OAUTH_TOKEN, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
+            const roleResponse = await awsAuthorizationController.authorizeRole(twitchOauthToken, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
 
             if (!roleResponse) {
                 return res.status(500).send({message: 'Could not resolve role for this Twitch account'});
@@ -148,6 +148,7 @@ class AwsAuthorizationController {
             const cognitoUsername = roleResponse.cognitoUsername;
 
             pendingWebSocketInitializations.set(cognitoUserId!, {
+                twitchOauthToken,
                 twitchBroadcasterUsername,
                 twitchBroadcasterUserId,
                 twitchRole,

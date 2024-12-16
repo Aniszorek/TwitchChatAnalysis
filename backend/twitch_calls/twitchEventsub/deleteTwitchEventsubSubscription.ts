@@ -6,10 +6,11 @@ const LOG_PREFIX = 'TWITCH_API_EVENTSUB';
 /**
  * Deletes a Twitch EventSub subscription by its ID.
  */
-export async function deleteTwitchEventsubSubscription(queryParams: any) {
+export async function deleteTwitchEventsubSubscription(queryParams: any, headers:any) {
     try {
         return await twitchApiClient.delete('/eventsub/subscriptions', {
             params: { ...queryParams },
+            headers: { ...headers }
         });
 
     } catch (error: any) {

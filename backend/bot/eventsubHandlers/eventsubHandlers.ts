@@ -1,7 +1,7 @@
 import {TwitchWebSocketMessage} from "../bot";
 import {
     createPostStreamMetadataInterval,
-    deletePostStreamMetadataInterval,
+    deletePostStreamMetadataInterval, frontendClients,
     getFrontendClientTwitchStreamMetadata,
     incrementFollowersCount,
     incrementMessageCount,
@@ -53,10 +53,11 @@ export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWeb
 export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     const streamId = data.payload.event!.id!;
     const broadcasterId = data.payload.event!.broadcaster_user_id!;
+    const twitchOauthToken = frontendClients.get(cognitoUserId)?.twitchData.twitchOauthToken;
     logger.info(`Stream online. Stream ID: ${streamId}`, LOG_PREFIX, {color: LogColor.MAGENTA});
     setFrontendClientTwitchDataStreamId(cognitoUserId, streamId)
 
-    const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId);
+    const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId, twitchOauthToken!);
     const startedAt = streamStatus?.started_at
 
     const oldMetadata = getFrontendClientTwitchStreamMetadata(cognitoUserId);
@@ -82,8 +83,8 @@ export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWeb
 
     if(streamId && startedAt && verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get start_subs and start_followers count from Twitch API"))
     {
-        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
-        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId}, {"x-twitch-oauth-token": frontendClients.get(cognitoUserId)?.twitchData.twitchOauthToken })
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId}, {"x-twitch-oauth-token": frontendClients.get(cognitoUserId)?.twitchData.twitchOauthToken } )
         setStreamDataStartValues(cognitoUserId, startedAt, followerCount, subCount)
     }
 
@@ -104,8 +105,8 @@ export const streamOfflineHandler = async (cognitoUserId: string, data: TwitchWe
 
     if(verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, "get end_subs and end_followers count from Twitch API"))
     {
-        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId})
-        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId})
+        const subCount = await getChannelSubscriptionsCount({broadcaster_id: broadcasterId}, {"x-twitch-oauth-token": frontendClients.get(cognitoUserId)?.twitchData.twitchOauthToken })
+        const followerCount = await getChannelFollowersCount({broadcaster_id: broadcasterId}, {"x-twitch-oauth-token": frontendClients.get(cognitoUserId)?.twitchData.twitchOauthToken })
         setStreamDataEndValues(cognitoUserId,  createTimestamp(), followerCount, subCount)
     }
 

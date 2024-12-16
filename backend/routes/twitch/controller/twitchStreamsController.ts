@@ -1,15 +1,16 @@
 import {FetchTwitchStreamData} from "../model/fetchTwitchStreamDataResponse";
 import {LogColor, logger} from "../../../utilities/logger";
 import {fetchTwitchStreamMetadata} from "../../../twitch_calls/twitchStreams/fetchTwitchStreamMetadata";
+import {frontendClients} from "../../../bot/frontendClients";
 
 const LOG_PREFIX = 'TWITCH_STREAMS_CONTROLLER';
 
 class TwitchStreamsController {
     // for internal use only
-    public async fetchTwitchStreamMetadata(userId: string): Promise<FetchTwitchStreamData> {
+    public async fetchTwitchStreamMetadata(userId: string, twitchOauthToken: string): Promise<FetchTwitchStreamData> {
         try {
             const queryParams = { user_id: userId }
-            const response = await fetchTwitchStreamMetadata(queryParams)
+            const response = await fetchTwitchStreamMetadata(queryParams, {"x-twitch-oauth-token": twitchOauthToken})
 
             const streamData = response.data.data[0];
 

@@ -6,10 +6,11 @@ const LOG_PREFIX = 'TWITCH_API_MODERATION';
 // Requires a user access token that includes the moderator:manage:chat_messages scope.
 // broadcaster_id The ID of the broadcaster that owns the chat room to remove messages from.
 // moderator_id The ID of the broadcaster or a user that has permission to moderate the broadcaster’s chat room. This ID must match the user ID in the user access token.
-export const deleteMessage = async (queryParams:any) => {
+export const deleteMessage = async (queryParams:any, headers:any) => {
     try {
         const result = await twitchApiClient.delete('/moderation/chat', {
             params: queryParams,
+            headers: { ...headers }
         })
         return result.data
     } catch (error: any) {

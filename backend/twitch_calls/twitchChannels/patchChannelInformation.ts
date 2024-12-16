@@ -12,10 +12,11 @@ export type PatchChannelInformationPayload = {
 
 // Requires a user access token that includes the channel:manage:broadcast scope.
 // broadcaster_id The ID of the broadcaster whose channel you want to update. This ID must match the user ID in the user access token.
-export const patchChannelInformation = async (queryParams:any, payload: PatchChannelInformationPayload) => {
+export const patchChannelInformation = async (queryParams:any, payload: PatchChannelInformationPayload, headers:any) => {
     try {
         const result = await twitchApiClient.patch('/channels', payload, {
-            params: queryParams
+            params: queryParams,
+            headers: { ...headers }
         })
         return result.data
     } catch (error: any) {

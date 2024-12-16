@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import axios, {AxiosResponse} from "axios";
 import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
-import {CLIENT_ID, TWITCH_BOT_OAUTH_TOKEN} from "../envConfig";
+import {CLIENT_ID} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
     channelChatDeleteMessageHandler,
@@ -81,10 +81,11 @@ export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId
 }
 
 async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserId: string): Promise<void> {
+    const twitchOauthToken = frontendClients.get(cognitoUserId)!.twitchData.twitchOauthToken;
     switch (data.metadata.message_type) {
         case 'session_welcome': {
             const websocketSessionID = data.payload.session!.id;
-            await registerEventSubListeners(cognitoUserId, websocketSessionID);
+            await registerEventSubListeners(cognitoUserId, websocketSessionID, twitchOauthToken!);
             const client = frontendClients.get(cognitoUserId);
             if (client) {
                 client.readiness.twitchReady = true;
@@ -133,15 +134,15 @@ async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserI
     }
 }
 
-async function registerEventSubListeners(cognitoUserId: string, websocketSessionID: string): Promise<void> {
+async function registerEventSubListeners(cognitoUserId: string, websocketSessionID: string, twitchOauthToken: string): Promise<void> {
     try {
 
         const headers = {
-            'Authorization': `Bearer ${TWITCH_BOT_OAUTH_TOKEN}`,
+            'Authorization': `Bearer ${twitchOauthToken}`,
             'Client-Id': CLIENT_ID,
             'Content-Type': 'application/json'
         }
-        const viewerId = await twitchUsersController.fetchTwitchUserIdFromOauthToken();
+        const viewerId = await twitchUsersController.fetchTwitchUserIdFromOauthToken(twitchOauthToken);
         const broadcasterId = frontendClients.get(cognitoUserId)?.twitchData.twitchBroadcasterUserId;
 
         if (!viewerId) {
@@ -211,6 +212,7 @@ function verifyRegisterResponse(response: AxiosResponse<VerifyResponseData>, reg
     }
 }
 
+// todo powinniśmy używać tutaj klienta (move to controller)
 async function registerResponse(cognitoUserId: string, websocketSessionID: string, type:string, condition:any, headers:any, version:string = '1' ): Promise<void> {
     const response = await axios.post(
         EVENTSUB_SUBSCRIPTION_URL,

@@ -5,10 +5,11 @@ const LOG_PREFIX = 'TWITCH_API_CHANNELS';
 
 // Requires a user access token that includes the channel:manage:vips scope.
 // broadcaster_id The ID of the broadcaster who owns the channel where the user has VIP status.
-export const postAddVip = async (queryParams:any) => {
+export const postAddVip = async (queryParams:any, headers:any) => {
     try {
         const result = await twitchApiClient.post('/channels/vips', {}, {
             params: queryParams,
+            headers: { ...headers }
         })
         return result.data
     } catch (error: any) {

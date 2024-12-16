@@ -4,6 +4,7 @@ import {verifyToken} from "../aws/cognitoAuth";
 import {LogColor, logger, LogStyle} from "./logger";
 import {CognitoRole} from "./CognitoRoleEnum";
 import {verifyUserPermission} from "./cognitoRoles";
+import {twitchAuthController} from "../routes/twitch/controller/twitchAuthController";
 
 const LOG_PREFIX = "TCA SECURED"
 
@@ -42,7 +43,13 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                 let headers: Partial<THeaders> = {};
                 if (requiredHeaders) {
                     headers = extractHeaders<THeaders>(req, requiredHeaders);
+                    if (requiredHeaders.find((header) => header === "x-twitch-oauth-token")) {
+                        if (headers["x-twitch-oauth-token"]) {
+                            await twitchAuthController.validateTwitchAuth(headers["x-twitch-oauth-token"]);
+                        }
+                    }
                 }
+
 
                 let validatedBody = null;
                 if (bodyValidationFn) {
@@ -53,8 +60,7 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                     validatedBody = body;
                 }
 
-                if(!skipAuthorization && requiredRole)
-                {
+                if (!skipAuthorization && requiredRole) {
                     const authHeader = req.headers['authorization'];
                     if (!authHeader) {
                         throw new Error('Authorization header is required');
@@ -66,7 +72,7 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                     }
 
                     const cognitoUserId = (await verifyToken(token)).sub;
-                    if(!cognitoUserId) {
+                    if (!cognitoUserId) {
                         throw new Error('bad cognitoIdToken');
                     }
 
@@ -86,13 +92,15 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                             cognitoUserId
                         }
                     ]);
-                }
-                else if (!skipAuthorization && !requiredRole) {
+                } else if (!skipAuthorization && !requiredRole) {
                     throw new Error(`If skipAuthorization is set to false, you must provide CognitoRole!`);
                 }
 
                 // return unauthorized
-                logger.info(`got access without authorization: ${actionDescription}`, LOG_PREFIX, {color: LogColor.GREEN, style: LogStyle.BOLD})
+                logger.info(`got access without authorization: ${actionDescription}`, LOG_PREFIX, {
+                    color: LogColor.GREEN,
+                    style: LogStyle.BOLD
+                })
                 return originalHandler.apply(this, [
                     req,
                     res,
@@ -104,8 +112,11 @@ export function TCASecured<TQueryParams extends Record<string, string | undefine
                         validatedBody,
                     }
                 ]);
-            } catch (error:any) {
-                logger.error(`Error in ${propertyKey}: ${error.message}`, LOG_PREFIX, {color: LogColor.RED_BRIGHT, style: LogStyle.BOLD});
+            } catch (error: any) {
+                logger.error(`Error in ${propertyKey}: ${error.message}`, LOG_PREFIX, {
+                    color: LogColor.RED_BRIGHT,
+                    style: LogStyle.BOLD
+                });
                 res.status(400).json({
                     error: error.message || 'An unexpected error occurred'
                 });
