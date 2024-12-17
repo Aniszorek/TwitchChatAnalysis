@@ -13,6 +13,7 @@ import {
     patchChannelInformation
 } from "../../../twitch_calls/twitchChannels/patchChannelInformation";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
+import {getChannelInformation} from "../../../twitch_calls/twitchChannels/getChannelInformation";
 
 const LOG_PREFIX = 'TWITCH_CHANNEL_CONTROLLER';
 
@@ -187,12 +188,39 @@ class TwitchChannelController {
         const { queryParams, headers, validatedBody } = context;
         try {
             const result = await patchChannelInformation(queryParams, validatedBody, headers); // Using validatedBody
-            logger.info(`Successfully patched stream settings`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
+            logger.info(`Successfully patched Channel Information`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
             res.json(result);
         } catch (error: any) {
             logger.error(`Error in patch / route: ${error.message}. ${error.response.data.message}`, LOG_PREFIX);
             res.status(error.response.status).json({
-                error: `Failed to patch stream settings: ${error.response.data.message}`,
+                error: `Failed to patch Channel Information: ${error.response.data.message}`,
+            });
+        }
+    }
+
+    @TCASecured({
+        requiredQueryParams: ["broadcaster_id"],
+        requiredHeaders: ["x-twitch-oauth-token"],
+        requiredRole: COGNITO_ROLES.VIEWER,
+        actionDescription: "Get Channel Information"
+    })
+    public async getChannelInfo(
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+        context: { queryParams: any, headers: any, validatedBody: any }
+    )
+    {
+        const { queryParams, headers, validatedBody } = context;
+        try{
+            const result = await getChannelInformation(queryParams, headers);
+            logger.info(`Successfully got Channel Information`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
+            res.json(result);
+        }
+        catch (error: any) {
+            logger.error(`Error in get / route: ${error.message}. ${error.response.data.message}`, LOG_PREFIX);
+            res.status(error.response.status).json({
+                error: `Failed to get Channel Information: ${error.response.data.message}`,
             });
         }
     }
