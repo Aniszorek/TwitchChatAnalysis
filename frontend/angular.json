@@ -27,7 +27,9 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/app/header/header.component.css",
+              "src/app/shared/styles/shared-styles.css"
             ],
             "scripts": []
           },
@@ -85,7 +87,9 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/app/header/header.component.css",
+              "src/app/shared/styles/shared-styles.css"
             ],
             "scripts": []
           }
