@@ -8,7 +8,8 @@ import {
   AfterViewChecked,
 } from '@angular/core';
 import {DatePipe, NgForOf} from '@angular/common';
-import {ChatMessage, TwitchService} from '../../twitch/twitch.service';
+import {TwitchService} from '../../twitch/twitch.service';
+import {Message} from '../../twitch/message';
 
 @Component({
   selector: 'app-stream-chat',
@@ -24,7 +25,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   @ViewChild('chatList') chatList!: ElementRef<HTMLUListElement>;
   @ViewChild('chatInput') chatInput!: ElementRef<HTMLTextAreaElement>;
 
-  messages: ChatMessage[] = [];
+  messages: Message[] = [];
   readonly maxChars = 260;
   readonly maxInputHeight = 70;
 

@@ -1,1 +1,24 @@
-<p>suspicious-messages works!</p>
+<div class="chat-container">
+  <div class="chat-header">
+    Suspicious messages
+    <div class="tooltip-container">
+      <span class="tooltip-icon">ℹ</span>
+      <span class="tooltip-text">
+        Colors represent negativity levels:<br>
+        <span class="tooltip-very-negative">red</span> (very negative),
+        <span class="tooltip-negative">yellow</span> (negative),
+        <span class="tooltip-slightly-negative">orange</span> (slightly negative).
+      </span>
+    </div>
+  </div>
+
+  <ul #chatList class="chat-list">
+    <li
+      *ngFor="let message of messages"
+      class="chat-message"
+      [ngClass]="getMessageClass(message.nlpClassification)">
+      <span class="chat-username">{{ message.chatUserLogin }}:</span>
+      <span class="chat-text">{{ message.messageText }}</span>
+    </li>
+  </ul>
+</div>

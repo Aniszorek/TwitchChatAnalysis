@@ -1,0 +1,147 @@
+:host {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.chat-container {
+  width: 100%;
+  max-height: 100%;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.chat-header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 2rem;
+  color: var(--text-color);
+  background-color: var(--card-color);
+  padding: 10px;
+  border-bottom: 2px solid #333333;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-icon {
+  font-size: 1.2rem;
+  color: var(--text-color);
+  cursor: pointer;
+  position: relative;
+}
+
+.tooltip-text {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: 120%;
+  transform: translateY(-50%);
+  background-color: #2e2e2e;
+  color: #ffffff;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  text-align: left;
+  width: 300px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.tooltip-text span {
+  font-weight: bold;
+}
+
+.tooltip-very-negative {
+  color: var(--very-negative-message-color);
+}
+
+.tooltip-negative {
+  color: var(--negative-message-color);
+}
+
+.tooltip-slightly-negative {
+  color: var(--slightly-negative-message-color);
+}
+
+.tooltip-icon:hover + .tooltip-text {
+  display: block;
+}
+
+
+.chat-title {
+  color: var(--text-color);
+}
+
+.chat-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.menu,
+.settings {
+  font-size: 1rem;
+  color: #cccccc;
+  cursor: pointer;
+}
+
+.menu:hover,
+.settings:hover {
+  color: #ffffff;
+}
+
+.chat-list {
+  flex-grow: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #555555 #333333;
+}
+
+.chat-message {
+  font-size: 0.8rem;
+  padding: 2px;
+  display: block;
+  border-bottom: 3px solid var(--card-color);
+}
+
+.chat-username {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--username-color);
+  text-shadow: 1px 1px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black;
+  display: inline;
+  margin-right: 5px;
+}
+
+.chat-text {
+  color: #ffffff;
+  word-break: break-word;
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.very-negative {
+  background-color: var(--very-negative-message-color);
+}
+
+.negative {
+  background-color: var(--negative-message-color);
+}
+
+.slightly-negative {
+  background-color: var(--slightly-negative-message-color);
+}
+

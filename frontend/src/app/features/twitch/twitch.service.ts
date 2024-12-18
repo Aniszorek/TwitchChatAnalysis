@@ -3,6 +3,7 @@ import {urls} from '../../app.config';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {BehaviorSubject, catchError, Subject, tap} from 'rxjs';
 import {AuthService} from '../../auth/auth.service';
+import {Message, NlpChatMessage} from './message';
 
 export interface SearchUserState {
   success: boolean;
@@ -10,17 +11,6 @@ export interface SearchUserState {
   errorMessage?: string;
 }
 
-export interface ChatMessage {
-  broadcasterUserId: string;
-  broadcasterUserLogin: string;
-  broadcasterUserName: string;
-  chatterUserId: string;
-  chatUserLogin: string;
-  chatUserName: string;
-  messageId: string;
-  messageText: string;
-  messageTimestamp: string;
-}
 
 @Injectable({
   providedIn: 'root',
@@ -31,8 +21,11 @@ export class TwitchService {
   private readonly backendUrl = urls.backendUrl;
   private readonly twitchUsername = new BehaviorSubject<string | null>(null);
 
-  private readonly chatMessages = new Subject<ChatMessage | null>();
+  private readonly chatMessages = new Subject<Message | null>();
   chatMessages$ = this.chatMessages.asObservable();
+
+  private readonly nlpChatMessages = new Subject<NlpChatMessage | null>();
+  nlpChatMessages$ = this.nlpChatMessages.asObservable();
 
   private readonly searchUserState = new BehaviorSubject<SearchUserState | null>(null);
   searchUserState$ = this.searchUserState.asObservable();
@@ -152,8 +145,11 @@ export class TwitchService {
           console.log('WebSocket initialization completed');
           this.loadingState.next(false);
         } else {
-          const message: ChatMessage = this.mapRawMessage(rawMessage);
-          this.chatMessages.next(message);
+          // todo jak będziemy dostawać tutaj typ wiadomości to można to jakoś ładniej ograć
+          const message: Message = this.mapRawMessage(rawMessage);
+          if (message.broadcasterUserId)
+            this.chatMessages.next(message);
+          else this.nlpChatMessages.next(this.mapNlpMessage(rawMessage));
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
@@ -165,9 +161,9 @@ export class TwitchService {
   }
 
   /**
-   * Maps a raw WebSocket message to a ChatMessage object.
+   * Maps a raw WebSocket message to a Message object.
    */
-  private mapRawMessage(rawMessage: any): ChatMessage {
+  private mapRawMessage(rawMessage: any): Message {
     return {
       broadcasterUserId: rawMessage.broadcasterUserId,
       broadcasterUserLogin: rawMessage.broadcasterUserLogin,
@@ -178,6 +174,20 @@ export class TwitchService {
       messageId: rawMessage.messageId,
       messageText: rawMessage.messageText,
       messageTimestamp: rawMessage.messageTimestamp,
+    };
+  }
+
+  /**
+   * Maps a raw WebSocket message to a NlpChatMessage object.
+   */
+  private mapNlpMessage(rawMessage: any): NlpChatMessage {
+    return {
+      broadcasterUserLogin: rawMessage.broadcaster_user_login,
+      chatUserLogin: rawMessage.chatter_user_login,
+      messageText: rawMessage.message_text,
+      nlpClassification: rawMessage.nlp_classification,
+      streamId: rawMessage.stream_id,
+      timestamp: rawMessage.timestamp
     };
   }
 

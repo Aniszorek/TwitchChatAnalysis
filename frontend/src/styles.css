@@ -7,6 +7,10 @@
   --primary-color-hover: #5815bd;
   --text-color: #e5e5e5;
   --placeholder-text-color: #aaaaaa;
+  --username-color: #00ACC1;
+  --very-negative-message-color: #8B0000;
+  --negative-message-color: #FF4500;
+  --slightly-negative-message-color: #FFA500;
   --border-radius: 8px;
   --font-family: 'Arial', sans-serif;
   --header-height: 5.5vh;
