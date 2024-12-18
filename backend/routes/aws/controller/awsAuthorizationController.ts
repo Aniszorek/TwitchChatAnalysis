@@ -16,6 +16,8 @@ import {ValidateUserRolePayload} from "../model/validateUserRolePayload";
 import {isCognitoRoleValid} from "../../../utilities/cognitoRoles";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {twitchAuthController} from "../../twitch/controller/twitchAuthController";
+import {SetTwitchUsernameResponse} from "../model/setTwitchUsernameResponse";
+import {twitchUsersController} from "../../twitch/controller/twitchUsersController";
 
 const LOG_PREFIX = "AWS_AUTHORIZATION_CONTROLLER"
 
@@ -127,7 +129,8 @@ class AwsAuthorizationController {
             // Check if streamer exists
             const result = await twitchAuthController.verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername, twitchOauthToken);
             if (!result.success) {
-                return res.status(404).send({message: result.message});
+                const response:SetTwitchUsernameResponse = {message: result.message}
+                return res.status(404).send(response);
             }
 
             // Validate role for user
@@ -135,7 +138,8 @@ class AwsAuthorizationController {
             const roleResponse = await awsAuthorizationController.authorizeRole(twitchOauthToken, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
 
             if (!roleResponse) {
-                return res.status(500).send({message: 'Could not resolve role for this Twitch account'});
+                const response:SetTwitchUsernameResponse = {message: 'Could not resolve role for this Twitch account'}
+                return res.status(500).send(response);
             }
 
             const streamId = result.streamStatus!.stream_id!;
@@ -161,10 +165,19 @@ class AwsAuthorizationController {
                 cognitoIdToken,
             });
 
-            res.send({message: 'Streamer found and WebSocket connections can now be initialized'});
+            const user_id = await twitchUsersController.fetchTwitchUserIdFromOauthToken(twitchOauthToken)
+            const response:SetTwitchUsernameResponse = {
+                message: "Streamer found and WebSocket connections can now be initialized",
+                broadcaster_id: twitchBroadcasterUserId,
+                user_id: user_id
+            }
+
+            res.send(response);
+
         } catch (error: any) {
+            const response:SetTwitchUsernameResponse = {message: "Error during setTwitchUsername"};
             logger.error(`Error during setTwitchUsername: ${error.message}`, LOG_PREFIX);
-            res.status(500).send('Error during setTwitchUsername');
+            res.status(500).send(response);
         }
     }
 
