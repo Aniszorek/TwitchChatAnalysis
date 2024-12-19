@@ -140,16 +140,15 @@ export class TwitchService {
     this.websocket.onmessage = (event) => {
       try {
         const rawMessage = JSON.parse(event.data);
-        console.log(rawMessage);
         if (rawMessage.type == 'initComplete') {
           console.log('WebSocket initialization completed');
           this.loadingState.next(false);
-        } else {
-          // todo jak będziemy dostawać tutaj typ wiadomości to można to jakoś ładniej ograć
-          const message: Message = this.mapRawMessage(rawMessage);
-          if (message.broadcasterUserId)
-            this.chatMessages.next(message);
-          else this.nlpChatMessages.next(this.mapNlpMessage(rawMessage));
+        } else if (rawMessage.type == "TwitchMessage") {
+          this.chatMessages.next(this.mapRawMessage(rawMessage.messageObject));
+        } else if (rawMessage.type == "NlpMessage") {
+          this.nlpChatMessages.next(this.mapNlpMessage(rawMessage.messageObject));
+        } else if (rawMessage.type == "MessageDeleted") {
+          //todo
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
@@ -184,6 +183,7 @@ export class TwitchService {
     return {
       broadcasterUserLogin: rawMessage.broadcaster_user_login,
       chatUserLogin: rawMessage.chatter_user_login,
+      messageId: rawMessage.message_id,
       messageText: rawMessage.message_text,
       nlpClassification: rawMessage.nlp_classification,
       streamId: rawMessage.stream_id,

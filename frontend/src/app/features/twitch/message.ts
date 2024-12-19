@@ -17,6 +17,7 @@ export interface NlpChatMessage {
   messageText: string;
   timestamp: string;
   nlpClassification: SentimentLabel;
+  messageId: string;
 }
 
 export enum SentimentLabel {

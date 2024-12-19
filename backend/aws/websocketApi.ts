@@ -3,6 +3,8 @@ import {frontendClients, incrementSentimentMessageCount, SentimentLabel} from ".
 import {checkReadinessAndNotifyFrontend, sendMessageToFrontendClient} from "../bot/wsServer";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
+import {WEBSOCKET_MESSAGE_TYPE} from "../bot/websocket/websocketMessageType";
+import {WebsocketPayload} from "../bot/websocket/websocketPayload";
 
 const LOG_PREFIX = `API_GATEWAY_WS`
 
@@ -16,7 +18,7 @@ interface RegisterConnectionMessage {
     streamer_name: string;
 }
 
-interface WebSocketMessage {
+interface AwsWebsocketResponse {
     type?: string;
     data?: unknown;
 }
@@ -58,12 +60,16 @@ export function connectAwsWebSocket(twitchUsername: string, cognitoUserId: strin
 
         awsWebSocket.on("message", (message: WebSocket.Data) => {
             try {
-                const data: WebSocketMessage = JSON.parse(message.toString());
+                const data: AwsWebsocketResponse = JSON.parse(message.toString());
                 logger.info(`Received message: ${IS_DEBUG_ENABLED ? JSON.stringify(data, null, 2) : ""}`,LOG_PREFIX, {color: LogColor.YELLOW, style: LogStyle.BOLD});
 
                 if (data.type === NLP_MESSAGE_WEBSOCKET_TYPE && data.data) {
                     //TODO handle processed messages on FE
-                    sendMessageToFrontendClient(cognitoUserId, data.data);
+                    const message: WebsocketPayload = {
+                        type: WEBSOCKET_MESSAGE_TYPE.NLP_MESSAGE,
+                        messageObject: data.data
+                    }
+                    sendMessageToFrontendClient(cognitoUserId, message);
 
                     const nlpClassification = (data.data as any)?.nlp_classification;
                     const convertedNlpClassification = Object.values(SentimentLabel).includes(nlpClassification as SentimentLabel) ? nlpClassification as SentimentLabel : undefined;

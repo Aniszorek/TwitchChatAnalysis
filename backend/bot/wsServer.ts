@@ -22,6 +22,8 @@ import {awsStreamController} from "../routes/aws/controller/awsStreamController"
 import {verifyUserPermission} from "../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
 import {twitchEventsubController} from "../routes/twitch/controller/twitchEventsubController";
+import {WebsocketPayload} from "./websocket/websocketPayload";
+import {WEBSOCKET_MESSAGE_TYPE} from "./websocket/websocketMessageType";
 
 const LOG_PREFIX = 'BACKEND_WS'
 
@@ -237,8 +239,7 @@ export function trackSubscription(userId: string, subscriptionId: string) {
     }
 }
 
-// todo jaka będzie struktura message?
-export const sendMessageToFrontendClient = (userId: string, message: any) => {
+export const sendMessageToFrontendClient = (userId: string, message: WebsocketPayload) => {
     const userData = frontendClients.get(userId);
     if (userData && userData.ws.readyState === WebSocket.OPEN) {
         userData.ws.send(JSON.stringify(message));
@@ -286,10 +287,11 @@ export function checkReadinessAndNotifyFrontend(cognitoUserId: string): void {
 
     const {readiness} = client;
     if (readiness.twitchReady && readiness.awsReady) {
-        sendMessageToFrontendClient(cognitoUserId, {
-            type: 'initComplete',
-            message: "WebSocket initialization completed",
-        });
+        const websocketMessage:WebsocketPayload = {
+            type: WEBSOCKET_MESSAGE_TYPE.INIT_COMPLETE,
+            messageObject: {message:"WebSocket initialization completed"}
+        }
+        sendMessageToFrontendClient(cognitoUserId, websocketMessage);
         logger.info(`All WebSocket handlers executed for user ${cognitoUserId}`, LOG_PREFIX);
     }
 }

@@ -75,7 +75,7 @@ export class TwitchUsersController {
 
         } catch (error: any) {
             logger.error(`Error fetching username for OAuth token: ${error.message}`, LOG_PREFIX);
-            return undefined;
+            throw error
         }
     }
 

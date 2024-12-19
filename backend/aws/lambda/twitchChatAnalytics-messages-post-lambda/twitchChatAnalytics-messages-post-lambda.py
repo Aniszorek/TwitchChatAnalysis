@@ -81,6 +81,7 @@ def lambda_handler(event, context):
             chatter_user_login = message_data['chatter_user_login']
             message_text = message_data['message_text']
             timestamp = message_data['timestamp']
+            message_id = message_data['message_id']
 
         except Exception as e:
             print(f"Failed reading json: {str(e)}")
@@ -128,6 +129,7 @@ def lambda_handler(event, context):
             continue
 
         try:
+            result['message_id'] = message_id
             print(f"Starting {lambda_send_back_name}")
             response = lambda_client.invoke(
                 FunctionName=lambda_send_back_name,
