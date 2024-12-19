@@ -3,7 +3,7 @@ import {ChatComponent} from "./chat/chat.component";
 import {VideoComponent} from './video/video.component';
 import {TwitchService} from '../twitch/twitch.service';
 import {SuspiciousMessagesComponent} from './suspicious-messages/suspicious-messages.component';
-import {RouterOutlet} from '@angular/router';
+import {ManagementComponent} from './managment/management.component';
 
 @Component({
   selector: 'app-stream',
@@ -12,7 +12,7 @@ import {RouterOutlet} from '@angular/router';
     ChatComponent,
     VideoComponent,
     SuspiciousMessagesComponent,
-    RouterOutlet
+    ManagementComponent
   ],
   templateUrl: './stream.component.html',
   styleUrl: './stream.component.css'

@@ -21,8 +21,7 @@ export class ErrorMessageComponent implements OnInit {
       this.messages.push(msg);
       setTimeout(() => {
         this.messages.shift();
-      //   todo poprawienie timeouta
-      }, 5000000);
+      }, 500);
     });
   }
 }
