@@ -4,10 +4,10 @@ import {TwitchService} from '../features/twitch/twitch.service';
 
 // todo dawać dostęp tylko jeśli ktoś jest przynajmniej moderatorem (do przemyślenia czy na /stream można wejść jako viewer, teraz niby tak, ale potem tam więcej opcji chyba będzie) -
 export const authTwitchGuard: CanActivateFn = () => {
-  const authService = inject(TwitchService);
+  const twitchService = inject(TwitchService);
   const router = inject(Router);
 
-  if (authService.getTwitchBroadcasterUsername() != null) {
+  if (twitchService['state'].broadcasterUsername.getValue() != null) {
     return true;
   }
 

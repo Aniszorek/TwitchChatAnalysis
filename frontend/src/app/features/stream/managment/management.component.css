@@ -1,0 +1,65 @@
+.management-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--card-color);
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.tabs {
+  height: var(--header-height);
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
+}
+
+@media (max-width: 1215px) {
+  .tabs {
+    font-size: 1rem;
+  }
+}
+
+.tabs a {
+  height: var(--header-height);
+  color: var(--placeholder-text-color);
+  text-decoration: none;
+  padding: 0.2rem 0.5rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.tabs a:hover {
+  color: white;
+}
+
+.tabs a.active {
+  color: white;
+  font-weight: bold;
+}
+
+.tabs a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.4s ease;
+}
+
+.tabs a.active::after {
+  width: 100%;
+}
+
+.tab-content {
+  flex: 1;
+  background-color: var(--background-color-input);
+  border-radius: 4px;
+  overflow: auto;
+}

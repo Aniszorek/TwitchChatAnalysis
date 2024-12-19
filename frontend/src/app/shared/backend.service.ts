@@ -91,8 +91,7 @@ export class BackendService {
 }
 
 export interface BanData {
-  userId : String;
+  user_id : String;
   duration: number | null;
   reason: string;
 }
-

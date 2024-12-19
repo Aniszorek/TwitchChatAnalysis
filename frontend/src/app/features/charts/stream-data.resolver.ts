@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {Resolve} from '@angular/router';
 import {Observable} from 'rxjs';
 import {finalize, tap} from 'rxjs/operators';
-import {AuthService} from '../../auth/auth.service';
 import {TwitchService} from '../twitch/twitch.service';
 import {LoadingService} from '../../shared/loading.service';
 import {BackendService} from '../../shared/backend.service';
@@ -19,7 +18,7 @@ export class StreamDataResolver implements Resolve<any> {
   }
 
   resolve(): Observable<any> {
-    const broadcasterUserLogin = this.twitchService.getTwitchBroadcasterUsername();
+    const broadcasterUserLogin = this.twitchService['state'].broadcasterUsername.getValue();
 
     if (!broadcasterUserLogin) {
       console.warn('broadcasterUserLogin is empty');
