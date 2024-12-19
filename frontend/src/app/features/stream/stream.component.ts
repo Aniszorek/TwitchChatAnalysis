@@ -21,6 +21,6 @@ export class StreamComponent {
   selectedUser: string | null = null;
 
   constructor(twitchService: TwitchService) {
-    this.selectedUser = twitchService.getTwitchUsername();
+    this.selectedUser = twitchService.getTwitchBroadcasterUsername();
   }
 }

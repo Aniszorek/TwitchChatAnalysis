@@ -1,0 +1,17 @@
+.notification-container {
+  position: fixed;
+  padding: 10px;
+  top: var(--header-height);
+  right: 10px;
+  z-index: 1000;
+}
+
+.notification {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

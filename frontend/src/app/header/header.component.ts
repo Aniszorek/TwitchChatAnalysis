@@ -3,6 +3,7 @@ import {AuthService} from '../auth/auth.service';
 import {Router, RouterLink} from '@angular/router';
 import {NgClass, NgIf} from '@angular/common';
 import {TwitchService} from '../features/twitch/twitch.service';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-header',
@@ -10,7 +11,8 @@ import {TwitchService} from '../features/twitch/twitch.service';
   imports: [
     NgIf,
     NgClass,
-    RouterLink
+    RouterLink,
+    MatIcon
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
