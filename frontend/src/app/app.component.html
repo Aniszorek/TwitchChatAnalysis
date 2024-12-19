@@ -1,5 +1,6 @@
 <div>
   <app-header/>
+  <app-error-message></app-error-message>
   <div *ngIf="!(isLoading$ | async)">
     <router-outlet class="content"></router-outlet>
   </div>

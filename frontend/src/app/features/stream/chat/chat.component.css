@@ -68,11 +68,11 @@
 }
 
 .chat-message:nth-child(odd) {
-  background-color: #39393E;
+  background-color: var(--list-element-color);
 }
 
 .chat-message:nth-child(even) {
-  background-color: #242424;
+  background-color: var(--second-list-element-color);
 }
 
 .chat-timestamp {

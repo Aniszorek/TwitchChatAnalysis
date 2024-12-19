@@ -7,7 +7,7 @@ export const authTwitchGuard: CanActivateFn = () => {
   const authService = inject(TwitchService);
   const router = inject(Router);
 
-  if (authService.getTwitchUsername() != null) {
+  if (authService.getTwitchBroadcasterUsername() != null) {
     return true;
   }
 

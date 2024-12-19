@@ -5,13 +5,13 @@ import {BaseChartDirective} from 'ng2-charts';
 import {
   ChartOptions,
 } from 'chart.js';
-import {StreamService} from './services/stream.service';
 import {AuthService} from '../../auth/auth.service';
 import {TwitchService} from '../twitch/twitch.service';
 import {KeysService} from './services/keys.service';
 import {ChartService} from './services/chart.service';
 import {AppState} from './models/chart-enums.model';
 import {ActivatedRoute} from '@angular/router';
+import {BackendService} from '../../shared/backend.service';
 
 
 // todo TCA-106 dodałabym opcje usuwania danych z jakiegoś streama bo teraz mamy nasrane pustymi wykresami
@@ -50,7 +50,7 @@ export class ChartsComponent implements OnInit {
   protected readonly relatedKeysMap: { [key: string]: string[] };
 
   constructor(
-    private readonly streamService: StreamService,
+    private readonly backendService: BackendService,
     private readonly authService: AuthService,
     private readonly twitchService: TwitchService,
     private readonly keysService: KeysService,
@@ -58,7 +58,7 @@ export class ChartsComponent implements OnInit {
     private readonly route: ActivatedRoute
   ) {
     this.authorization = this.authService.getIdToken();
-    this.broadcasterUserLogin = this.twitchService.getTwitchUsername();
+    this.broadcasterUserLogin = this.twitchService.getTwitchBroadcasterUsername();
     this.timeFormatter = new Intl.DateTimeFormat('default', {
       hour: '2-digit',
       minute: '2-digit',
@@ -133,7 +133,7 @@ export class ChartsComponent implements OnInit {
     }
     this.selectedStream = this.streams.find((stream) => stream.stream_id === streamId);
 
-    this.streamService
+    this.backendService
       .getStreamMetadata(streamId, this.broadcasterUserLogin, this.authService.getIdToken())
       .subscribe((data) => {
         if (!data) {

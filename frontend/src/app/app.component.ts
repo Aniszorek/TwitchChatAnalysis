@@ -5,6 +5,7 @@ import { LoadingService } from './shared/loading.service';
 import { Observable } from 'rxjs';
 import {HeaderComponent} from './header/header.component';
 import {AsyncPipe, NgIf} from '@angular/common';
+import {ErrorMessageComponent} from './error-message/error-message.component';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,8 @@ import {AsyncPipe, NgIf} from '@angular/common';
     HeaderComponent,
     RouterOutlet,
     AsyncPipe,
-    NgIf
+    NgIf,
+    ErrorMessageComponent
   ],
   styleUrls: ['./app.component.css']
 })
