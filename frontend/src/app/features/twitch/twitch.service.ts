@@ -4,6 +4,7 @@ import { BehaviorSubject, Subject, catchError, tap } from 'rxjs';
 import { urls } from '../../app.config';
 import { AuthService } from '../../auth/auth.service';
 import { Message, NlpChatMessage } from './message';
+import {hasAccess, Tab, UserRole} from './permissions.config';
 
 export interface SearchUserState {
   success: boolean;
@@ -28,7 +29,7 @@ export class TwitchService {
   private readonly state = {
     broadcasterUsername: new BehaviorSubject<string | null>(null),
     broadcasterId: new BehaviorSubject<string | null>(null),
-    userRole: new BehaviorSubject<string | null>(null),
+    userRole: new BehaviorSubject<UserRole | null>(null),
     userId: new BehaviorSubject<string | null>(null),
     searchUserState: new BehaviorSubject<SearchUserState | null>(null),
     loadingState: new BehaviorSubject<boolean>(false),
@@ -86,7 +87,10 @@ export class TwitchService {
     this.resetChatState();
   }
 
-  /** Private Methods **/
+  canAccess(section: Tab): boolean {
+    const userRole = this.state.userRole.getValue();
+    return hasAccess(userRole, section);
+  }
 
   private connectToWebSocket(): void {
     console.log('Connecting to WebSocket for Twitch chat');
@@ -120,7 +124,7 @@ export class TwitchService {
 
   private handleError(message: any, error?: any): void {
     console.error(message, error);
-    this.updateSearchState(false, message.error.message);
+    this.updateSearchState(false, message.error.error);
     this.updateLoadingState(false);
   }
 

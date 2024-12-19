@@ -1,5 +1,6 @@
 export interface SetTwitchUsernameResponse {
-    message: string;
+    error?: string;
+    message?: string;
     broadcaster_id?: string;
     user_id?: string;
     twitch_role?: string;

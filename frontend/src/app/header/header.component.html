@@ -1,6 +1,5 @@
 <header>
   <a [routerLink]="['/stream-search']"><mat-icon class="large-icon" svgIcon="logo-white"></mat-icon></a>
-  <!--  todo dawać dostęp tylko jeśli ktoś jest przynajmniej moderatorem - -->
   <menu *ngIf="authService.isLoggedIn() && twitchService['state'].broadcasterUsername.getValue() != null" class="nav-buttons">
     <button
       (click)="goToStream()"
@@ -8,6 +7,7 @@
       Stream
     </button>
     <button
+      *ngIf="twitchService.canAccess(Tab.CHARTS)"
       (click)="goToCharts()"
       [ngClass]="{'active': activeView === 'charts'}">
       Charts

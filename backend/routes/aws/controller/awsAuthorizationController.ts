@@ -129,7 +129,7 @@ class AwsAuthorizationController {
             // Check if streamer exists
             const result = await twitchAuthController.verifyTwitchUsernameAndStreamStatus(twitchBroadcasterUsername, twitchOauthToken);
             if (!result.success) {
-                const response:SetTwitchUsernameResponse = {message: result.message}
+                const response:SetTwitchUsernameResponse = {error: result.message}
                 return res.status(404).send(response);
             }
 
@@ -138,7 +138,7 @@ class AwsAuthorizationController {
             const roleResponse = await awsAuthorizationController.authorizeRole(twitchOauthToken, twitchBroadcasterUsername.toLowerCase(), CLIENT_ID, cognitoIdToken);
 
             if (!roleResponse) {
-                const response:SetTwitchUsernameResponse = {message: 'Could not resolve role for this Twitch account'}
+                const response:SetTwitchUsernameResponse = {error: 'Could not resolve role for this Twitch account'}
                 return res.status(500).send(response);
             }
 
@@ -176,7 +176,7 @@ class AwsAuthorizationController {
             res.send(response);
 
         } catch (error: any) {
-            const response:SetTwitchUsernameResponse = {message: "Error during setTwitchUsername"};
+            const response:SetTwitchUsernameResponse = {error: "Error during setTwitchUsername"};
             logger.error(`Error during setTwitchUsername: ${error.message}`, LOG_PREFIX);
             res.status(500).send(response);
         }

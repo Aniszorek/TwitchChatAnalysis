@@ -4,6 +4,7 @@ import {Router, RouterLink} from '@angular/router';
 import {NgClass, NgIf} from '@angular/common';
 import {TwitchService} from '../features/twitch/twitch.service';
 import {MatIcon} from '@angular/material/icon';
+import {Tab} from '../features/twitch/permissions.config';
 
 @Component({
   selector: 'app-header',
@@ -46,4 +47,6 @@ export class HeaderComponent {
   goToProfile() {
     this.router.navigate(['/profile']);
   }
+
+  protected readonly Tab = Tab;
 }
