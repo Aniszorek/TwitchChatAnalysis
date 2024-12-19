@@ -18,6 +18,12 @@ header img {
   cursor: pointer;
 }
 
+.large-icon {
+  width: auto;
+  height: var(--header-height);
+  padding: 4px;
+}
+
 menu {
   display: flex;
   align-items: center;

@@ -6,6 +6,9 @@ import { Observable } from 'rxjs';
 import {HeaderComponent} from './header/header.component';
 import {AsyncPipe, NgIf} from '@angular/common';
 import {ErrorMessageComponent} from './error-message/error-message.component';
+import {MatIconRegistry} from '@angular/material/icon';
+import {DomSanitizer} from '@angular/platform-browser';
+import {registerIcons} from './shared/icon-registry';
 
 @Component({
   selector: 'app-root',
@@ -25,10 +28,14 @@ export class AppComponent implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly loadingService: LoadingService
+    private readonly loadingService: LoadingService,
+    private readonly matIconRegistry: MatIconRegistry,
+    private readonly domSanitizer: DomSanitizer
   ) {
     this.isLoading$ = this.loadingService.loading$;
     this.loadingService.setLoading('auth', true);
+
+    registerIcons(this.matIconRegistry, this.domSanitizer);
   }
 
   ngOnInit(): void {
