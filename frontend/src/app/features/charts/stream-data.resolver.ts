@@ -13,7 +13,6 @@ import {BackendService} from '../../shared/backend.service';
 export class StreamDataResolver implements Resolve<any> {
   constructor(
     private readonly backendService: BackendService,
-    private readonly authService: AuthService,
     private readonly twitchService: TwitchService,
     private readonly loadingService: LoadingService
   ) {
@@ -21,7 +20,6 @@ export class StreamDataResolver implements Resolve<any> {
 
   resolve(): Observable<any> {
     const broadcasterUserLogin = this.twitchService.getTwitchBroadcasterUsername();
-    const authorization = this.authService.getIdToken();
 
     if (!broadcasterUserLogin) {
       console.warn('broadcasterUserLogin is empty');
@@ -32,7 +30,7 @@ export class StreamDataResolver implements Resolve<any> {
 
     this.loadingService.setLoading('streamData', true);
 
-    return this.backendService.getStreams(broadcasterUserLogin, authorization).pipe(
+    return this.backendService.getStreams(broadcasterUserLogin).pipe(
       tap(() => console.log('Fetching stream data...')),
       finalize(() => this.loadingService.setLoading('streamData', false))
     );

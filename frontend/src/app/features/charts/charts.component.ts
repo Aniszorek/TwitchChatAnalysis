@@ -134,7 +134,7 @@ export class ChartsComponent implements OnInit {
     this.selectedStream = this.streams.find((stream) => stream.stream_id === streamId);
 
     this.backendService
-      .getStreamMetadata(streamId, this.broadcasterUserLogin, this.authService.getIdToken())
+      .getStreamMetadata(streamId, this.broadcasterUserLogin)
       .subscribe((data) => {
         if (!data) {
           this.setAppState(AppState.metadataNotAvailable)

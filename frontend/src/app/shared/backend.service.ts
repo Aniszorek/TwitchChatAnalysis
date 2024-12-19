@@ -12,7 +12,7 @@ export class BackendService {
   constructor(private readonly http: HttpClient, private readonly notificationService: NotificationService) {}
 
 
-  getStreamMetadata(streamId: string, broadcasterUserLogin: string, authorization: string | null): Observable<any> {
+  getStreamMetadata(streamId: string, broadcasterUserLogin: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/aws/stream-metadata`, {
       headers: {
         broadcasterUserLogin: broadcasterUserLogin,
@@ -29,7 +29,7 @@ export class BackendService {
     );
   }
 
-  getStreams(broadcasterUserLogin: string, authorization: string | null): Observable<any> {
+  getStreams(broadcasterUserLogin: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/aws/stream`, {
       headers: {
         broadcasterUserLogin: broadcasterUserLogin,
