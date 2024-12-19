@@ -29,7 +29,7 @@
 }
 
 .video-section {
-  max-height: calc(var(--app-height) * 2 / 3);
+  height: calc(var(--app-height) * 2 / 3);
   flex: 2;
   display: flex;
   justify-content: center;
@@ -41,7 +41,7 @@
 }
 
 .stream-management {
-  max-height: calc(var(--app-height) * 1 / 3);
+  height: calc(var(--app-height) * 1 / 3);
   flex: 1;
   background: var(--background-color-input);
   border: 1px solid #333;
@@ -65,13 +65,13 @@
 
 /*todo [TCA-116] jak są wiadomości to chat z jakiegoś powodu się rozszerza bardziej niż video, trzeba się temu przyjrzeć*/
 .chat-section {
-  max-height: calc(var(--app-height) * (2 / 3));
+  height: calc(var(--app-height) * (2 / 3));
   flex: 2 1 0;
   display: flex;
   flex-direction: column;
 }
 
 .suspicious-messages {
-  max-height: calc(var(--app-height) * 1 / 3);
+  height: calc(var(--app-height) * 1 / 3);
   flex: 1;
 }

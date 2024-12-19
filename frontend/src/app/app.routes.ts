@@ -7,6 +7,13 @@ import {SearchUserComponent} from './features/search-user/search-user.component'
 import {ChartsComponent} from './features/charts/charts.component';
 import {authTwitchGuard} from './auth/auth.twitch.guard';
 import {StreamDataResolver} from './features/charts/stream-data.resolver';
+import {ModeratorsComponent} from './features/stream/managment/moderators/moderators.component';
+import {SuspendedComponent} from './features/stream/managment/suspended/suspended.component';
+import {StreamSettingsComponent} from './features/stream/managment/stream-settings/stream-settings.component';
+import {AutoModComponent} from './features/stream/managment/auto-mod/auto-mod.component';
+import {BlockedTermsComponent} from './features/stream/managment/blocked-terms/blocked-terms.component';
+import {RaidPollComponent} from './features/stream/managment/raid-poll/raid-poll.component';
+import {ManagementComponent} from './features/stream/managment/management.component';
 import {ProfileComponent} from './features/profile/profile.component';
 
 export const routes: Routes = [
@@ -26,7 +33,22 @@ export const routes: Routes = [
   {
     path: 'stream',
     component: StreamComponent,
-    canActivate: [authGuard, authTwitchGuard]
+    canActivate: [authGuard, authTwitchGuard],
+    children: [
+      {
+        path: '',
+        component: ManagementComponent,
+        children: [
+          {path: 'suspended', component: SuspendedComponent},
+          {path: 'moderators', component: ModeratorsComponent},
+          {path: 'stream-settings', component: StreamSettingsComponent},
+          {path: 'auto-mod', component: AutoModComponent},
+          {path: 'blocked-terms', component: BlockedTermsComponent},
+          {path: 'raid-poll', component: RaidPollComponent},
+          {path: '', redirectTo: 'suspended', pathMatch: 'full'}
+        ]
+      }
+    ]
   },
   {
     path: 'charts',

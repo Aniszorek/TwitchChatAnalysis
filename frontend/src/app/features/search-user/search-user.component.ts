@@ -33,11 +33,12 @@ export class SearchUserComponent implements OnInit {
         if (state.success) {
           this.errorMessage = null;
           this.successMessage = state.message ?? 'Operation successful.';
-          this.twitchService.setTwitchBroadcasterUsername(this.username.toLowerCase());
+          this.twitchService['state'].broadcasterUsername.next(this.username.toLowerCase());
           console.log('Redirecting');
           this.router.navigate(['/stream']);
         } else {
-          this.errorMessage = state.errorMessage ?? 'Unknown error occurred';
+          console.log("stan", state)
+          this.errorMessage = state.message ?? 'Unknown error occurred';
           this.successMessage = null;
         }
       }

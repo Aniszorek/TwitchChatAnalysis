@@ -1,7 +1,7 @@
 <header>
   <a [routerLink]="['/stream-search']"><mat-icon class="large-icon" svgIcon="logo-white"></mat-icon></a>
   <!--  todo dawać dostęp tylko jeśli ktoś jest przynajmniej moderatorem - -->
-  <menu *ngIf="authService.isLoggedIn() && twitchService.getTwitchBroadcasterUsername()!=null" class="nav-buttons">
+  <menu *ngIf="authService.isLoggedIn() && twitchService['state'].broadcasterUsername.getValue() != null" class="nav-buttons">
     <button
       (click)="goToStream()"
       [ngClass]="{'active': activeView === 'stream'}">
@@ -14,9 +14,9 @@
     </button>
   </menu>
 
-  <div *ngIf="authService.isLoggedIn() && twitchService.getTwitchBroadcasterUsername() != null" class="center-button">
+  <div *ngIf="authService.isLoggedIn() && twitchService['state'].broadcasterUsername.getValue() != null" class="center-button">
     <button [routerLink]="['/stream-search']" class="stream-search-button">
-      Watching: <span class="username">{{ twitchService.getTwitchBroadcasterUsername() }}</span>
+      Watching: <span class="username">{{ twitchService['state'].broadcasterUsername.getValue() }}</span>
     </button>
   </div>
 

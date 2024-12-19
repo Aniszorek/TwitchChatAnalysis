@@ -58,7 +58,7 @@ export class ChartsComponent implements OnInit {
     private readonly route: ActivatedRoute
   ) {
     this.authorization = this.authService.getIdToken();
-    this.broadcasterUserLogin = this.twitchService.getTwitchBroadcasterUsername();
+    this.broadcasterUserLogin = this.twitchService['state'].broadcasterUsername.getValue();
     this.timeFormatter = new Intl.DateTimeFormat('default', {
       hour: '2-digit',
       minute: '2-digit',

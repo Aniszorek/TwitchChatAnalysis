@@ -1,1 +1,14 @@
-<p>managment works!</p>
+<div class="management-container">
+  <nav class="tabs">
+    <a routerLink="suspended" routerLinkActive="active">Suspended</a>
+    <a routerLink="moderators" routerLinkActive="active">Moderators & VIPs</a>
+    <a routerLink="auto-mod" routerLinkActive="active">Auto-Mod</a>
+    <a routerLink="blocked-terms" routerLinkActive="active">Blocked Terms</a>
+    <a routerLink="stream-settings" routerLinkActive="active">Stream Settings</a>
+    <a routerLink="raid-poll" routerLinkActive="active">Raid Poll</a>
+  </nav>
+
+  <div class="tab-content">
+    <router-outlet></router-outlet>
+  </div>
+</div>

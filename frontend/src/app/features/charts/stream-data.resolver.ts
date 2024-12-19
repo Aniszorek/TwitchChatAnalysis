@@ -19,7 +19,7 @@ export class StreamDataResolver implements Resolve<any> {
   }
 
   resolve(): Observable<any> {
-    const broadcasterUserLogin = this.twitchService.getTwitchBroadcasterUsername();
+    const broadcasterUserLogin = this.twitchService['state'].broadcasterUsername.getValue();
 
     if (!broadcasterUserLogin) {
       console.warn('broadcasterUserLogin is empty');

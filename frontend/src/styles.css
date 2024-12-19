@@ -7,6 +7,10 @@
   --primary-color-hover: #5815bd;
   --text-color: #e5e5e5;
   --placeholder-text-color: #aaaaaa;
+  --light-grey: #8F8E8E;
+  --list-element-color: #39393E;
+  --second-list-element-color: #242424;
+  --mdc-plain-tooltip-container-color: var(--background-color);
   --username-color: #00ACC1;
   --very-negative-message-color: #8B0000;
   --negative-message-color: #FF4500;
