@@ -1,7 +1,8 @@
 import {TwitchWebSocketMessage} from "../bot";
 import {
     createPostStreamMetadataInterval,
-    deletePostStreamMetadataInterval, frontendClients,
+    deletePostStreamMetadataInterval,
+    frontendClients,
     getFrontendClientTwitchStreamMetadata,
     incrementFollowersCount,
     incrementMessageCount,
@@ -24,6 +25,8 @@ import {verifyUserPermission} from "../../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../../utilities/CognitoRoleEnum";
 import {FetchTwitchStreamData} from "../../routes/twitch/model/fetchTwitchStreamDataResponse";
 import {twitchStreamsController} from "../../routes/twitch/controller/twitchStreamsController";
+import {WEBSOCKET_MESSAGE_TYPE} from "../websocket/websocketMessageType";
+import {WebsocketPayload} from "../websocket/websocketPayload";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS"
 
@@ -47,7 +50,12 @@ export const channelChatMessageHandler = (cognitoUserId: string, data: TwitchWeb
         awsTwitchMessageController.postTwitchMessage(msg, cognitoUserId);
     }
 
-    sendMessageToFrontendClient(cognitoUserId, msg);
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.TWITCH_MESSAGE,
+        messageObject: msg
+    }
+
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage);
 }
 
 export const streamOnlineHandler = async (cognitoUserId: string, data: TwitchWebSocketMessage) => {
@@ -153,7 +161,12 @@ export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocke
 export const channelChatDeleteMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
     const message_id = data.payload.event?.message_id
     logger.info(`Received message delete event, message_id: ${message_id}`, LOG_PREFIX, {color: LogColor.MAGENTA});
-    sendMessageToFrontendClient(cognitoUserId, message_id)
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.MESSAGE_DELETED,
+        messageObject: {message_id}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
 
 }
 

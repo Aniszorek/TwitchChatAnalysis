@@ -117,6 +117,7 @@ class AwsTwitchMessageController {
                 message_text: msg.messageText,
                 timestamp: msg.messageTimestamp,
                 stream_id: streamId,
+                message_id: msg.messageId
             }
             const headers = {
                 broadcasteruserlogin: msg.broadcasterUserLogin,

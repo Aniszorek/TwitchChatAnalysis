@@ -1,6 +1,5 @@
 import WebSocket from "ws";
-import axios, {AxiosResponse} from "axios";
-import {checkReadinessAndNotifyFrontend, trackSubscription} from "./wsServer";
+import {checkReadinessAndNotifyFrontend} from "./wsServer";
 import {CLIENT_ID} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
 import {
@@ -14,18 +13,13 @@ import {
 } from "./eventsubHandlers/eventsubHandlers";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
 import {frontendClients} from "./frontendClients";
-import {IS_DEBUG_ENABLED} from "../entryPoint";
 import {verifyUserPermission} from "../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
 import {twitchUsersController} from "../routes/twitch/controller/twitchUsersController";
 import {twitchEventsubController} from "../routes/twitch/controller/twitchEventsubController";
 
 const LOG_PREFIX = 'TWITCH_WS'
-
-
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
-const EVENTSUB_SUBSCRIPTION_URL = 'https://api.twitch.tv/helix/eventsub/subscriptions'
-
 
 export interface TwitchWebSocketMessage {
     metadata: {
