@@ -3,7 +3,6 @@ import {ChatComponent} from "./chat/chat.component";
 import {VideoComponent} from './video/video.component';
 import {TwitchService} from '../twitch/twitch.service';
 import {SuspiciousMessagesComponent} from './suspicious-messages/suspicious-messages.component';
-import {ManagementComponent} from './managment/management.component';
 import {RouterOutlet} from '@angular/router';
 
 @Component({

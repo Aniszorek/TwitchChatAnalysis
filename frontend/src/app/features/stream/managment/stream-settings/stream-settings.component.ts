@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-stream-settings',
   imports: [],
   templateUrl: './stream-settings.component.html',
+  standalone: true,
   styleUrl: './stream-settings.component.css'
 })
 export class StreamSettingsComponent {

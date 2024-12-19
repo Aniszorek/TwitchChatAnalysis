@@ -48,7 +48,7 @@ export class SuspendedComponent implements OnInit {
   }
 
   onRemoveTimeout(user: User) {
-    this.streamService.unbanUser(this.broadcasterId!, this.moderatorId!, user.user_id).subscribe((data) => {
+    this.streamService.unbanUser(this.broadcasterId!, this.moderatorId!, user.user_id).subscribe(() => {
       this.suspendedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(u => u.user_id !== user.user_id);
     });
   }
@@ -60,14 +60,14 @@ export class SuspendedComponent implements OnInit {
       // todo dorobić możliwość podania powodu może
       reason: "",
     }
-    this.streamService.banUser(this.broadcasterId!, this.moderatorId!, user.user_id, data).subscribe((data) => {
+    this.streamService.banUser(this.broadcasterId!, this.moderatorId!, user.user_id, data).subscribe(() => {
       this.suspendedUsers.banned_users.push(user);
       this.suspendedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(u => u.user_id !== user.user_id);
     });
   }
 
   onUnbanUser(user: User) {
-    this.streamService.unbanUser(this.broadcasterId!, this.moderatorId!, user.user_id).subscribe((data) => {
+    this.streamService.unbanUser(this.broadcasterId!, this.moderatorId!, user.user_id).subscribe(() => {
       this.suspendedUsers.banned_users = this.suspendedUsers.banned_users.filter(u => u.user_id !== user.user_id);
     });
   }

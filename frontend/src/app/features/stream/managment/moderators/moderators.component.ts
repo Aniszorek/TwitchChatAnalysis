@@ -4,6 +4,7 @@ import { Component } from '@angular/core';
   selector: 'app-moderators',
   imports: [],
   templateUrl: './moderators.component.html',
+  standalone: true,
   styleUrl: './moderators.component.css'
 })
 export class ModeratorsComponent {
