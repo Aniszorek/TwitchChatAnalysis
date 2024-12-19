@@ -99,13 +99,13 @@ export class TwitchService {
       if (idToken) {
         this.websocket?.send(JSON.stringify({ type: 'auth', cognitoIdToken: idToken }));
       } else {
-        this.handleError('No ID token available to authenticate WebSocket connection');
+        console.error('No ID token available to authenticate WebSocket connection');
         this.disconnectWebSocket();
       }
     };
 
     this.websocket.onmessage = (event) => this.handleWebSocketMessage(event);
-    this.websocket.onerror = (err) => this.handleError('WebSocket error', err);
+    this.websocket.onerror = (err) => console.log('WebSocket connection closed (on close)');
     this.websocket.onclose = () => console.log('WebSocket connection closed');
   }
 
@@ -140,11 +140,14 @@ export class TwitchService {
         case 'NlpMessage':
           this.state.nlpChatMessages.next(this.mapNlpMessage(rawMessage.messageObject));
           break;
+        case 'MessageDeleted':
+          //todo
+          break;
         default:
           console.warn('Unknown message type:', rawMessage.type);
       }
-    } catch (err) {
-      this.handleError('Error parsing WebSocket message', err);
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
     }
   }
 
