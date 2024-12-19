@@ -23,7 +23,6 @@ interface SearchResponse {
 export class TwitchService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
-
   private readonly backendUrl = urls.backendUrl;
 
   private readonly state = {
@@ -56,7 +55,6 @@ export class TwitchService {
     this.state.searchUserState.next(null);
     this.state.loadingState.next(false);
   }
-
 
   async searchUser(twitchUsername: string): Promise<void> {
     if (!twitchUsername) {
