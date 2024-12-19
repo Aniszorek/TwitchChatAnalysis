@@ -169,7 +169,8 @@ class AwsAuthorizationController {
             const response:SetTwitchUsernameResponse = {
                 message: "Streamer found and WebSocket connections can now be initialized",
                 broadcaster_id: twitchBroadcasterUserId,
-                user_id: user_id
+                user_id: user_id,
+                twitch_role: twitchRole
             }
 
             res.send(response);
