@@ -1,1 +1,59 @@
-<p>moderators works!</p>
+<div class="moderators-container">
+  <div class="column">
+    <h3>Moderator</h3>
+    <ul>
+      <li
+        *ngFor="let user of moderators"
+        class="user-item"
+      >
+        <span>{{ user.user_login }}</span>
+        <div class="actions">
+          <button class="action-btn" matTooltip="Remove moderator" (click)="onRemoveModerator(user)">
+            <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="column">
+    <h3>Vips</h3>
+    <ul>
+      <li *ngFor="let user of vips" class="user-item">
+        <span>{{ user.user_login }}</span>
+        <div class="actions">
+          <button class="action-btn" matTooltip="Remove Vip" (click)="onRemoveVip(user)">
+            <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="column">
+    <h3>Search</h3>
+    <input
+      type="text"
+      placeholder="Type nickname..."
+      (input)="onSearch($event)"
+    />
+    <ul>
+      <li *ngFor="let user of searchedModerators" class="user-item">
+        <span>{{ user.user_login }}</span>
+        <div class="actions">
+          <button class="action-btn" matTooltip="Remove moderator" (click)="onRemoveModerator(user)">
+            <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
+          </button>
+        </div>
+      </li>
+      <li *ngFor="let user of searchedVips" class="user-item">
+        <span>{{ user.user_login }}</span>
+        <div class="actions">
+          <button class="action-btn" matTooltip="Remove vip" (click)="onRemoveVip(user)">
+            <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

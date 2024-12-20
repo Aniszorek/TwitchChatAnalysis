@@ -11,7 +11,7 @@ import {KeysService} from './services/keys.service';
 import {ChartService} from './services/chart.service';
 import {AppState} from './models/chart-enums.model';
 import {ActivatedRoute} from '@angular/router';
-import {BackendService} from '../../shared/backend.service';
+import {BackendService} from '../../shared/services/backend.service';
 
 
 // todo TCA-106 dodałabym opcje usuwania danych z jakiegoś streama bo teraz mamy nasrane pustymi wykresami

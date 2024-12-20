@@ -2,7 +2,7 @@ import {Injectable, signal} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, firstValueFrom, from, interval, map, Observable, of, Subject, Subscription, tap} from 'rxjs';
 import {config, urls} from "../app.config";
-import {LoadingService} from '../shared/loading.service';
+import {LoadingService} from '../shared/services/loading.service';
 
 interface AuthTokens {
   idToken: string;

@@ -88,6 +88,65 @@ export class BackendService {
       })
     );
   }
+
+  getModerators(broadcasterId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/twitch/moderation/moderators`, {
+      params: {
+        broadcaster_id: broadcasterId
+      },
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error fetching moderators:', error);
+        return throwError(() => new Error('Unable to fetch moderators. Please try again later.'));
+      })
+    );
+  }
+
+  removeModerator(broadcasterId: string, userId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/twitch/moderation/moderators`, {
+      params: {
+        broadcaster_id: broadcasterId,
+        user_id: userId
+      },
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error fetching moderators:', error);
+        return throwError(() => new Error('Unable to fetch moderators. Please try again later.'));
+      })
+    );
+  }
+
+  getVips(broadcasterId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/twitch/channels/vips`, {
+      params: {
+        broadcaster_id: broadcasterId
+      },
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error unbanning user:', error);
+        return throwError(() => new Error('Unable to fetch moderators. Please try again later.'));
+      })
+    );
+  }
+
+  removeVip(broadcasterId: string, userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/twitch/moderation/vips`, {
+      params: {
+        broadcaster_id: broadcasterId,
+        user_id: userId
+      },
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error fetching moderators:', error);
+        return throwError(() => new Error('Unable to fetch moderators. Please try again later.'));
+      })
+    );
+  }
+
 }
 
 export interface BanData {

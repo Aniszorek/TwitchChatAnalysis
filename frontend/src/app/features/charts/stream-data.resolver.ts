@@ -3,8 +3,8 @@ import {Resolve} from '@angular/router';
 import {Observable} from 'rxjs';
 import {finalize, tap} from 'rxjs/operators';
 import {TwitchService} from '../twitch/twitch.service';
-import {LoadingService} from '../../shared/loading.service';
-import {BackendService} from '../../shared/backend.service';
+import {LoadingService} from '../../shared/services/loading.service';
+import {BackendService} from '../../shared/services/backend.service';
 
 @Injectable({
   providedIn: 'root',

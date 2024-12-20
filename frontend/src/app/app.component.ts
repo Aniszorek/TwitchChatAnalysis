@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet} from '@angular/router';
 import { AuthService } from './auth/auth.service';
-import { LoadingService } from './shared/loading.service';
+import { LoadingService } from './shared/services/loading.service';
 import { Observable } from 'rxjs';
 import {HeaderComponent} from './header/header.component';
 import {AsyncPipe, NgIf} from '@angular/common';

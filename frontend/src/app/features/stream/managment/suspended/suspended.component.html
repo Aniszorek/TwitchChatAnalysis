@@ -44,14 +44,28 @@
       (input)="onSearch($event)"
     />
     <ul>
-    <li *ngFor="let user of searchedUsers?.banned_users" class="user-item">
-      <span>{{ user.user_login }}</span>
-      <div class="actions">
-        <button class="action-btn" matTooltip="Unban user" (click)="onUnbanUser(user)">
-          <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
-        </button>
-      </div>
-    </li>
+      <li *ngFor="let user of searchedUsers?.banned_users" class="user-item">
+        <span>{{ user.user_login }}</span>
+        <div class="actions">
+          <button class="action-btn" matTooltip="Unban user" (click)="onUnbanUser(user)">
+            <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
+          </button>
+        </div>
+      </li>
+      <li *ngFor="let user of searchedUsers?.timed_out_users" class="user-item">
+        <span>{{ user.user_login }}</span>
+        <div class="actions">
+          <button class="action-btn info-btn" matTooltip="Until: {{ user.expires_at }}">
+            <mat-icon class="action-icon" svgIcon="info"></mat-icon>
+          </button>
+          <button class="action-btn" matTooltip="Remove timeout" (click)="onRemoveTimeout(user)">
+            <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
+          </button>
+          <button class="action-btn" matTooltip="Ban user" (click)="onBanUser(user)">
+            <mat-icon class="action-icon" svgIcon="ban"></mat-icon>
+          </button>
+        </div>
+      </li>
     </ul>
   </div>
 </div>

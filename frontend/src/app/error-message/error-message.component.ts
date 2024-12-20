@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {NotificationService} from '../shared/notification.service';
+import {NotificationService} from '../shared/services/notification.service';
 import {NgForOf} from '@angular/common';
 
 @Component({

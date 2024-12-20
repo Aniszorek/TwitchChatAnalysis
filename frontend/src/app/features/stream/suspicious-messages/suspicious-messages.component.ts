@@ -24,6 +24,7 @@ export class SuspiciousMessagesComponent implements OnInit, AfterViewChecked {
   ngOnInit() {
     const sub = this.twitchService.nlpChatMessages$.subscribe((message) => {
       if (message) {
+        console.log(message)
         if (negativeClasses.includes(message.nlpClassification)) {
           this.messages.push(message);
         }

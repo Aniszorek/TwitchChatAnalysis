@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {BackendService, BanData} from '../../../../shared/backend.service';
+import {BackendService, BanData} from '../../../../shared/services/backend.service';
 import {TwitchService} from '../../../twitch/twitch.service';
 import {NgForOf,} from '@angular/common';
 import {MatTooltip} from '@angular/material/tooltip';
@@ -77,6 +77,10 @@ export class SuspendedComponent implements OnInit {
     console.log(searchTerm)
 
     this.searchedUsers.banned_users = this.suspendedUsers.banned_users.filter(user =>
+      user.user_login.toLowerCase().includes(searchTerm)
+    );
+
+    this.searchedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(user =>
       user.user_login.toLowerCase().includes(searchTerm)
     );
   }
