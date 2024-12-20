@@ -183,10 +183,28 @@ export class TwitchService {
   }
 
   private mapRawMessage(rawMessage: any): Message {
-    return { ...rawMessage };
+    return {
+      broadcasterUserId: rawMessage.broadcasterUserId,
+      broadcasterUserLogin: rawMessage.broadcasterUserLogin,
+      broadcasterUserName: rawMessage.broadcasterUserName,
+      chatterUserId: rawMessage.chatterUserId,
+      chatUserLogin: rawMessage.chatterUserLogin,
+      chatUserName: rawMessage.chatterUserName,
+      messageId: rawMessage.messageId,
+      messageText: rawMessage.messageText,
+      messageTimestamp: rawMessage.messageTimestamp,
+    };
   }
 
   private mapNlpMessage(rawMessage: any): NlpChatMessage {
-    return { ...rawMessage };
+    return {
+      broadcasterUserLogin: rawMessage.broadcaster_user_login,
+      chatUserLogin: rawMessage.chatter_user_login,
+      messageId: rawMessage.message_id,
+      messageText: rawMessage.message_text,
+      nlpClassification: rawMessage.nlp_classification,
+      streamId: rawMessage.stream_id,
+      timestamp: rawMessage.timestamp
+    };
   }
 }
