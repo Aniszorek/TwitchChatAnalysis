@@ -41,7 +41,7 @@ export interface TwitchData {
     twitchBroadcasterUsername: string | null;
     twitchBroadcasterUserId: string | null;
     twitchRole: string | null;
-    streamId: string | null | undefined;
+    streamId: string | undefined;
     streamMetadata: TwitchStreamMetadata;
     streamData: StreamData;
 }
@@ -93,7 +93,7 @@ export const setFrontendClientTwitchData = (
     twitchBroadcasterUsername: string,
     twitchBroadcasterUserId: string,
     twitchRole: string,
-    streamId: string | null | undefined,
+    streamId: string | undefined,
     twitchOauthToken: string,
 ) => {
     const userData = frontendClients.get(cognitoUserId);
@@ -116,7 +116,7 @@ export const getFrontendClientTwitchStreamMetadata = (cognitoUserId: string): Tw
 }
 
 
-export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | null | undefined) => {
+export const setFrontendClientTwitchDataStreamId = (cognitoUserId: string, streamId: string | undefined) => {
     const client = frontendClients.get(cognitoUserId);
     if (client) {
         client.twitchData.streamId = streamId;
@@ -137,19 +137,29 @@ export const setFrontendClientTwitchStreamMetadata = (cognitoUserId: string, met
 
 export const incrementMessageCount = (cognitoUserId: string) => {
     const client = frontendClients.get(cognitoUserId)
-    if (client) {
+
+    if(!client)
+    {
+        logger.error(`client not defined for user-id: ${cognitoUserId}`, LOG_PREFIX)
+    }
+
+    if (client && client.twitchData.streamId !== undefined) {
         if (client.twitchData.streamMetadata.messageCount)
             client.twitchData.streamMetadata.messageCount += 1
         else
             client.twitchData.streamMetadata.messageCount = 1
-    } else {
-        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
 
 export const incrementSentimentMessageCount = (cognitoUserId: string, label: SentimentLabel) => {
     const client = frontendClients.get(cognitoUserId)
-    if (client) {
+
+    if(!client)
+    {
+        logger.error(`client not defined for user-id: ${cognitoUserId}`, LOG_PREFIX)
+    }
+
+    if (client && client.twitchData.streamId !== undefined) {
         switch (label) {
             case SentimentLabel.VERY_NEGATIVE:
                 incrementVeryNegativeCount(client)
@@ -173,8 +183,6 @@ export const incrementSentimentMessageCount = (cognitoUserId: string, label: Sen
                 incrementVeryPositiveCount(client)
                 break
         }
-    } else {
-        throw Error(`${LOG_PREFIX} invalid cognitoUserId: ${cognitoUserId}`);
     }
 }
 

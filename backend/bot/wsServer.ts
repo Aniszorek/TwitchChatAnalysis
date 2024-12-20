@@ -72,7 +72,7 @@ export const initWebSocketServer = (server: any): WebSocketServer => {
                             twitchBroadcasterUsername: null,
                             twitchBroadcasterUserId: null,
                             twitchRole: null,
-                            streamId: null,
+                            streamId: undefined,
                             streamMetadata: {
                                 title: undefined,
                                 category: undefined,
