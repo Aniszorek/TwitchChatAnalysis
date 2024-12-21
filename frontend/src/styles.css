@@ -8,6 +8,7 @@
   --text-color: #e5e5e5;
   --placeholder-text-color: #aaaaaa;
   --light-grey: #8F8E8E;
+  --disabled-color: #444;
   --list-element-color: #39393E;
   --second-list-element-color: #242424;
   --mdc-plain-tooltip-container-color: var(--background-color);

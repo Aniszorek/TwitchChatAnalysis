@@ -25,6 +25,8 @@ export class StreamSettingsComponent implements OnInit{
   isEditingTitle: boolean = false;
   channelInfo: ChannelInfo | null = null;
   categories: Category[] = [];
+  hasChanges: boolean = false;
+  isSaving: boolean = false;
   private currentTag: string = '';
 
   @ViewChild('titleInput') titleInput!: ElementRef<HTMLTextAreaElement>;
@@ -60,11 +62,13 @@ export class StreamSettingsComponent implements OnInit{
     if (this.currentTag && !this.channelInfo!.tags.includes(this.currentTag)) {
       this.channelInfo!.tags.push(this.currentTag);
       this.currentTag = '';
+      this.hasChanges = true;
     }
   }
 
   removeTag(tag: string): void {
     this.channelInfo!.tags = this.channelInfo!.tags.filter(t => t !== tag);
+    this.hasChanges = true;
   }
 
   updateTag(event: Event) {
@@ -79,6 +83,7 @@ export class StreamSettingsComponent implements OnInit{
   updateTitle(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.channelInfo!.title = inputElement.value;
+    this.hasChanges = true;
   }
 
   searchCategories(event: Event): void {
@@ -101,17 +106,30 @@ export class StreamSettingsComponent implements OnInit{
     this.channelInfo!.game_name = category.name;
     this.channelInfo!.game_id = category.id;
     this.categories = [];
+    this.hasChanges = true;
+  }
+
+  onLanguageChange() {
+    this.hasChanges = true;
   }
 
   applyChanges() {
     this.isEditingTitle = false;
+    this.isSaving = true;
     const data: ChannelInfoRequest = {
       game_id: this.channelInfo!.game_id,
       tags: this.channelInfo!.tags,
       title: this.channelInfo!.title,
       broadcaster_language: this.channelInfo!.broadcaster_language
     }
-    this.backendService.patchChannelInformation(this.broadcasterUserId!, data!).subscribe(() => {
+    this.backendService.patchChannelInformation(this.broadcasterUserId!, data!).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.hasChanges = false;
+      },
+      error: () => {
+        this.isSaving = false;
+      }
     });
   }
 }

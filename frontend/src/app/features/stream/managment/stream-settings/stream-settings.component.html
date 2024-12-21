@@ -38,7 +38,9 @@
         </li>
       </ul>
       <h3>Language</h3>
-      <select class="dropdown" [(ngModel)]="channelInfo!.broadcaster_language">
+      <select class="dropdown"
+              [(ngModel)]="channelInfo!.broadcaster_language"
+              (ngModelChange)="onLanguageChange()">
         <option value="en">English (US)</option>
         <option value="bg">Bulgarian</option>
         <option value="zh-Hans">Chinese (Simpl.)</option>
@@ -93,7 +95,9 @@
   </div>
   <button
     class="apply-changes-btn"
-    (click)="applyChanges()">Apply changes</button>
+    [disabled]="!hasChanges || isSaving"
+    (click)="applyChanges()">
+    Apply changes</button>
 
 </div>
 

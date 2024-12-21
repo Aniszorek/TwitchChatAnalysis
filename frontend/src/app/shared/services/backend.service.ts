@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {catchError, Observable, throwError} from 'rxjs';
+import {catchError, Observable, tap, throwError} from 'rxjs';
 import {NotificationService} from './notification.service';
 import {GetCategoriesResponse} from './models/categories-response';
 import {ChannelInfoRequest} from './models/channel-info-request';
@@ -171,6 +171,9 @@ export class BackendService {
         broadcaster_id: broadcasterId,
       },
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Channel information updated successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error changing channel information:', error);

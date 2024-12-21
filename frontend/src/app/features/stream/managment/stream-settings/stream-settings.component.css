@@ -60,7 +60,7 @@ h3 {
 }
 
 .search-input[readonly] {
-  background-color: #444;
+  background-color: var(--disabled-color);
   cursor: not-allowed;
   color: var(--placeholder-text-color);
 }
@@ -175,9 +175,13 @@ h3 {
   cursor: pointer;
 }
 
-
 .apply-changes-btn:hover {
   background-color: var(--primary-color-hover);
+}
+
+.apply-changes-btn:disabled {
+  background-color: var(--disabled-color);
+  cursor: not-allowed;
 }
 
 

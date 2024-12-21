@@ -9,6 +9,7 @@ import {ErrorMessageComponent} from './error-message/error-message.component';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {registerIcons} from './shared/icon-registry';
+import {SuccessMessageComponent} from './shared/services/notification/success-message/success-message.component';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ import {registerIcons} from './shared/icon-registry';
     RouterOutlet,
     AsyncPipe,
     NgIf,
-    ErrorMessageComponent
+    ErrorMessageComponent,
+    SuccessMessageComponent
   ],
   styleUrls: ['./app.component.css']
 })
