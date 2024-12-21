@@ -2,6 +2,8 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {catchError, Observable, throwError} from 'rxjs';
 import {NotificationService} from './notification.service';
+import {GetCategoriesResponse} from './models/categories-response';
+import {ChannelInfoRequest} from './models/channel-info-request';
 
 @Injectable({
   providedIn: 'root',
@@ -112,8 +114,8 @@ export class BackendService {
     }).pipe(
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
-        console.error('Error fetching moderators:', error);
-        return throwError(() => new Error('Unable to fetch moderators. Please try again later.'));
+        console.error('Error removing moderator:', error);
+        return throwError(() => new Error('Unable to remove moderator. Please try again later.'));
       })
     );
   }
@@ -126,8 +128,8 @@ export class BackendService {
     }).pipe(
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
-        console.error('Error unbanning user:', error);
-        return throwError(() => new Error('Unable to fetch moderators. Please try again later.'));
+        console.error('Error getting vips:', error);
+        return throwError(() => new Error('Unable to getting vips. Please try again later.'));
       })
     );
   }
@@ -141,12 +143,55 @@ export class BackendService {
     }).pipe(
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
-        console.error('Error fetching moderators:', error);
-        return throwError(() => new Error('Unable to fetch moderators. Please try again later.'));
+        console.error('Error removing vip:', error);
+        return throwError(() => new Error('Unable to remove vip. Please try again later.'));
       })
     );
   }
 
+  getChannelInformation(broadcasterId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/twitch/channels`, {
+      params: {
+        broadcaster_id: broadcasterId,
+      },
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error getting channel information:', error);
+        return throwError(() => new Error('Unable to get channel information. Please try again later.'));
+      })
+    );
+  }
+
+  patchChannelInformation(broadcasterId: string, body: ChannelInfoRequest) {
+    return this.http.patch<any>(`${this.apiUrl}/twitch/channels`,
+      body,
+      {
+      params: {
+        broadcaster_id: broadcasterId,
+      },
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error changing channel information:', error);
+        return throwError(() => new Error('Unable to change channel information. Please try again later.'));
+      })
+    );
+  }
+
+  searchCategories(query: string) {
+    return this.http.get<GetCategoriesResponse>(`${this.apiUrl}/twitch/search/categories`, {
+        params: {
+          query: query
+        },
+      }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error searching categories:', error);
+        return throwError(() => new Error('Unable to search categories. Please try again later.'));
+      })
+    );
+  }
 }
 
 export interface BanData {

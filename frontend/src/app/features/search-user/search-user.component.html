@@ -4,6 +4,7 @@
     <input
       [disabled]="loading"
       [(ngModel)]="username"
+      (keydown.enter)="searchUser()"
       placeholder="Type streamer nickname..."
       class="input"
     />
@@ -31,7 +32,5 @@
         Connect
       </button>
     </ng-template>
-
-
   </div>
 </div>
