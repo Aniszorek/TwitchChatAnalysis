@@ -4,6 +4,8 @@ import {catchError, Observable, tap, throwError} from 'rxjs';
 import {NotificationService} from './notification.service';
 import {GetCategoriesResponse} from './models/categories-response';
 import {ChannelInfoRequest} from './models/channel-info-request';
+import {AutoModSettingsRequest} from './models/auto-mod-settings-reqeuest';
+import {AutoModSettingsResponse} from './models/auto-mod-settings-response';
 
 @Injectable({
   providedIn: 'root',
@@ -67,6 +69,9 @@ export class BackendService {
       user_id: userId,
       data: data,
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('User banned successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error banning user:', error);
@@ -83,6 +88,9 @@ export class BackendService {
         user_id: userId,
       },
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('User unbaned successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error unbanning user:', error);
@@ -112,6 +120,9 @@ export class BackendService {
         user_id: userId
       },
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Moderator removed successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error removing moderator:', error);
@@ -141,6 +152,9 @@ export class BackendService {
         user_id: userId
       },
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Vip removed successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error removing vip:', error);
@@ -195,6 +209,40 @@ export class BackendService {
       })
     );
   }
+
+  getAutomodSettings(broadcasterId: string, moderatorId: string) {
+    return this.http.get<AutoModSettingsResponse>(`${this.apiUrl}/twitch/moderation/automod/settings`, {
+        params: {
+          broadcaster_id: broadcasterId,
+          moderator_id: moderatorId
+        },
+      }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error getting automod settings:', error);
+        return throwError(() => new Error('Unable to get automod settings. Please try again later.'));
+      })
+    );
+  }
+
+  putAutomodSettings(broadcasterId: string, moderatorId: string, body: Partial<AutoModSettingsRequest>) {
+    return this.http.put<AutoModSettingsResponse>(`${this.apiUrl}/twitch/moderation/automod/settings`, body,{
+        params: {
+          broadcaster_id: broadcasterId,
+          moderator_id: moderatorId
+        },
+      }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Auto-mod settings updated successfully!');
+      }),
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error updating automod settings:', error);
+        return throwError(() => new Error('Unable to updating automod settings. Please try again later.'));
+      })
+    );
+  }
+
 }
 
 export interface BanData {

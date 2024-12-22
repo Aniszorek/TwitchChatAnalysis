@@ -2,8 +2,13 @@
   height: 100%;
   display: flex;
   justify-content: space-between;
-  position: relative;
-  padding-bottom: 4rem;
+  flex-direction: column;
+}
+
+.columns-container {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
 }
 
 .column {
@@ -164,9 +169,8 @@ h3 {
 }
 
 .apply-changes-btn {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
+  margin: 0.5rem;
+  align-self: flex-end;
   background-color: var(--primary-color);
   color: var(--text-color);
   border: none;
@@ -183,6 +187,3 @@ h3 {
   background-color: var(--disabled-color);
   cursor: not-allowed;
 }
-
-
-
