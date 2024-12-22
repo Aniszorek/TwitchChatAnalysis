@@ -79,6 +79,8 @@ def lambda_handler(event, context):
             stream_id = message_data['stream_id']
             broadcaster_user_login = message_data['broadcaster_user_login']
             chatter_user_login = message_data['chatter_user_login']
+            chatter_user_id = message_data['chatter_user_id']
+            chatter_user_name = message_data['chatter_user_name']
             message_text = message_data['message_text']
             timestamp = message_data['timestamp']
             message_id = message_data['message_id']
@@ -130,6 +132,9 @@ def lambda_handler(event, context):
 
         try:
             result['message_id'] = message_id
+            result['chatter_user_name'] = chatter_user_name
+            result['chatter_user_id'] = chatter_user_id
+
             print(f"Starting {lambda_send_back_name}")
             response = lambda_client.invoke(
                 FunctionName=lambda_send_back_name,

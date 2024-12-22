@@ -74,6 +74,8 @@ class AwsTwitchMessageController {
 
             const payload: PostTwitchMessagePayload = {
                 chatter_user_login: msg.chatterUserLogin,
+                chatter_user_id: msg.chatterUserId,
+                chatter_user_name: msg.chatterUserName,
                 message_text: msg.messageText,
                 timestamp: msg.messageTimestamp,
                 stream_id: streamId,
