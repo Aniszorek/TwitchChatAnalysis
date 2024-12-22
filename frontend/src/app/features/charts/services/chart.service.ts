@@ -37,15 +37,15 @@ export class ChartService {
               aggregatedData: { [key: string]: number[] }):
     { chartData: any[], chartLabels: string[], chartOptions: ChartOptions<'line'> } {
 
-    const chartData = selectedDataKeys.map((key, index) => {
+    const chartData = selectedDataKeys.map((key) => {
       const data = this.getDataForKey(key, aggregatedData, metadata);
       return {
         label: keyDisplayNames[key]?.displayName || key,
         data: data,
-        borderColor: this.getBrightColor(index),
+        borderColor: this.getBrightColor(key),
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        pointBorderColor: this.getBrightColor(index),
-        pointBackgroundColor: this.getBrightColor(index),
+        pointBorderColor: this.getBrightColor(key),
+        pointBackgroundColor: this.getBrightColor(key),
         fill: false,
       };
     });
@@ -66,9 +66,19 @@ export class ChartService {
     return metadata.map((entry: any) => entry.metadata[key]);
   }
 
-  private getBrightColor(index: number): string {
-    const colors = ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0'];
-    return colors[index % colors.length];
+  private getBrightColor(key: string): string {
+
+    const colorMap: { [key: string]: string } = {
+      "viewer_count": '#36a2eb',
+      "message_count": '#ffce56',
+      "follower_count": '#cc65fe',
+      "subscriber_count": '#ff9f40',
+      "neutral_message_count": '#4bc0c0',
+      "negative_message_count": '#ff6384',
+      "positive_message_count": '#4caf50',
+    };
+
+    return colorMap[key]
   }
 
   private getChartOptions(metadata: any[]): ChartOptions<'line'> {
