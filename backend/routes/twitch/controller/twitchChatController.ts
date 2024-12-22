@@ -1,11 +1,13 @@
 import {NextFunction, Request, Response} from 'express';
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
-import {isSendChatMessagePayload, postChatMessage} from "../../../twitch_calls/twitchChat/sendChatMessage";
+import {postChatMessage} from "../../../twitch_calls/twitchChat/sendChatMessage";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {getChatSettings} from "../../../twitch_calls/twitchChat/getChatSettings";
-import {isPatchChatSettingsPayload, patchChatSettings} from "../../../twitch_calls/twitchChat/patchChatSettings";
+import {patchChatSettings} from "../../../twitch_calls/twitchChat/patchChatSettings";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
+import {isPatchChatSettingsPayload} from "../model/patchChatSettingsPayload";
+import {isSendChatMessagePayload} from "../model/postSendChatMessagePayload";
 
 const LOG_PREFIX = "TWITCH_CHAT_CONTROLLER";
 
@@ -18,7 +20,7 @@ export class TwitchChatController {
         actionDescription: "Get Chat Settings"
     })
     public async getChatSettings(req: Request, res: Response, next: NextFunction, context: any) {
-        const {queryParams, headers, validatedBody} = context;
+        const {queryParams, headers} = context;
         try {
             const result = await getChatSettings(queryParams, headers);
             logger.info(
@@ -67,7 +69,7 @@ export class TwitchChatController {
         actionDescription: "Send Chat Message"
     })
     public async sendChatMessage(req: Request, res: Response, next: NextFunction, context: any) {
-        const {queryParams, headers, validatedBody} = context;
+        const {headers, validatedBody} = context;
         try {
             const result = await postChatMessage(validatedBody, headers);
             logger.info(

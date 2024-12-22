@@ -1,7 +1,7 @@
 import WebSocket from "ws";
-import {checkReadinessAndNotifyFrontend} from "./wsServer";
+import {checkReadinessAndNotifyFrontend} from "./localWebsocket/wsServer";
 import {CLIENT_ID} from "../envConfig";
-import {EventSubSubscriptionType} from "./eventSubSubscriptionType";
+import {EventSubSubscriptionType} from "./eventsubHandlers/eventSubSubscriptionType";
 import {
     channelChatDeleteMessageHandler,
     channelChatMessageHandler,
@@ -12,40 +12,15 @@ import {
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";
 import {LogColor, logger, LogStyle} from "../utilities/logger";
-import {frontendClients} from "./frontendClients";
+import {frontendClients} from "../websocket/frontendClients";
 import {verifyUserPermission} from "../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../utilities/CognitoRoleEnum";
 import {twitchUsersController} from "../routes/twitch/controller/twitchUsersController";
 import {twitchEventsubController} from "../routes/twitch/controller/twitchEventsubController";
+import {TwitchWebSocketMessage} from "./twitchWebsocketMessage";
 
 const LOG_PREFIX = 'TWITCH_WS'
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
-
-export interface TwitchWebSocketMessage {
-    metadata: {
-        message_type: string;
-        subscription_type?: string;
-        message_timestamp?: string;
-    };
-    payload: {
-        session?: { id: string };
-        event?: {
-            broadcaster_user_id?: string;
-            broadcaster_user_login?: string;
-            broadcaster_user_name?: string;
-            chatter_user_id?: string;
-            chatter_user_login?: string;
-            chatter_user_name?: string;
-            message?: { text: string };
-            message_id?: string;
-            id?: string; // For stream.online events
-            user_login?: string; // for channel.follow, subscribe, subscription.message events
-            title?: string; // for channel.update event
-            category_name?: string; // for channel.update event
-        };
-    };
-}
-
 
 export async function startTwitchWebSocket(twitchUsername: string, cognitoUserId: string): Promise<WebSocket | null> {
     try {

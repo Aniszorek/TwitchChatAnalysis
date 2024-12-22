@@ -1,7 +1,7 @@
 import {deleteTwitchEventsubSubscription} from "../../../twitch_calls/twitchEventsub/deleteTwitchEventsubSubscription";
 import {LogColor, logger} from "../../../utilities/logger";
 import {registerResponse} from "../../../twitch_calls/twitchEventsub/postTwitchEventsubSubscription";
-import {trackSubscription} from "../../../bot/wsServer";
+import {trackSubscription} from "../../../bot/localWebsocket/wsServer";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 
 const LOG_PREFIX = "TWITCH_EVENTSUB_CONTROLLER";

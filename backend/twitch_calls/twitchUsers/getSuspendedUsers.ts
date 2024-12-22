@@ -1,25 +1,8 @@
 import {twitchApiClient} from "../twitchApiConfig";
 import {logger} from "../../utilities/logger";
+import {SuspendedUser, SuspendedUsersResponse} from "../../routes/twitch/model/getSuspendedUsersResponse";
 
 const LOG_PREFIX = 'TWITCH_API_USERS';
-
-export type SuspendedUser = {
-    user_id: string;
-    user_login: string;
-    user_name: string;
-    expires_at: string;
-    created_at: string;
-    reason: string;
-    moderator_id: string;
-    moderator_login: string;
-    moderator_name: string;
-};
-
-export type SuspendedUsersResponse = {
-    banned_users: SuspendedUser[];
-    timed_out_users: SuspendedUser[];
-};
-
 
 /**
  * Public function to get banned and timed-out users for a broadcaster.

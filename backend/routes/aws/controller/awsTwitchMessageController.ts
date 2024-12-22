@@ -5,7 +5,7 @@ import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {getTwitchMessageFromApiGateway,} from "../../../api_gateway_calls/twitch-message/getTwitchMessage";
 import {GetTwitchMessageResponse, TwitchMessageData} from "../model/getTwitchMessageResponse";
 import {ErrorWithStatus} from "../../../utilities/ErrorWithStatus";
-import {getClientAndCognitoIdToken} from "../../../bot/frontendClients";
+import {getClientAndCognitoIdToken} from "../../../websocket/frontendClients";
 import {TwitchMessage} from "../model/twitchMessage";
 import {PostTwitchMessagePayload} from "../model/postTwitchMessagePayload";
 import {postMessageToApiGateway} from "../../../api_gateway_calls/twitch-message/postTwitchMessage";
@@ -23,7 +23,7 @@ class AwsTwitchMessageController {
         actionDescription: "Get TwitchMessages"
     })
     public async getTwitchMessages(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const {queryParams, optionalQueryParams, headers, validatedBody, cognitoUserId} = context;
+        const {queryParams, optionalQueryParams, headers, cognitoUserId} = context;
         try{
             const result = await getTwitchMessageFromApiGateway({...queryParams, ...optionalQueryParams}, headers);
 

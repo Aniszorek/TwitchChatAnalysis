@@ -1,11 +1,9 @@
 import {twitchApiClient} from "../twitchApiConfig";
 import {logger} from "../../utilities/logger";
+import {FollowersCountResponse} from "../../routes/twitch/model/getChannelFollowersResponse";
 
 const LOG_PREFIX = 'TWITCH_API_CHANNELS';
 
-export interface FollowersCountResponse {
-    total: number;
-}
 // Requires a user access token that includes the moderator:read:followers scope.
 // The ID in the broadcaster_id query parameter must match the user ID in the access token or the user ID in the access token must be a moderator for the specified broadcaster.
 export const getChannelFollowersCount = async (queryParams: any, headers:any): Promise<number> => {

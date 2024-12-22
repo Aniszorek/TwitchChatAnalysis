@@ -74,6 +74,51 @@ export enum SentimentLabel {
 
 export const frontendClients = new Map<string, UserConnections>();
 
+export const initFrontendClient= (userId: string, ws: WebSocket)=> {
+    frontendClients.set(userId, {
+        ws,
+        twitchWs: null,
+        awsWs: null,
+        subscriptions: new Set(),
+        cognito: {
+            cognitoIdToken: null,
+            cognitoUsername: null,
+        },
+        twitchData: {
+            twitchOauthToken: null,
+            twitchBroadcasterUsername: null,
+            twitchBroadcasterUserId: null,
+            twitchRole: null,
+            streamId: undefined,
+            streamMetadata: {
+                title: undefined,
+                category: undefined,
+                viewerCount: 0,
+                followersCount: 0,
+                subscriberCount: 0,
+                messageCount: 0,
+                veryNegativeMessageCount: 0,
+                negativeMessageCount: 0,
+                slightlyNegativeMessageCount: 0,
+                neutralMessageCount: 0,
+                slightlyPositiveMessageCount: 0,
+                positiveMessageCount: 0,
+                veryPositiveMessageCount: 0
+            },
+            streamData:{
+                startedAt: undefined,
+                startFollows: 0,
+                startSubs: 0,
+                endedAt: undefined,
+                endFollows: 0,
+                endSubs: 0
+            }
+        },
+        postStreamMetadataIntervalId: undefined,
+        readiness: {twitchReady: false, awsReady: false},
+    });
+}
+
 export const setFrontendClientCognitoData = (
     cognitoUserId: string,
     cognitoIdToken: string | null,

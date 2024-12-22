@@ -1,4 +1,3 @@
-import {TwitchWebSocketMessage} from "../bot";
 import {
     createPostStreamMetadataInterval,
     deletePostStreamMetadataInterval,
@@ -12,8 +11,8 @@ import {
     setStreamDataEndValues,
     setStreamDataStartValues,
     TwitchStreamMetadata
-} from "../frontendClients";
-import {sendMessageToFrontendClient} from "../wsServer";
+} from "../../websocket/frontendClients";
+import {sendMessageToFrontendClient} from "../localWebsocket/wsServer";
 import {getChannelSubscriptionsCount} from "../../twitch_calls/twitch/getBroadcastersSubscriptions";
 import {getChannelFollowersCount} from "../../twitch_calls/twitchChannels/getChannelFollowers";
 import {createTimestamp} from "../../utilities/utilities";
@@ -25,8 +24,9 @@ import {verifyUserPermission} from "../../utilities/cognitoRoles";
 import {COGNITO_ROLES} from "../../utilities/CognitoRoleEnum";
 import {FetchTwitchStreamData} from "../../routes/twitch/model/fetchTwitchStreamDataResponse";
 import {twitchStreamsController} from "../../routes/twitch/controller/twitchStreamsController";
-import {WEBSOCKET_MESSAGE_TYPE} from "../websocket/websocketMessageType";
-import {WebsocketPayload} from "../websocket/websocketPayload";
+import {WEBSOCKET_MESSAGE_TYPE} from "../localWebsocket/websocketMessageType";
+import {WebsocketPayload} from "../localWebsocket/websocketPayload";
+import {TwitchWebSocketMessage} from "../twitchWebsocketMessage";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS"
 

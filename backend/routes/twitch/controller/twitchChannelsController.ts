@@ -5,15 +5,16 @@ import {LogColor, logger, LogStyle} from "../../../utilities/logger";
 import {getChannelVips} from "../../../twitch_calls/twitchChannels/getChannelVips";
 import {postAddVip} from "../../../twitch_calls/twitchChannels/vipUser";
 import {deleteVipUser} from "../../../twitch_calls/twitchChannels/unvipUser";
-import {isPostCreatePollPayload, postCreatePoll} from "../../../twitch_calls/twitchChannels/postCreatePoll";
+import { postCreatePoll} from "../../../twitch_calls/twitchChannels/postCreatePoll";
 import {postStartRaid} from "../../../twitch_calls/twitchChannels/postStartRaid";
 import {deleteCancelRaid} from "../../../twitch_calls/twitchChannels/deleteCancelRaid";
 import {
-    isPatchChannelInformationPayload,
     patchChannelInformation
 } from "../../../twitch_calls/twitchChannels/patchChannelInformation";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 import {getChannelInformation} from "../../../twitch_calls/twitchChannels/getChannelInformation";
+import {isPostCreatePollPayload} from "../model/postCreatePollPayload";
+import {isPatchChannelInformationPayload} from "../model/patchChannelInformationPayload";
 
 const LOG_PREFIX = 'TWITCH_CHANNEL_CONTROLLER';
 
@@ -26,7 +27,7 @@ class TwitchChannelController {
         actionDescription: "Get Channel Followers"
     })
     public async getFollowers(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const { queryParams, headers, validatedBody } = context;
+        const { queryParams, headers } = context;
         try {
             const result = await getChannelFollowersCount(queryParams, headers);
             logger.info("Successfully get followers count", LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
@@ -46,7 +47,7 @@ class TwitchChannelController {
         actionDescription: "Get Channel VIPs"
     })
     public async getVips(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const { queryParams, headers, validatedBody } = context;
+        const { queryParams, headers } = context;
         try {
             const result = await getChannelVips(queryParams, headers);
             logger.info(`Successfully get vips for broadcaster_id: ${queryParams.broadcaster_id}`, LOG_PREFIX, {
@@ -70,7 +71,7 @@ class TwitchChannelController {
         actionDescription: "Add VIP",
     })
     public async addVip(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const { queryParams, headers, validatedBody } = context;
+        const { queryParams, headers } = context;
         try {
             const result = await postAddVip(queryParams, headers);
             logger.info(`Successfully added VIP with user_id: ${queryParams.user_id}`, LOG_PREFIX, {
@@ -93,7 +94,7 @@ class TwitchChannelController {
         actionDescription: "Delete VIP"
     })
     public async deleteVip(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const { queryParams, headers, validatedBody } = context;
+        const { queryParams, headers } = context;
         try {
             const result = await deleteVipUser(queryParams, headers);
             logger.info(`Successfully deleted VIP with user_id: ${queryParams.user_id}`, LOG_PREFIX, {
@@ -116,7 +117,7 @@ class TwitchChannelController {
         bodyValidationFn: isPostCreatePollPayload
     })
     public async createPoll(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const { queryParams, headers, validatedBody } = context;
+        const { headers, validatedBody } = context;
         try {
             const result = await postCreatePoll(validatedBody, headers); // Using validatedBody from context
             logger.info(`Successfully started a poll`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
@@ -136,7 +137,7 @@ class TwitchChannelController {
         actionDescription: "Start Raid"
     })
     public async startRaid(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const { queryParams, headers, validatedBody } = context;
+        const { queryParams, headers } = context;
         try {
             const result = await postStartRaid(queryParams, headers);
             logger.info(`Successfully started a raid to: ${queryParams.to_broadcaster_id}`, LOG_PREFIX, {
@@ -159,7 +160,7 @@ class TwitchChannelController {
         actionDescription: "Cancel Raid"
     })
     public async cancelRaid(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const { queryParams, headers, validatedBody } = context;
+        const { queryParams, headers } = context;
         try {
             const result = await deleteCancelRaid(queryParams, headers);
             logger.info(`Successfully cancelled a raid`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });
@@ -211,7 +212,7 @@ class TwitchChannelController {
         context: { queryParams: any, headers: any, validatedBody: any }
     )
     {
-        const { queryParams, headers, validatedBody } = context;
+        const { queryParams, headers } = context;
         try{
             const result = await getChannelInformation(queryParams, headers);
             logger.info(`Successfully got Channel Information`, LOG_PREFIX, { color: LogColor.MAGENTA, style: LogStyle.DIM });

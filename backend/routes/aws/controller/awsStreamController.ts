@@ -5,7 +5,7 @@ import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {getStreamFromApiGateway} from "../../../api_gateway_calls/stream/getStream";
 import {getStreamsByBroadcasterUsernameFromApiGateway} from "../../../api_gateway_calls/stream/getStreamByBroadcaster";
 import {deleteStreamAndMetadataFromApiGateway} from "../../../api_gateway_calls/stream/deleteStreamAndMetadata";
-import {getClientAndCognitoIdToken} from "../../../bot/frontendClients";
+import {getClientAndCognitoIdToken} from "../../../websocket/frontendClients";
 import {createTimestamp} from "../../../utilities/utilities";
 import {PatchStreamPayload} from "../model/patchStreamPayload";
 import {patchStreamToApiGateway} from "../../../api_gateway_calls/stream/patchStream";
@@ -24,7 +24,7 @@ class AwsStreamController {
         actionDescription: "Get Stream Metadata"
     })
     public async getStream(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const {optionalQueryParams, headers, validatedBody} = context;
+        const {optionalQueryParams, headers} = context;
         const stream_id = optionalQueryParams.stream_id;
         try {
             const result = stream_id ? await getStreamFromApiGateway(optionalQueryParams, headers)
@@ -48,7 +48,7 @@ class AwsStreamController {
         actionDescription: "Delete Stream Metadata"
     })
     public async deleteStream(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const {queryParams, headers, validatedBody} = context;
+        const {queryParams, headers} = context;
         try {
             const result = await deleteStreamAndMetadataFromApiGateway(queryParams, headers)
             res.json(result)
