@@ -27,6 +27,14 @@ import {twitchStreamsController} from "../../routes/twitch/controller/twitchStre
 import {WEBSOCKET_MESSAGE_TYPE} from "../localWebsocket/websocketMessageType";
 import {WebsocketPayload} from "../localWebsocket/websocketPayload";
 import {TwitchWebSocketMessage} from "../twitchWebsocketMessage";
+import {ModeratorAddEventsubResponse} from "./models/moderatorAddEventsubResponse";
+import {ModeratorRemoveEventsubResponse} from "./models/moderatorRemoveEventsubResponse";
+import {ChannelVipAddEventsubResponse} from "./models/channelVipAddEventsubResponse";
+import {ChannelVipRemoveEventsubResponse} from "./models/channelVipRemoveEventsubResponse";
+import {ChannelBanEventsubResponse} from "./models/channelBanEventsubResponse";
+import {ChannelUnbanEventsubResponse} from "./models/channelUnbanEventsubResponse";
+import {AutomodSettingsUpdateEventsubResponse} from "./models/automodSettingsUpdateEventsubResponse";
+import {ChannelUpdateEventsubResponse} from "./models/channelUpdateEventsubResponse";
 
 const LOG_PREFIX = "EVENTSUB_HANDLERS"
 
@@ -155,7 +163,24 @@ export const channelUpdateHandler = (cognitoUserId: string, data: TwitchWebSocke
         veryPositiveMessageCount: oldMetadata?.veryPositiveMessageCount
     }
     setFrontendClientTwitchStreamMetadata(cognitoUserId, newMetadata)
+
+    const eventData: ChannelUpdateEventsubResponse = {
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!,
+        "title": data.payload.event?.title!,
+        "language": data.payload.event?.language!,
+        "category_name": data.payload.event?.category_name!,
+        "category_id": data.payload.event?.category_id!,
+        "content_classification_labels": data.payload.event?.content_classification_labels!
+    }
     logger.info(`channel updated: title: ${data.payload.event?.title}, category ${data.payload.event?.category_name}`, LOG_PREFIX, {color: LogColor.MAGENTA})
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.CHANNEL_UPDATE,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
 }
 
 export const channelChatDeleteMessageHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
@@ -170,3 +195,147 @@ export const channelChatDeleteMessageHandler = (cognitoUserId: string, data: Twi
 
 }
 
+export const moderatorAddHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const eventData: ModeratorAddEventsubResponse = {
+        "user_id": data.payload.event?.user_id!,
+        "user_login": data.payload.event?.user_login!,
+        "user_name": data.payload.event?.user_name!,
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!
+    }
+    logger.info(`Received message moderatorAdd event, new moderator username: ${data.payload.event?.user_login!}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.MODERATOR_ADD,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
+}
+
+export const moderatorRemoveHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const eventData: ModeratorRemoveEventsubResponse = {
+        "user_id": data.payload.event?.user_id!,
+        "user_login": data.payload.event?.user_login!,
+        "user_name": data.payload.event?.user_name!,
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!
+    }
+    logger.info(`Received message moderatorRemove event, removed moderator username: ${data.payload.event?.user_login!}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.MODERATOR_REMOVE,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
+}
+
+export const channelVipAddHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const eventData: ChannelVipAddEventsubResponse = {
+        "user_id": data.payload.event?.user_id!,
+        "user_login": data.payload.event?.user_login!,
+        "user_name": data.payload.event?.user_name!,
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!
+    }
+    logger.info(`Received message channelVipAdd event, new VIP username: ${data.payload.event?.user_login!}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.CHANNEL_VIP_ADD,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
+}
+
+export const channelVipRemoveHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const eventData: ChannelVipRemoveEventsubResponse = {
+        "user_id": data.payload.event?.user_id!,
+        "user_login": data.payload.event?.user_login!,
+        "user_name": data.payload.event?.user_name!,
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!
+    }
+    logger.info(`Received message channelVipRemove event, removed VIP username: ${data.payload.event?.user_login!}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.CHANNEL_VIP_REMOVE,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
+}
+
+export const channelBanHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const eventData: ChannelBanEventsubResponse = {
+        "user_id": data.payload.event?.user_id!,
+        "user_login": data.payload.event?.user_login!,
+        "user_name": data.payload.event?.user_name!,
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!,
+        "moderator_user_id": data.payload.event?.moderator_user_id!,
+        "moderator_user_login": data.payload.event?.moderator_user_login!,
+        "moderator_user_name": data.payload.event?.moderator_user_name!,
+        "reason": data.payload.event?.reason!,
+        "banned_at": data.payload.event?.banned_at!,
+        "ends_at": data.payload.event?.ends_at!,
+        "is_permanent": data.payload.event?.is_permanent!
+    }
+    logger.info(`Received message channelBan event, today's unlucky guy is: ${data.payload.event?.user_login!}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.CHANNEL_BAN,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
+}
+
+export const channelUnbanHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const eventData: ChannelUnbanEventsubResponse = {
+        "user_id": data.payload.event?.user_id!,
+        "user_login": data.payload.event?.user_login!,
+        "user_name": data.payload.event?.user_name!,
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!,
+        "moderator_user_id": data.payload.event?.moderator_user_id!,
+        "moderator_user_login": data.payload.event?.moderator_user_login!,
+        "moderator_user_name": data.payload.event?.moderator_user_name!,
+    }
+    logger.info(`Received message channelUnban event, today's lucky guy is: ${data.payload.event?.user_login!}`, LOG_PREFIX, {color: LogColor.MAGENTA});
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.CHANNEL_UNBAN,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
+}
+
+export const automodSettingsUpdateHandler = (cognitoUserId: string, data: TwitchWebSocketMessage) => {
+    const eventData: AutomodSettingsUpdateEventsubResponse = {
+        "broadcaster_user_id": data.payload.event?.broadcaster_user_id!,
+        "broadcaster_user_login": data.payload.event?.broadcaster_user_login!,
+        "broadcaster_user_name": data.payload.event?.broadcaster_user_name!,
+        "moderator_user_id": data.payload.event?.moderator_user_id!,
+        "moderator_user_login": data.payload.event?.moderator_user_login!,
+        "moderator_user_name": data.payload.event?.moderator_user_name!,
+        "overall_level": data.payload.event?.overall_level!,
+        "disability": data.payload.event?.disability!,
+        "aggression": data.payload.event?.aggression!,
+        "sexuality_sex_or_gender": data.payload.event?.sexuality_sex_or_gender!,
+        "misogyny": data.payload.event?.misogyny!,
+        "bullying": data.payload.event?.bullying!,
+        "swearing": data.payload.event?.swearing!,
+        "race_ethnicity_or_religion": data.payload.event?.race_ethnicity_or_religion!,
+        "sex_based_terms": data.payload.event?.sex_based_terms!
+    }
+    logger.info(`Received message automodSettingsUpdate event`, LOG_PREFIX, {color: LogColor.MAGENTA});
+
+    const websocketMessage:WebsocketPayload = {
+        type: WEBSOCKET_MESSAGE_TYPE.AUTOMOD_SETTINGS_UPDATE,
+        messageObject: {eventData}
+    }
+    sendMessageToFrontendClient(cognitoUserId, websocketMessage)
+}

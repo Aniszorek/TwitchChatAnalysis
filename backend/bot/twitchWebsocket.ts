@@ -3,11 +3,13 @@ import {checkReadinessAndNotifyFrontend} from "./localWebsocket/wsServer";
 import {CLIENT_ID} from "../envConfig";
 import {EventSubSubscriptionType} from "./eventsubHandlers/eventSubSubscriptionType";
 import {
+    automodSettingsUpdateHandler,
+    channelBanHandler,
     channelChatDeleteMessageHandler,
     channelChatMessageHandler,
     channelFollowHandler,
-    channelSubscribeHandler,
-    channelUpdateHandler,
+    channelSubscribeHandler, channelUnbanHandler,
+    channelUpdateHandler, channelVipAddHandler, channelVipRemoveHandler, moderatorAddHandler, moderatorRemoveHandler,
     streamOfflineHandler,
     streamOnlineHandler
 } from "./eventsubHandlers/eventsubHandlers";
@@ -95,6 +97,34 @@ async function handleWebSocketMessage(data: TwitchWebSocketMessage, cognitoUserI
                     channelChatDeleteMessageHandler(cognitoUserId, data)
                     break;
                 }
+                case EventSubSubscriptionType.MODERATOR_ADD: {
+                    moderatorAddHandler(cognitoUserId, data)
+                    break;
+                }
+                case EventSubSubscriptionType.MODERATOR_REMOVE: {
+                    moderatorRemoveHandler(cognitoUserId, data)
+                    break;
+                }
+                case EventSubSubscriptionType.CHANNEL_VIP_ADD: {
+                    channelVipAddHandler(cognitoUserId, data)
+                    break;
+                }
+                case EventSubSubscriptionType.CHANNEL_VIP_REMOVE: {
+                    channelVipRemoveHandler(cognitoUserId, data)
+                    break;
+                }
+                case EventSubSubscriptionType.CHANNEL_BAN: {
+                    channelBanHandler(cognitoUserId, data)
+                    break;
+                }
+                case EventSubSubscriptionType.CHANNEL_UNBAN: {
+                    channelUnbanHandler(cognitoUserId, data)
+                    break;
+                }
+                case EventSubSubscriptionType.AUTOMOD_SETTINGS_UPDATE: {
+                    automodSettingsUpdateHandler(cognitoUserId, data)
+                    break;
+                }
             }
             break;
         }
@@ -142,6 +172,36 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
             await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_FOLLOW, {
                 broadcaster_user_id: broadcasterId, moderator_user_id: viewerId,
             }, headers, '2')
+
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.MODERATOR_ADD, {
+                broadcaster_user_id: broadcasterId,
+            }, headers)
+
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.MODERATOR_REMOVE, {
+                broadcaster_user_id: broadcasterId,
+            }, headers)
+
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_VIP_ADD, {
+                broadcaster_user_id: broadcasterId
+            }, headers)
+
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_VIP_REMOVE, {
+                broadcaster_user_id: broadcasterId
+            }, headers)
+
+            // TODO add channel:moderate scope to auth generate link
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_BAN, {
+                broadcaster_user_id: broadcasterId
+            }, headers)
+
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_UNBAN, {
+                broadcaster_user_id: broadcasterId
+            }, headers)
+
+            await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.AUTOMOD_SETTINGS_UPDATE, {
+                broadcaster_user_id: broadcasterId,
+                moderator_user_id: viewerId
+            }, headers)
         }
 
         // streamer role required
