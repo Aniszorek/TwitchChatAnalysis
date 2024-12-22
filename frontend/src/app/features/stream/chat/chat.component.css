@@ -52,7 +52,8 @@
 
 .chat-list {
   flex-grow: 1;
-  min-height: 0;
+  min-height: var(--chat-height);
+  max-height: var(--chat-height);
   overflow-y: auto;
   list-style: none;
   padding: 0;
@@ -60,6 +61,7 @@
   scrollbar-width: thin;
   scrollbar-color: #555555 #333333;
 }
+
 
 .chat-message {
   padding: 5px;
