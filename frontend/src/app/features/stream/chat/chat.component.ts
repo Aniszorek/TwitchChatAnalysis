@@ -10,6 +10,7 @@ import {
 import {DatePipe, NgForOf} from '@angular/common';
 import {TwitchService} from '../../twitch/twitch.service';
 import {Message} from '../../twitch/message';
+import {BackendService} from '../../../shared/services/backend.service';
 
 @Component({
   selector: 'app-stream-chat',
@@ -19,8 +20,14 @@ import {Message} from '../../twitch/message';
   styleUrls: ['./chat.component.css'],
 })
 export class ChatComponent implements OnInit, AfterViewChecked {
+  broadcasterUsername: string | null = null;
+  broadcasterId: string | null = null;
+  userId: string | null = null;
+
   private readonly twitchService = inject(TwitchService);
+  private readonly backendService = inject(BackendService);
   private readonly destroyRef = inject(DestroyRef);
+  private messageInputValue: string = ""
 
   @ViewChild('chatList') chatList!: ElementRef<HTMLUListElement>;
   @ViewChild('chatInput') chatInput!: ElementRef<HTMLTextAreaElement>;
@@ -28,6 +35,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   messages: Message[] = [];
   readonly maxChars = 260;
   readonly maxInputHeight = 70;
+
 
   ngOnInit() {
     const sub = this.twitchService.chatMessages$.subscribe((message) => {
@@ -37,8 +45,11 @@ export class ChatComponent implements OnInit, AfterViewChecked {
         this.messages = [];
       }
     });
-
     this.destroyRef.onDestroy(() => sub.unsubscribe());
+
+    this.broadcasterUsername = this.twitchService['state'].broadcasterUsername.getValue();
+    this.broadcasterId = this.twitchService['state'].broadcasterId.getValue();
+    this.userId = this.twitchService['state'].userId.getValue();
   }
 
   ngAfterViewChecked(): void {
@@ -64,6 +75,20 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     if (value.length > this.maxChars) {
       inputElement.value = value.substring(0, this.maxChars);
     }
+
+    this.messageInputValue = value;
+  }
+
+  onSendMessage(){
+
+    const message = this.chatInput.nativeElement.value
+    if(message.length < 1) {
+      return
+    }
+    console.log('🚀   Sending message   🚀');
+    this.backendService.sendTwitchMessage(this.broadcasterId!, this.userId!, message).subscribe(() => {})
+    this.messageInputValue = ""
+    this.chatInput.nativeElement.value = ""
   }
 
   private getTotalPadding(inputElement: Element) {
@@ -73,5 +98,4 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
     return paddingTop + paddingBottom;
   }
-
 }
