@@ -5,6 +5,7 @@ import { urls } from '../../app.config';
 import { AuthService } from '../../auth/auth.service';
 import { Message, NlpChatMessage } from './message';
 import {hasAccess, Tab, UserRole} from './permissions.config';
+import {User} from '../stream/managment/suspended/models/suspended.model';
 
 export interface SearchUserState {
   success: boolean;
@@ -16,6 +17,12 @@ interface SearchResponse {
   user_id: string;
   twitch_role: string;
   message: string;
+}
+
+interface ChannelInformation {
+  game_id: string;
+  title: string;
+  tags: string[]
 }
 
 @Injectable({
@@ -35,12 +42,20 @@ export class TwitchService {
     loadingState: new BehaviorSubject<boolean>(false),
     chatMessages: new Subject<Message | null>(),
     nlpChatMessages: new Subject<NlpChatMessage | null>(),
+    moderatorChanges: new Subject<{ action: 'add' | 'remove'; user?: User;}>(),
+    vipChanges: new Subject<{ action: 'add' | 'remove'; user?: User;}>(),
+    bannedChanges: new Subject<{ action: 'add' | 'remove'; user?: User;}>(),
+    channelInfoChanges: new Subject<{ action: 'add' | 'remove'; channelInfo?: ChannelInformation;}>()
   };
 
   chatMessages$ = this.state.chatMessages.asObservable();
   nlpChatMessages$ = this.state.nlpChatMessages.asObservable();
   searchUserState$ = this.state.searchUserState.asObservable();
   loadingState$ = this.state.loadingState.asObservable();
+  moderatorChanges$ = this.state.moderatorChanges.asObservable();
+  vipChanges$ = this.state.vipChanges.asObservable();
+  bannedChanges$ = this.state.bannedChanges.asObservable();
+  channelInfoChanges$ = this.state.channelInfoChanges.asObservable();
 
   private websocket: WebSocket | null = null;
 
@@ -145,6 +160,28 @@ export class TwitchService {
         case 'MessageDeleted':
           //todo
           break;
+        case 'ModeratorAdd':
+          this.state.moderatorChanges.next({ action: 'add', user: rawMessage.messageObject.eventData });
+          break;
+        case 'ModeratorRemove':
+          this.state.moderatorChanges.next({ action: 'remove', user: rawMessage.messageObject.eventData });
+          break;
+        case 'ChannelBan':
+          this.state.bannedChanges.next({ action: 'add', user: this.mapBannedUser(rawMessage.messageObject.eventData) });
+          break;
+        case 'ChannelUnban':
+          this.state.bannedChanges.next({ action: 'remove', user: this.mapBannedUser(rawMessage.messageObject.eventData) });
+          break;
+        case 'ChannelVipAdd':
+          this.state.vipChanges.next({ action: 'add', user: rawMessage.messageObject.eventData });
+          break;
+        case 'ChannelVipRemove':
+          this.state.vipChanges.next({ action: 'remove', user: rawMessage.messageObject.eventData });
+          break;
+        case 'ChannelUpdate':
+          // todo na masterze jeszcze nie ma komponentu od tego, więc póki co nie zaciągamy tych danych
+          this.state.channelInfoChanges.next({action: 'add', channelInfo: rawMessage.messageObject.eventData});
+          break;
         default:
           console.warn('Unknown message type:', rawMessage.type);
       }
@@ -209,6 +246,16 @@ export class TwitchService {
       nlpClassification: rawMessage.nlp_classification,
       streamId: rawMessage.stream_id,
       timestamp: rawMessage.timestamp
+    };
+  }
+
+  private mapBannedUser(rawMessage: any): User {
+    return {
+      created_at: rawMessage.banned_at,
+      expires_at: rawMessage.ends_at || null,
+      user_id: rawMessage.user_id,
+      user_login: rawMessage.user_login,
+      user_name: rawMessage.user_name
     };
   }
 }
