@@ -1,9 +1,5 @@
 export interface GetTwitchMessageResponse {
     chatter_user_login: string;
-    is_banned?: boolean;
-    is_timeouted?: boolean;
-    is_vip?: boolean;
-    is_mod?: boolean;
     messages: TwitchMessageData[];
 }
 

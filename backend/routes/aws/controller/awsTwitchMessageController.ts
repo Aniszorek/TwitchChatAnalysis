@@ -3,9 +3,6 @@ import express from "express";
 import {LogColor, logger, LogStyle} from "../../../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {getTwitchMessageFromApiGateway,} from "../../../api_gateway_calls/twitch-message/getTwitchMessage";
-import {getSuspendedUsers} from "../../../twitch_calls/twitchUsers/getSuspendedUsers";
-import {getChannelVips} from "../../../twitch_calls/twitchChannels/getChannelVips";
-import {getChannelModerators} from "../../../twitch_calls/twitchModeration/getModerators";
 import {GetTwitchMessageResponse, TwitchMessageData} from "../model/getTwitchMessageResponse";
 import {ErrorWithStatus} from "../../../utilities/ErrorWithStatus";
 import {getClientAndCognitoIdToken} from "../../../bot/frontendClients";
@@ -13,8 +10,6 @@ import {TwitchMessage} from "../model/twitchMessage";
 import {PostTwitchMessagePayload} from "../model/postTwitchMessagePayload";
 import {postMessageToApiGateway} from "../../../api_gateway_calls/twitch-message/postTwitchMessage";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
-import {verifyUserPermission} from "../../../utilities/cognitoRoles";
-import {twitchUsersController} from "../../twitch/controller/twitchUsersController";
 
 const LOG_PREFIX = "AWS_TWITCH_MESSAGE_CONTROLLER"
 
@@ -30,16 +25,11 @@ class AwsTwitchMessageController {
     public async getTwitchMessages(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
         const {queryParams, optionalQueryParams, headers, validatedBody, cognitoUserId} = context;
         try{
-            const twitchOauthToken = headers["x-twitch-oauth-token"];
-            const broadcasterId = await AwsTwitchMessageController.getBroadcasterId(headers.broadcasteruserlogin, twitchOauthToken);
             const result = await getTwitchMessageFromApiGateway({...queryParams, ...optionalQueryParams}, headers);
 
             const response = await AwsTwitchMessageController.buildResponse(
                 result,
-                broadcasterId,
-                cognitoUserId,
                 queryParams.chatter_user_login,
-                headers
             );
 
             logger.info("Successfully get twitch messages", LOG_PREFIX, { color: LogColor.YELLOW, style: LogStyle.DIM });
@@ -60,44 +50,14 @@ class AwsTwitchMessageController {
                     error: `Failed to fetch twitch messages: ${JSON.stringify(error.response.data)}`,
                 });
             }
-
-
         }
-
     }
 
     private static async buildResponse(
         messages: TwitchMessageData[],
-        broadcasterId: string,
-        cognitoUserId: string,
         chatterUserLogin: string,
-        headers: any
     ): Promise<GetTwitchMessageResponse> {
-        const response: GetTwitchMessageResponse = { chatter_user_login: chatterUserLogin, messages };
-
-        if (verifyUserPermission(cognitoUserId, COGNITO_ROLES.STREAMER, 'get chatter data only for streamer access')) {
-            const suspendedLists = await getSuspendedUsers({broadcaster_id: broadcasterId}, headers);
-            response.is_banned = suspendedLists.banned_users.some(user => user.user_login === chatterUserLogin);
-            response.is_timeouted = suspendedLists.timed_out_users.some(user => user.user_login === chatterUserLogin);
-
-            const vipList = await getChannelVips({broadcaster_id: broadcasterId}, headers);
-            response.is_vip = vipList?.some(user => user.user_login === chatterUserLogin);
-
-            const modList = await getChannelModerators({broadcaster_id: broadcasterId}, headers);
-            response.is_mod = modList?.some(user => user.user_login === chatterUserLogin);
-        }
-
-        return response;
-    }
-
-    private static async getBroadcasterId (broadcasterUsername: string, twitchOauthToken: string){
-
-        const response = await twitchUsersController.fetchTwitchUserIdByNickname(broadcasterUsername, twitchOauthToken);
-        if (!response.userId) {
-
-            throw new ErrorWithStatus(400, `Broadcaster with username: ${broadcasterUsername} does not exist`);
-        }
-        return response.userId;
+        return {chatter_user_login: chatterUserLogin, messages};
     }
 
     // for internal use only
