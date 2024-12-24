@@ -1,1 +1,112 @@
-<p>raid-poll works!</p>
+<div class="raid-poll-container">
+  <div class="columns-container">
+    <div class="column">
+      <h3>Raid</h3>
+      <div class="raid-container">
+        <label for="raid-streamer">Streamer to raid</label>
+        <input
+          id="raid-streamer"
+          [(ngModel)]="twitchUsername"
+          class="search-input"
+          maxlength="140"
+          placeholder="Search streamer"
+          (keydown.enter)="onStartRaid()"
+        />
+
+        <div class="actions">
+          <button
+            class="action-btn"
+            (click)="onCancelRaid()">
+            Cancel
+          </button>
+          <button
+            class="action-btn"
+            (click)="onStartRaid()">
+            Start
+          </button>
+          <div *ngIf="raidTimerVisible"
+               class="timer-container"
+               matTooltip="Time to start raid [minutes:seconds]">
+            <span class="timer-label">Time left:</span>
+            <span class="timer">{{ formatTime(raidTimer) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="column">
+      <h3>Poll</h3>
+      <div class="poll-container">
+        <div class="label-input-group">
+          <label for="poll-title">Title</label>
+          <input
+            id="poll-title"
+            class="search-input"
+            type="text"
+            placeholder="Title"
+            [(ngModel)]="pollOptions.title"/>
+        </div>
+        <div class="label-input-group">
+          <label for="poll-duration">Duration</label>
+          <input id="poll-duration"
+                 class="search-input"
+                 type="number"
+                 placeholder="Duration"
+                 [(ngModel)]="pollOptions.duration"/>
+        </div>
+        <div class="poll-options">
+          <label>Options ({{ pollOptions.choices.length }}/{{ maxOptions }})</label>
+          <div class="add-option-group">
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Option"
+              (keydown.enter)="addOption()"
+              [(ngModel)]="newOption"
+            />
+            <button
+              class="add-option-btn"
+              (click)="addOption()"
+              [disabled]="pollOptions.choices.length >= maxOptions || newOption.trim() === ''"
+            >
+              Add
+            </button>
+          </div>
+          <ul>
+            <li class="poll-option" *ngFor="let option of pollOptions.choices; index as i">
+              <input type="text" [value]="option.title" readonly/>
+              <button
+                class="remove-btn"
+                matTooltip="Remove option"
+                (click)="removeOption(i)"
+              >
+                <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="bits-container">
+          <label class="bits-label">Bits</label>
+
+          <div class="bits-row">
+            <span>Bits Voting</span>
+            <div class="toggle-switch">
+              <input
+                id="bits-toggle"
+                type="checkbox"
+                [(ngModel)]="pollOptions.channel_points_voting_enabled"/>
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+        </div>
+
+
+        <button
+          class="apply-changes-btn"
+          (click)="applyChanges()">
+          Start a poll
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

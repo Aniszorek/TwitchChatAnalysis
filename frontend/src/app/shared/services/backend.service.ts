@@ -9,6 +9,8 @@ import {AutoModSettingsResponse} from './models/auto-mod-settings-response';
 import {PostBlockedTermRequest} from './models/blocked-terms-request';
 import {BlockedTerm} from './models/blocked-term';
 import {PostBlockedTermsResponse} from './models/blocked-terms-response';
+import {PostPollRequest} from './models/poll-request';
+import {GetChatterInfoResponse} from './models/chatter-info-response';
 
 @Injectable({
   providedIn: 'root',
@@ -312,6 +314,76 @@ export class BackendService {
       })
     );
   }
+
+  postPoll(body: PostPollRequest) {
+    return this.http.post<any>(`${this.apiUrl}/twitch/channels/polls`, body)
+      .pipe(
+        tap(() => {
+          this.notificationService.sendSuccessMessage('Poll started successfully!');
+        }),
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error starting poll:', error);
+          return throwError(() => new Error('Unable to start poll. Please try again later.'));
+        })
+      );
+  }
+
+  getUserInformation(broadcasterUserId: string, user_id: string) {
+    return this.http.get<GetChatterInfoResponse>(`${this.apiUrl}/twitch/users/chatter-info`, {
+      params: {
+        broadcaster_id: broadcasterUserId,
+        twitch_username: user_id
+      }
+    })
+      .pipe(
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error getting user:', error);
+          return throwError(() => new Error('Unable to get user. Please try again later.'));
+        })
+      );
+  }
+
+  startRaid(broadcasterUserId: string, raidUsername: string) {
+    console.log(broadcasterUserId, raidUsername)
+    return this.http.post<GetChatterInfoResponse>(`${this.apiUrl}/twitch/channels/raids`, {}, {
+      params: {
+        from_broadcaster_id: broadcasterUserId,
+        to_broadcaster_username: raidUsername
+      }
+    })
+      .pipe(
+        tap(() => {
+          this.notificationService.sendSuccessMessage('Raid started successfully!');
+        }),
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error raiding:', error);
+          return throwError(() => new Error('Unable to start raid. Please try again later.'));
+        })
+      );
+  }
+
+  cancelRaid(broadcasterUserId: string) {
+    console.log(broadcasterUserId)
+    return this.http.delete<GetChatterInfoResponse>(`${this.apiUrl}/twitch/channels/raids`, {
+      params: {
+        broadcaster_id: broadcasterUserId,
+      }
+    })
+      .pipe(
+        tap(() => {
+          this.notificationService.sendSuccessMessage('Raid canceled successfully!');
+        }),
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error canceling raid:', error);
+          return throwError(() => new Error('Unable to cancel raid. Please try again later.'));
+        })
+      );
+  }
+
 }
 
 export interface BanData {

@@ -15,6 +15,7 @@ import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 import {getChannelInformation} from "../../../twitch_calls/twitchChannels/getChannelInformation";
 import {isPostCreatePollPayload} from "../model/postCreatePollPayload";
 import {isPatchChannelInformationPayload} from "../model/patchChannelInformationPayload";
+import {twitchUsersController} from "./twitchUsersController";
 
 const LOG_PREFIX = 'TWITCH_CHANNEL_CONTROLLER';
 
@@ -131,16 +132,27 @@ class TwitchChannelController {
     }
 
     @TCASecured({
-        requiredQueryParams: ["from_broadcaster_id", "to_broadcaster_id"],
+        requiredQueryParams: ["from_broadcaster_id", "to_broadcaster_username"],
         requiredHeaders: ["x-twitch-oauth-token"],
         requiredRole: COGNITO_ROLES.STREAMER,
         actionDescription: "Start Raid"
     })
     public async startRaid(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
         const { queryParams, headers } = context;
+        const twitch_username = queryParams.to_broadcaster_username;
+        const from_broadcaster_id = queryParams.from_broadcaster_id;
+        const twitchOauthToken = headers["x-twitch-oauth-token"];
+
         try {
-            const result = await postStartRaid(queryParams, headers);
-            logger.info(`Successfully started a raid to: ${queryParams.to_broadcaster_id}`, LOG_PREFIX, {
+            const resultUserId = await twitchUsersController.fetchTwitchUserIdByNickname(twitch_username, twitchOauthToken);
+            if (!resultUserId.found)
+            {
+                throw Error("Twitch user not found");
+            }
+
+            const result = await postStartRaid({from_broadcaster_id: from_broadcaster_id, to_broadcaster_id: resultUserId.userId}, headers);
+
+            logger.info(`Successfully started a raid to: ${queryParams.to_broadcaster_username}`, LOG_PREFIX, {
                 color: LogColor.MAGENTA,
                 style: LogStyle.DIM,
             });
