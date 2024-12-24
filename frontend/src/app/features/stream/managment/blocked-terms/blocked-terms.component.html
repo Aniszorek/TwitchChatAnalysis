@@ -1,1 +1,30 @@
-<p>blocked-terms works!</p>
+<div class="stream-settings-container">
+  <div class="column">
+    <h3>Blocked Terms</h3>
+    <div class="input-container">
+      <input
+        class="search-input"
+        [(ngModel)]="newTerm"
+        (keydown.enter)="addTerm()"
+        (input)="checkExistingTerm()"
+        placeholder="Add a tag..."
+      />
+      <button
+        class="action-btn"
+        [disabled]="!newTerm.trim() || existingTerm"
+        (click)="addTerm()"
+      >
+        Add
+      </button>
+      <span *ngIf="existingTerm" class="tag">
+        {{ existingTerm.text }}
+      </span>
+    </div>
+    <div class="tags-container">
+      <div *ngFor="let term of blockedTerms" class="tag">
+        {{ term.text }}
+        <mat-icon class="tag-remove" (click)="removeTerm(term)" svgIcon="unban"></mat-icon>
+      </div>
+    </div>
+  </div>
+</div>

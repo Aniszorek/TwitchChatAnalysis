@@ -12,6 +12,7 @@ import {ChartService} from './services/chart.service';
 import {AppState} from './models/chart-enums.model';
 import {ActivatedRoute} from '@angular/router';
 import {BackendService} from '../../shared/services/backend.service';
+import {MatIcon} from '@angular/material/icon';
 
 
 // todo TCA-106 dodałabym opcje usuwania danych z jakiegoś streama bo teraz mamy nasrane pustymi wykresami
@@ -23,7 +24,8 @@ import {BackendService} from '../../shared/services/backend.service';
     NgForOf,
     NgIf,
     BaseChartDirective,
-    DatePipe
+    DatePipe,
+    MatIcon
   ],
   templateUrl: './charts.component.html',
   styleUrls: ['./charts.component.css']
@@ -43,6 +45,8 @@ export class ChartsComponent implements OnInit {
   protected selectedStream: any = null;
   protected chartLabels: string[] = [];
   protected chartOptions: ChartOptions<'line'> = {};
+  showModal: boolean = false;
+  streamToRemove: { id: string; index: number } | null = null;
 
   protected selectedAggregationKeys: { [key: string]: boolean };
   protected readonly keyDisplayNames: { [key: string]: { displayName: string; tooltip: string } }
@@ -83,6 +87,28 @@ export class ChartsComponent implements OnInit {
 
   getAppState() {
     return this.appState;
+  }
+
+  confirmRemoveStream(event: Event, streamId: string, index: number): void {
+    event.stopPropagation();
+    this.streamToRemove = { id: streamId, index: index };
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.streamToRemove = null;
+  }
+
+  removeStream(): void {
+    if (!this.streamToRemove) return;
+
+    const { id, index } = this.streamToRemove;
+    this.backendService.deleteStreamAndMetadata(this.broadcasterUserLogin!, id).subscribe(() => {
+      this.streams.splice(index, 1);
+      this.closeModal();
+      this.selectedStream = null;
+    });
   }
 
   protected isMainKeySelected(key: string): boolean {

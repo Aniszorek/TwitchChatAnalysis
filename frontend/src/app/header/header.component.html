@@ -1,5 +1,5 @@
 <header>
-  <a [routerLink]="['/stream-search']"><mat-icon class="large-icon" svgIcon="logo-white"></mat-icon></a>
+  <a [routerLink]="['/stream-search']" (click)="changeViewToStream()"><mat-icon class="large-icon" svgIcon="logo-white"></mat-icon></a>
   <menu *ngIf="authService.isLoggedIn() && twitchService['state'].broadcasterUsername.getValue() != null" class="nav-buttons">
     <button
       (click)="goToStream()"
@@ -15,7 +15,7 @@
   </menu>
 
   <div *ngIf="authService.isLoggedIn() && twitchService['state'].broadcasterUsername.getValue() != null" class="center-button">
-    <button [routerLink]="['/stream-search']" class="stream-search-button">
+    <button [routerLink]="['/stream-search']" class="stream-search-button" (click)="changeViewToStream()">
       Watching: <span class="username">{{ twitchService['state'].broadcasterUsername.getValue() }}</span>
     </button>
   </div>

@@ -64,13 +64,18 @@ export class ModeratorsComponent implements OnInit {
 
   onSearch(event: Event) {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
+    if (searchTerm.length > 0) {
+      this.searchedModerators = this.moderators.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
 
-    this.searchedModerators = this.moderators.filter(user =>
-      user.user_login.toLowerCase().includes(searchTerm)
-    );
-
-    this.searchedVips = this.vips.filter(user =>
-      user.user_login.toLowerCase().includes(searchTerm)
-    );
+      this.searchedVips = this.vips.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
+    }
+    else {
+      this.searchedModerators = [];
+      this.searchedVips = [];
+    }
   }
 }

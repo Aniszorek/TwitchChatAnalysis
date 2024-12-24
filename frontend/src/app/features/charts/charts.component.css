@@ -80,6 +80,79 @@
   background-color: var(--primary-color-hover);
 }
 
+.stream-item {
+  position: relative;
+  padding: 15px;
+}
+
+.remove-icon {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: var(--card-color);
+  cursor: pointer;
+  font-size: 20px;
+  transition: color 0.3s ease;
+}
+
+.remove-icon:hover {
+  color: white;
+}
+
+.confirmation-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #2a2a2f;
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  width: 300px;
+  text-align: center;
+}
+
+.confirmation-modal button {
+  margin: 10px 5px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.confirmation-modal button.confirm {
+  background-color: #36a2eb;
+  color: white;
+}
+
+.confirmation-modal button.confirm:hover {
+  background-color: #58b4f6;
+}
+
+.confirmation-modal button.cancel {
+  background-color: #444;
+  color: white;
+}
+
+.confirmation-modal button.cancel:hover {
+  background-color: #555;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+
+
 .chart-container {
   width: 100%;
   height: 50vh;

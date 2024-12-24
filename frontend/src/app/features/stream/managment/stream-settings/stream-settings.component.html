@@ -1,1 +1,107 @@
-<p>stream-settings works!</p>
+<div class="stream-settings-container">
+  <div class="columns-container">
+  <div class="column">
+    <h3>Title</h3>
+    <div class="title-container">
+      <textarea
+        class="search-input"
+        [value]="channelInfo?.title"
+        [readonly]="!isEditingTitle"
+        maxlength="140"
+        (keydown.enter)="applyChanges()"
+        (input)="updateTitle($event); adjustHeight()"
+        rows="1"
+        #titleInput
+      ></textarea>
+      <button class="action-btn" (click)="toggleEditTitle()">
+        <mat-icon class="action-icon" svgIcon="edit"></mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="column">
+    <h3>Category</h3>
+    <div class="category-container">
+      <div class="input-with-icon">
+        <mat-icon class="action-icon" svgIcon="search"></mat-icon>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Category"
+          [value]="channelInfo?.game_name"
+          (input)="searchCategories($event)"
+          (keydown.enter)="applyChanges()"
+        >
+      </div>
+      <ul *ngIf="categories.length > 0" class="category-results">
+        <li *ngFor="let category of categories" (click)="selectCategory(category)">
+          {{ category.name }}
+        </li>
+      </ul>
+      <h3>Language</h3>
+      <select class="dropdown"
+              [(ngModel)]="channelInfo!.broadcaster_language"
+              (ngModelChange)="onLanguageChange()">
+        <option value="en">English (US)</option>
+        <option value="bg">Bulgarian</option>
+        <option value="zh-Hans">Chinese (Simpl.)</option>
+        <option value="zh-Hant">Chinese (Trdl.)</option>
+        <option value="cs">Czech</option>
+        <option value="da">Danish</option>
+        <option value="nl">Dutch</option>
+        <option value="fi">Finnish (Suomi)</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="el">Greek</option>
+        <option value="hu">Hungarian</option>
+        <option value="it">Italian</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+        <option value="no">Norwegian</option>
+        <option value="pl">Polish</option>
+        <option value="pt">Portuguese</option>
+        <option value="ro">Romanian</option>
+        <option value="ru">Russian</option>
+        <option value="sk">Slovak</option>
+        <option value="es">Spanish (EU)</option>
+        <option value="es-MX">Spanish (LATAM)</option>
+        <option value="sv">Swedish</option>
+        <option value="th">Thai</option>
+        <option value="tr">Turkish</option>
+        <option value="vi">Vietnamese</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="column">
+    <h3>Tags</h3>
+    <div class="tags-container">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Add tag..."
+        (input)="updateTag($event)"
+        (keydown.enter)="addTag()"
+      >
+      <div *ngFor="let tag of channelInfo?.tags">
+        <span class="tag">{{ tag }}
+        <mat-icon
+          class="tag-remove"
+          svgIcon="unban"
+          (click)="removeTag(tag)">
+        </mat-icon>
+      </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <button
+    class="apply-changes-btn"
+    [disabled]="!hasChanges"
+    (click)="applyChanges()">
+    Apply changes</button>
+</div>
+
+

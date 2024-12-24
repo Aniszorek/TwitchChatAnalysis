@@ -74,14 +74,19 @@ export class SuspendedComponent implements OnInit {
 
   onSearch(event: Event) {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-    console.log(searchTerm)
 
-    this.searchedUsers.banned_users = this.suspendedUsers.banned_users.filter(user =>
-      user.user_login.toLowerCase().includes(searchTerm)
-    );
+    if (searchTerm.length > 0) {
+      this.searchedUsers.banned_users = this.suspendedUsers.banned_users.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
 
-    this.searchedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(user =>
-      user.user_login.toLowerCase().includes(searchTerm)
-    );
+      this.searchedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
+    }
+    else {
+      this.searchedUsers.banned_users = [];
+      this.searchedUsers.timed_out_users = [];
+    }
   }
 }
