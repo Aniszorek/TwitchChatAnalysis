@@ -6,6 +6,9 @@ import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 import {FetchTwitchUserIdResponse} from "../model/fetchTwitchUserIdResponse";
 import {fetchTwitchUserIdByNickname} from "../../../twitch_calls/twitchUsers/fetchUserIdByNickname";
 import {fetchTwitchUserIdFromOauthToken} from "../../../twitch_calls/twitchUsers/fetchTwitchUserIdFromOauthToken";
+import {getChannelVips} from "../../../twitch_calls/twitchChannels/getChannelVips";
+import {getChannelModerators} from "../../../twitch_calls/twitchModeration/getModerators";
+import {GetChatterInfoResponse} from "../model/getChatterInfoResponse";
 
 const LOG_PREFIX = "TWITCH_USERS_CONTROLLER";
 
@@ -34,6 +37,55 @@ export class TwitchUsersController {
             })
         }
     }
+
+    @TCASecured({
+        requiredQueryParams: ["broadcaster_id", "twitch_username"],
+        requiredHeaders: ["x-twitch-oauth-token"],
+        requiredRole: COGNITO_ROLES.STREAMER,
+        actionDescription: "Get Chatter info"
+    })
+    public async getChatterInfo(req: Request, res: Response, next: NextFunction, context: any) {
+        const {queryParams, headers, validatedBody} = context;
+        const twitch_username = queryParams.twitch_username;
+        const broadcasterId = queryParams.broadcaster_id;
+        const twitchOauthToken = headers["x-twitch-oauth-token"];
+        try {
+
+            const resultUserId = await twitchUsersController.fetchTwitchUserIdByNickname(twitch_username, twitchOauthToken)
+            if (!resultUserId.found)
+            {
+                throw Error("Twitch user not found");
+            }
+
+            const suspendedLists = await getSuspendedUsers({broadcaster_id: broadcasterId}, headers);
+            const resultIsBanned = suspendedLists.banned_users.some(user => user.user_login === twitch_username);
+            const resultIsTimeouted = suspendedLists.timed_out_users.some(user => user.user_login === twitch_username);
+
+            const vipList = await getChannelVips({broadcaster_id: broadcasterId}, headers);
+            const resultIsVip = vipList?.some(user => user.user_login === twitch_username);
+
+            const modList = await getChannelModerators({broadcaster_id: broadcasterId}, headers);
+            const resultIsMod = modList?.some(user => user.user_login === twitch_username);
+
+            const response:GetChatterInfoResponse = {
+                chatter_user_login: twitch_username,
+                chatter_user_id: resultUserId.userId!,
+                is_banned: resultIsBanned,
+                is_timeouted: resultIsTimeouted,
+                is_vip: resultIsVip,
+                is_mod: resultIsMod
+            }
+            res.json(response);
+
+        } catch (error: any) {
+            logger.error(`Error in /chatterInfo route: ${error.message}. ${error.response?.data.message}`, LOG_PREFIX);
+            res.status(error.response?.status || 500).json({
+                error: `Failed to fetch chatter info users: ${error.response?.data.message || error.message}`
+            })
+        }
+
+    }
+
 
     // for internal use only
     public async fetchTwitchUserIdByNickname(nickname: string, twitchOauthToken: string):Promise<FetchTwitchUserIdResponse> {

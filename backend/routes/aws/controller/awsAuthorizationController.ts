@@ -2,8 +2,8 @@ import express from "express";
 import {TCASecured} from "../../../utilities/TCASecuredDecorator";
 import {exchangeCodeForToken, generateAuthUrl, refreshIdToken, verifyToken} from "../../../aws/cognitoAuth";
 import {LogColor, logger} from "../../../utilities/logger";
-import {handleWebSocketClose, pendingWebSocketInitializations} from "../../../bot/wsServer";
-import {frontendClients} from "../../../bot/frontendClients";
+import {handleWebSocketClose} from "../../../bot/localWebsocket/wsServer";
+import {frontendClients} from "../../../websocket/frontendClients";
 import {waitForWebSocketClose} from "../../../utilities/utilities";
 import {validateUserRole} from "../../../api_gateway_calls/twitchChatAnalytics-authorization/validateUserRole";
 import {CLIENT_ID} from "../../../envConfig";
@@ -18,6 +18,7 @@ import {IS_DEBUG_ENABLED} from "../../../entryPoint";
 import {twitchAuthController} from "../../twitch/controller/twitchAuthController";
 import {SetTwitchUsernameResponse} from "../model/setTwitchUsernameResponse";
 import {twitchUsersController} from "../../twitch/controller/twitchUsersController";
+import {pendingWebSocketInitializations} from "../../../bot/localWebsocket/pendingWebsocketInitializations";
 
 const LOG_PREFIX = "AWS_AUTHORIZATION_CONTROLLER"
 

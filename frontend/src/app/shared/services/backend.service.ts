@@ -298,6 +298,20 @@ export class BackendService {
     );
   }
 
+
+  sendTwitchMessage(broadcasterId: string, userId: string, message: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/twitch/chat/messages`, {
+      broadcaster_id: broadcasterId,
+      sender_id: userId,
+      message: message
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error sending Twitch message:', error);
+        return throwError(() => new Error('Unable to send Twitch message. Please try again later.'));
+      })
+    );
+  }
 }
 
 export interface BanData {

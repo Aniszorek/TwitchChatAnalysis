@@ -4,18 +4,6 @@ import {PostTwitchMessagePayload} from "../../routes/aws/model/postTwitchMessage
 
 const LOG_PREFIX = `API_GATEWAY_REST`;
 
-interface TwitchMessage {
-    broadcasterUserId: string,
-    broadcasterUserLogin: string,
-    broadcasterUserName: string,
-    chatterUserId: string,
-    chatterUserLogin: string,
-    chatterUserName: string,
-    messageText: string,
-    messageId: string,
-    messageTimestamp: string,
-}
-
 /**
  * Forwards messages from Twitch EventSub to AWS ApiGateway
  */

@@ -2,7 +2,7 @@ import axios from "axios";
 import querystring from "querystring";
 import jwt, {JwtHeader, JwtPayload} from "jsonwebtoken";
 import jwksClient, {SigningKey} from "jwks-rsa";
-import {LogColor, logger, LogStyle} from "../utilities/logger";
+import {LogColor, logger} from "../utilities/logger";
 import {IS_DEBUG_ENABLED} from "../entryPoint";
 
 
@@ -27,11 +27,6 @@ interface CognitoTokenResponse {
     refresh_token: string;
     expires_in: number;
     token_type: string;
-}
-
-interface RefreshTokenResult {
-    newIdToken: string | undefined;
-    newExpiryTime: number | undefined;
 }
 
 interface DecodedTokenHeader extends JwtHeader {

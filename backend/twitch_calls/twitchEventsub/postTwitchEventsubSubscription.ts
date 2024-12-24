@@ -11,7 +11,7 @@ export async function registerResponse(payload:any, headers:any) {
         });
     }
     catch (error: any) {
-        logger.error(`Error subscribing from Twitch EventSub: ${error.response?.data || error.message}`, LOG_PREFIX);
+        logger.error(`Error subscribing from Twitch EventSub: ${JSON.stringify(error.response?.data, null, 2) || JSON.stringify(error.message, null, 2)}`, LOG_PREFIX);
         throw error;
     }
 

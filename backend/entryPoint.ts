@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import {authRouter} from "./routes/aws/awsAuthorization";
 import * as http from "node:http";
-import {initWebSocketServer} from "./bot/wsServer";
+import {initWebSocketServer} from "./bot/localWebsocket/wsServer";
 import {twitchUsersRouter} from "./routes/twitch/twitchUsersRouter";
 import {twitchChannelsRouter} from "./routes/twitch/twitchChannelsRouter";
 import {logger, LogLevel} from "./utilities/logger";

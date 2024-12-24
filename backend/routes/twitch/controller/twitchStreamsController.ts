@@ -1,7 +1,6 @@
 import {FetchTwitchStreamData} from "../model/fetchTwitchStreamDataResponse";
 import {LogColor, logger} from "../../../utilities/logger";
 import {fetchTwitchStreamMetadata} from "../../../twitch_calls/twitchStreams/fetchTwitchStreamMetadata";
-import {frontendClients} from "../../../bot/frontendClients";
 
 const LOG_PREFIX = 'TWITCH_STREAMS_CONTROLLER';
 

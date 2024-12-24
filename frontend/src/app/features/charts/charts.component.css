@@ -118,6 +118,11 @@
   background-color: #555;
 }
 
+.tag.selected:hover {
+  background-color: #58b4f6;
+  color: #fff;
+}
+
 .aggregation-section {
   margin: 20px 0;
 }
@@ -164,6 +169,10 @@
 
 .aggregation-key-tag.selected {
   background-color: #6a45b2;
+  color: white;
+}
+.aggregation-key-tag.selected:hover {
+  background-color: #7a55c8;
   color: white;
 }
 

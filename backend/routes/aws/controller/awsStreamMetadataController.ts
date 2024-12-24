@@ -11,7 +11,7 @@ import {
     refreshStreamMetadataCounters,
     setFrontendClientTwitchStreamMetadata,
     TwitchStreamMetadata
-} from "../../../bot/frontendClients";
+} from "../../../websocket/frontendClients";
 import {createTimestamp} from "../../../utilities/utilities";
 import {PostStreamMetadataPayload} from "../model/postStreamMetadataPayload";
 import {postMetadataToApiGateway} from "../../../api_gateway_calls/stream-metadata/postStreamMetadata";
@@ -30,7 +30,7 @@ class AwsStreamMetadataController {
         actionDescription: "Get Stream Metadata"
     })
     public async getStreamMetadata(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
-        const {queryParams, headers, validatedBody} = context;
+        const {queryParams, headers} = context;
         try{
 
             const result =  await getStreamMetadataByStreamIdFromApiGateway(queryParams, headers)

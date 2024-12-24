@@ -1,13 +1,8 @@
 import {twitchApiClient} from "../twitchApiConfig";
 import {logger} from "../../utilities/logger";
+import {ModUser} from "../../routes/twitch/model/getChannelModeratorsResponse";
 
 const LOG_PREFIX = 'TWITCH_API_MODERATION';
-
-export type ModUser = {
-    user_id: string;
-    user_login: string;
-    user_name: string;
-}
 
 // Requires a user access token that includes the moderation:read scope.
 // broadcaster_id The ID of the broadcaster whose list of moderators you want to get. This ID must match the user ID in the access token.

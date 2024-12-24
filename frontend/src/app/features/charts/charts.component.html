@@ -16,7 +16,7 @@
             (click)="selectStream(stream.stream_id)"
             [class.selected]="stream.stream_id === streamId">
             <h3>{{ stream.stream_title }}</h3>
-            <p>Data: {{ stream.started_at | date: 'short' }}</p>
+            <p>Date: {{ stream.started_at | date: 'short' }}</p>
           </li>
         </ul>
       </div>
@@ -39,7 +39,7 @@
 
         </div>
 
-        <div class="aggregation-section">
+        <div *ngIf="showAggregationInfo" class="aggregation-section">
           <div class="aggregation-description">
             <p>
               Select the appropriate subgroups for the selected data to obtain more detailed analysis. For example, by

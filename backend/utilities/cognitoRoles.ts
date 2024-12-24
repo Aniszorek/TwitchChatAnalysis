@@ -1,15 +1,6 @@
-import {frontendClients} from "../bot/frontendClients";
+import {frontendClients} from "../websocket/frontendClients";
 import {LogColor, logger, LogStyle} from "./logger";
 import {COGNITO_ROLES, CognitoRole} from "./CognitoRoleEnum";
-
-interface UserData {
-    twitchData: {
-        twitchRole: CognitoRole;
-    };
-    cognito: {
-        cognitoUsername: string;
-    };
-}
 
 const LOG_PREFIX = "COGNITO_ROLES";
 

@@ -49,6 +49,8 @@ export class ChartsComponent implements OnInit {
   protected readonly aggregationKeys: string[];
   protected readonly relatedKeysMap: { [key: string]: string[] };
 
+  protected showAggregationInfo: boolean
+
   constructor(
     private readonly backendService: BackendService,
     private readonly authService: AuthService,
@@ -68,6 +70,7 @@ export class ChartsComponent implements OnInit {
     this.selectedAggregationKeys = this.keysService.getSelectedAggregationKeys();
     this.relatedKeysMap = this.keysService.getRelatedKeysMap()
     this.keyDisplayNames = this.keysService.getKeyDisplayNames()
+    this.showAggregationInfo = false
   }
 
   ngOnInit(): void {
@@ -118,6 +121,8 @@ export class ChartsComponent implements OnInit {
     this.selectedDataKeys = isKeySelected
       ? this.selectedDataKeys.filter(k => k !== key)
       : [...this.selectedDataKeys, key];
+
+    this.showAggregationInfo = this.isKeySelected("negative_message_count") || this.isKeySelected("positive_message_count");
 
     this.updateChart();
   }

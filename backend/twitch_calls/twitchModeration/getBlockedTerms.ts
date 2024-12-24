@@ -1,17 +1,8 @@
 import {twitchApiClient} from "../twitchApiConfig";
 import {logger} from "../../utilities/logger";
+import {GetBlockedTermsResponse} from "../../routes/twitch/model/getBlockedTermsResponse";
 
 const LOG_PREFIX = 'TWITCH_API_MODERATION';
-
-export interface GetBlockedTermsResponse {
-    broadcaster_id: string;
-    moderator_id: string;
-    id: string;
-    text: string;
-    created_at: string;
-    updated_at: string;
-    expires_at: string;
-}
 
 // Requires a user access token that includes the moderator:read:blocked_terms or moderator:manage:blocked_terms scope.
 // moderator_id	The ID of the broadcaster or a user that has permission to moderate the broadcaster’s chat room. This ID must match the user ID in the user access token.

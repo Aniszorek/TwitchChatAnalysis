@@ -21,9 +21,10 @@
       class="chat-input"
       placeholder="Type your message..."
       (input)="onInput($event)"
+      (keyup.enter)="onSendMessage()"
     ></textarea>
-    <button class="chat-send-btn">
-      <span class="icon-arrow">➤</span>
+    <button class="chat-send-btn" (click)="onSendMessage()">
+      <span class="icon-arrow">🚀</span>
     </button>
   </div>
 </div>
