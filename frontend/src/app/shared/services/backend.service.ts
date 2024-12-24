@@ -52,6 +52,26 @@ export class BackendService {
     );
   }
 
+  deleteStreamAndMetadata(broadcasterUserLogin: string, streamId: string): Observable<any> {
+      return this.http.delete<any>(`${this.apiUrl}/aws/stream`, {
+        headers: {
+          broadcasterUserLogin: broadcasterUserLogin,
+        },
+        params: {
+          stream_id: streamId
+        }
+      }).pipe(
+        tap(() => {
+          this.notificationService.sendSuccessMessage('Stream and metadata deleted successfully!');
+        }),
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error deleting stream and metadata:', error.error.error);
+          return throwError(() => new Error('Unable to delete stream and metadata . Please try again later.'));
+        })
+      );
+    }
+
 
   getSuspendedUsers(broadcasterId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/twitch/users/suspended`, {

@@ -48,5 +48,9 @@ export class HeaderComponent {
     this.router.navigate(['/profile']);
   }
 
+  changeViewToStream() {
+    this.activeView = 'stream';
+  }
+
   protected readonly Tab = Tab;
 }
