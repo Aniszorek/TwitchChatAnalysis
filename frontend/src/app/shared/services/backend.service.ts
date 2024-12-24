@@ -4,6 +4,11 @@ import {catchError, Observable, tap, throwError} from 'rxjs';
 import {NotificationService} from './notification.service';
 import {GetCategoriesResponse} from './models/categories-response';
 import {ChannelInfoRequest} from './models/channel-info-request';
+import {AutoModSettingsRequest} from './models/auto-mod-settings-reqeuest';
+import {AutoModSettingsResponse} from './models/auto-mod-settings-response';
+import {PostBlockedTermRequest} from './models/blocked-terms-request';
+import {BlockedTerm} from './models/blocked-term';
+import {PostBlockedTermsResponse} from './models/blocked-terms-response';
 
 @Injectable({
   providedIn: 'root',
@@ -67,6 +72,9 @@ export class BackendService {
       user_id: userId,
       data: data,
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('User banned successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error banning user:', error);
@@ -83,6 +91,9 @@ export class BackendService {
         user_id: userId,
       },
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('User unbaned successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error unbanning user:', error);
@@ -112,6 +123,9 @@ export class BackendService {
         user_id: userId
       },
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Moderator removed successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error removing moderator:', error);
@@ -141,6 +155,9 @@ export class BackendService {
         user_id: userId
       },
     }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Vip removed successfully!');
+      }),
       catchError((error) => {
         this.notificationService.sendMessage(error.error.error);
         console.error('Error removing vip:', error);
@@ -195,6 +212,92 @@ export class BackendService {
       })
     );
   }
+
+  getAutomodSettings(broadcasterId: string, moderatorId: string) {
+    return this.http.get<AutoModSettingsResponse>(`${this.apiUrl}/twitch/moderation/automod/settings`, {
+        params: {
+          broadcaster_id: broadcasterId,
+          moderator_id: moderatorId
+        },
+      }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error getting automod settings:', error);
+        return throwError(() => new Error('Unable to get automod settings. Please try again later.'));
+      })
+    );
+  }
+
+  putAutomodSettings(broadcasterId: string, moderatorId: string, body: Partial<AutoModSettingsRequest>) {
+    return this.http.put<AutoModSettingsResponse>(`${this.apiUrl}/twitch/moderation/automod/settings`, body,{
+        params: {
+          broadcaster_id: broadcasterId,
+          moderator_id: moderatorId
+        },
+      }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Auto-mod settings updated successfully!');
+      }),
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error updating automod settings:', error);
+        return throwError(() => new Error('Unable to updating automod settings. Please try again later.'));
+      })
+    );
+  }
+
+  getBlockedTerms(broadcasterId: string, moderatorId: string) {
+    return this.http.get<BlockedTerm[]>(`${this.apiUrl}/twitch/moderation/blocked_terms`,{
+        params: {
+          broadcaster_id: broadcasterId,
+          moderator_id: moderatorId
+        },
+      }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error getting blocked terms:', error);
+        return throwError(() => new Error('Unable to getting blocked terms. Please try again later.'));
+      })
+    );
+  }
+
+  postBlockedTerm(broadcasterId: string, moderatorId: string, body: PostBlockedTermRequest) {
+    return this.http.post<PostBlockedTermsResponse>(`${this.apiUrl}/twitch/moderation/blocked_terms`, body, {
+        params: {
+          broadcaster_id: broadcasterId,
+          moderator_id: moderatorId
+        },
+      }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Blocked term added successfully!');
+      }),
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error adding blocked term:', error);
+        return throwError(() => new Error('Unable to adding blocked term. Please try again later.'));
+      })
+    );
+  }
+
+  deleteBlockedTerm(broadcasterId: string, moderatorId: string, id: string) {
+    return this.http.delete<any>(`${this.apiUrl}/twitch/moderation/blocked_terms`, {
+        params: {
+          broadcaster_id: broadcasterId,
+          moderator_id: moderatorId,
+          id: id
+        },
+      }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Blocked term deleted successfully!');
+      }),
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error deleting blocked term:', error);
+        return throwError(() => new Error('Unable to delete blocked term. Please try again later.'));
+      })
+    );
+  }
+
 }
 
 export interface BanData {

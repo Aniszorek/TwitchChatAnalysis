@@ -26,7 +26,6 @@ export class StreamSettingsComponent implements OnInit{
   channelInfo: ChannelInfo | null = null;
   categories: Category[] = [];
   hasChanges: boolean = false;
-  isSaving: boolean = false;
   private currentTag: string = '';
 
   @ViewChild('titleInput') titleInput!: ElementRef<HTMLTextAreaElement>;
@@ -43,7 +42,6 @@ export class StreamSettingsComponent implements OnInit{
   fetchChannelInfo() {
     this.backendService.getChannelInformation(this.broadcasterUserId!).subscribe((data) => {
       this.channelInfo = data.data[0];
-      console.log(this.channelInfo);
 
       setTimeout(() => {
         if (this.titleInput?.nativeElement) {
@@ -115,7 +113,7 @@ export class StreamSettingsComponent implements OnInit{
 
   applyChanges() {
     this.isEditingTitle = false;
-    this.isSaving = true;
+    this.hasChanges = false;
     const data: ChannelInfoRequest = {
       game_id: this.channelInfo!.game_id,
       tags: this.channelInfo!.tags,
@@ -124,11 +122,9 @@ export class StreamSettingsComponent implements OnInit{
     }
     this.backendService.patchChannelInformation(this.broadcasterUserId!, data!).subscribe({
       next: () => {
-        this.isSaving = false;
-        this.hasChanges = false;
       },
       error: () => {
-        this.isSaving = false;
+        this.hasChanges = true
       }
     });
   }

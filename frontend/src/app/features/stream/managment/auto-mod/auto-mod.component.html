@@ -1,1 +1,34 @@
-<p>auto-mod works!</p>
+<div class="auto-mod-container">
+  <div class="settings-column">
+    <div class="overall-level-row">
+      <h3>Overall level</h3>
+      <mat-icon class="action-icon" matTooltip="If overall_level is enabled, you can only update it, and Twitch will adjust all other settings accordingly. If it's disabled, you can update all other settings individually." svgIcon="info"></mat-icon>
+      <label class="switch" matTooltip="Turn on/off overall level">
+        <input type="checkbox" [(ngModel)]="overallEnabled">
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="settings-grid">
+      <div class="setting-row" *ngFor="let setting of settingKeys">
+        <label>{{ setting | titlecase }}</label>
+        <div class="levels">
+          <button *ngFor="let level of levels"
+                  [ngClass]="{'selected': selectedSettings[setting] === level}"
+                  [disabled]="(setting === 'overall Level' && !overallEnabled) || (setting !== 'overall Level' && overallEnabled)"
+                  (click)="setLevel(setting, level)">
+            {{ level }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button
+    class="apply-changes-btn"
+    [disabled]="!changesApplied"
+    (click)="applyChanges()">
+    Apply changes
+  </button>
+</div>
+
