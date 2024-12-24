@@ -16,12 +16,14 @@
         <div class="actions">
           <button
             class="action-btn"
-            (click)="onCancelRaid()">
+            (click)="onCancelRaid()"
+            [disabled]="!isRaidStarted">
             Cancel
           </button>
           <button
             class="action-btn"
-            (click)="onStartRaid()">
+            (click)="onStartRaid()"
+            [disabled]="!twitchUsername.trim() || isRaidStarted">
             Start
           </button>
           <div *ngIf="raidTimerVisible"
@@ -103,7 +105,8 @@
 
         <button
           class="apply-changes-btn"
-          (click)="applyChanges()">
+          (click)="applyChanges()"
+          [disabled]="!isPollValid()">
           Start a poll
         </button>
       </div>

@@ -256,15 +256,24 @@ ul {
   cursor: pointer;
 }
 
+.action-btn:disabled {
+  background-color: var(--disabled-color);
+  cursor: not-allowed;
+}
+
+.action-btn:disabled:hover {
+  background-color: var(--disabled-color);
+  cursor: not-allowed;
+}
+
 .action-btn:hover {
   background-color: var(--primary-color-hover);
 }
 
-
 .apply-changes-btn {
   position: absolute;
-  bottom: 1rem; /* Adds spacing from the bottom */
-  right: 1rem; /* Aligns button to the right */
+  bottom: 1rem;
+  right: 1rem;
   background-color: var(--primary-color);
   color: var(--text-color);
   border: none;

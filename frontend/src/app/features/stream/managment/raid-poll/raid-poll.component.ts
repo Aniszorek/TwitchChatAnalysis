@@ -36,6 +36,7 @@ export class RaidPollComponent implements OnInit {
   twitchUsername: string = '';
   raidTimerVisible: boolean = false;
   raidTimer: number = this.raidTimerMaxTime;
+  isRaidStarted: boolean = false;
 
   constructor(private readonly twitchService: TwitchService,
               private readonly backendService: BackendService) {
@@ -64,9 +65,13 @@ export class RaidPollComponent implements OnInit {
   }
 
   onStartRaid() {
+    if (this.isRaidStarted) {
+      return
+    }
+
     this.backendService.startRaid(this.broadcasterUserId, this.twitchUsername).subscribe((data) => {
-      console.log(data);
       if (data) {
+        this.isRaidStarted = true;
         this.startRaidTimer();
       }
     });
@@ -91,6 +96,7 @@ export class RaidPollComponent implements OnInit {
     this.backendService.cancelRaid(this.broadcasterUserId).subscribe((data) => {
       console.log(data);
       this.clearRaidTimer();
+      this.isRaidStarted = false;
     });
   }
 
@@ -108,4 +114,11 @@ export class RaidPollComponent implements OnInit {
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   }
+
+  isPollValid(): boolean {
+    return this.pollOptions.title.trim() !== '' &&
+      this.pollOptions.duration > 0 &&
+      this.pollOptions.choices.length >= 2;
+  }
+
 }
