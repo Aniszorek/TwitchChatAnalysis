@@ -15,6 +15,7 @@ import {BlockedTermsComponent} from './features/stream/managment/blocked-terms/b
 import {RaidPollComponent} from './features/stream/managment/raid-poll/raid-poll.component';
 import {ManagementComponent} from './features/stream/managment/management.component';
 import {ProfileComponent} from './features/profile/profile.component';
+import {MessageHistoryComponent} from './features/stream/managment/message-history/message-history.component';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,7 @@ export const routes: Routes = [
           {path: 'auto-mod', component: AutoModComponent},
           {path: 'blocked-terms', component: BlockedTermsComponent},
           {path: 'raid-poll', component: RaidPollComponent},
+          {path: 'message-history', component: MessageHistoryComponent},
           {path: '', redirectTo: 'suspended', pathMatch: 'full'}
         ]
       }

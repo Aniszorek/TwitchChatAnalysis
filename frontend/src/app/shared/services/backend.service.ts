@@ -329,11 +329,11 @@ export class BackendService {
       );
   }
 
-  getUserInformation(broadcasterUserId: string, user_id: string) {
+  getUserInformation(broadcasterUserId: string, twitchUsername: string) {
     return this.http.get<GetChatterInfoResponse>(`${this.apiUrl}/twitch/users/chatter-info`, {
       params: {
         broadcaster_id: broadcasterUserId,
-        twitch_username: user_id
+        twitch_username: twitchUsername
       }
     })
       .pipe(
@@ -366,7 +366,6 @@ export class BackendService {
   }
 
   cancelRaid(broadcasterUserId: string) {
-    console.log(broadcasterUserId)
     return this.http.delete<GetChatterInfoResponse>(`${this.apiUrl}/twitch/channels/raids`, {
       params: {
         broadcaster_id: broadcasterUserId,
@@ -380,6 +379,24 @@ export class BackendService {
           this.notificationService.sendMessage(error.error.error);
           console.error('Error canceling raid:', error);
           return throwError(() => new Error('Unable to cancel raid. Please try again later.'));
+        })
+      );
+  }
+
+  getTwitchMessages(broadcasterUserLogin: string, twitchUsername: string) {
+    return this.http.get<any>(`${this.apiUrl}/aws/twitch-message`, {
+      headers: {
+        BroadcasterUserLogin: broadcasterUserLogin
+      },
+      params: {
+        chatter_user_login: twitchUsername,
+      }
+    })
+      .pipe(
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error getting twitch messages:', error);
+          return throwError(() => new Error('Unable to get twitch messages. Please try again later.'));
         })
       );
   }

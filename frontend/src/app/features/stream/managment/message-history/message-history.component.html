@@ -1,0 +1,64 @@
+<div class="message-history-container">
+  <div class="column">
+    <h3>Search user</h3>
+    <div class="search-user-container">
+      <input
+        [(ngModel)]="searchQuery"
+        placeholder="Search user"
+        (keydown.enter)="onSearchUser()"
+        [disabled]="isSearchInputDisabled"
+        (input)="onInputChange()">
+      <button
+        class="action-btn"
+        [disabled]="isSearchDisabled"
+        (click)="onSearchUser()">
+        Search
+      </button>
+    </div>
+
+<!--    todo trzeba do użytkownika dodać przyciski do banowania, dawania vipa itd, to na bazie interaktywnego czatu od dawida-->
+    <div class="user-info-container" *ngIf="user.chatter_user_login">
+      <div class="user-info">
+        <div class="user-details">
+          <p><strong>Username:</strong> {{ user.chatter_user_login }}</p>
+          <p>
+            <strong>Status: </strong>
+            <span *ngIf="user.chatter_user_login === broadcasterUserLogin" class="badge streamer">Streamer</span>
+            <span *ngIf="user.is_mod" class="badge mod">Mod</span>
+            <span *ngIf="user.is_vip" class="badge vip">VIP</span>
+            <span *ngIf="user.is_banned" class="badge ban">BANNED</span>
+            <span *ngIf="user.is_timeouted" class="badge timeout">TIMEOUTED</span>
+            <span *ngIf="!user.is_mod && !user.is_vip && !(user.chatter_user_login === broadcasterUserLogin)">Regular user</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="column">
+    <h3 matTooltip="Message colors indicate sentiment: Red (Very Negative), Orange (Negative), Yellow (Slightly Negative), Light Green (Slightly Positive), Green (Positive), Dark Green (Very Positive). No color means the message is Neutral.">
+      Message History
+    </h3>
+    <div class="message-history">
+      <ul #chatList class="chat-list">
+        <li
+          *ngFor="let message of messages"
+          class="chat-message"
+          [ngClass]="getMessageClass(message.nlp_classification)">
+          <div class="message-content">
+            <span class="classification-circle"></span>
+            <span class="chat-username">{{ message.chatter_user_login }}:</span>
+            <span class="chat-text">{{ message.message_text }}</span>
+          </div>
+        </li>
+      </ul>
+      <div *ngIf="messages.length === 0">
+        No messages
+      </div>
+    </div>
+
+
+  </div>
+
+</div>
