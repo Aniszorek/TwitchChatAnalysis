@@ -1,0 +1,26 @@
+.message {
+  position: relative;
+  width: 100%;
+  padding: 5px;
+}
+
+.message-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-timestamp {
+  color: #aaaaaa;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.chat-username {
+  font-weight: bold;
+  color: #1db954;
+}
+
+.chat-text {
+  color: #ffffff;
+  word-break: break-word;
+}

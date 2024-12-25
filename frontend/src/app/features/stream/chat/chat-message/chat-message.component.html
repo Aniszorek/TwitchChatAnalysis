@@ -1,0 +1,16 @@
+<div class="message" (mouseover)="showButtons = true" (mouseleave)="showButtons = false">
+  <div class="message-data">
+    <span class="chat-timestamp">{{ messageData().messageTimestamp | date: 'H:mm:ss' }}</span>
+    <span class="chat-username">{{ messageData().chatUserName }}: </span>
+    <span class="chat-text">{{ messageData().messageText }}</span>
+  </div>
+
+  <app-mod-action-buttons
+    [showButtons]="((showButtons && showButtonsPossible()) || popoutsOpen)"
+    (removed)="removeMessage()"
+    (addVip)="onVip()"
+    (addMod)="onMod()"
+    (ban)="onBanUser($event)"
+    (popoutOpen)="popoutOpenHandler($event)">
+  </app-mod-action-buttons>
+</div>

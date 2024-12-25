@@ -1,0 +1,71 @@
+.popout-ban-menu {
+  position: fixed;
+  transform: translateX(-100%);
+  background-color: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: max-content;
+}
+
+
+.arrow {
+  position: absolute;
+  top: -6px;
+  right: 10px;
+  transform: translateX(50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #555;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+}
+
+.ban-reason {
+  background-color: var(--card-color);
+  color: var(--text-color);
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 8px;
+  width: 100%;
+  min-height: 50px;
+  resize: vertical;
+}
+
+.ban-duration {
+  background-color: var(--background-color-input);
+  color: var(--text-color);
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 8px;
+  width: 120px;
+}
+
+.popout-btn {
+  display: block;
+  width: 50%;
+  padding: 8px;
+  color: var(--text-color);
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+  background-color: var(--primary-color);
+  text-align: center;
+}
+
+.popout-btn:hover {
+  background-color: var(--primary-color-hover);
+}

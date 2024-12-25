@@ -37,6 +37,7 @@ export class TwitchService {
     loadingState: new BehaviorSubject<boolean>(false),
     chatMessages: new Subject<Message | null>(),
     nlpChatMessages: new Subject<NlpChatMessage | null>(),
+    removedMessage: new Subject<string>(),
     moderatorChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
     vipChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
     bannedChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
@@ -47,6 +48,7 @@ export class TwitchService {
   nlpChatMessages$ = this.state.nlpChatMessages.asObservable();
   searchUserState$ = this.state.searchUserState.asObservable();
   loadingState$ = this.state.loadingState.asObservable();
+  removedMessage$ = this.state.removedMessage.asObservable()
   moderatorChanges$ = this.state.moderatorChanges.asObservable();
   vipChanges$ = this.state.vipChanges.asObservable();
   bannedChanges$ = this.state.bannedChanges.asObservable();
@@ -153,7 +155,7 @@ export class TwitchService {
           this.state.nlpChatMessages.next(this.mapNlpMessage(rawMessage.messageObject));
           break;
         case 'MessageDeleted':
-          //todo
+          this.state.removedMessage.next(rawMessage.messageObject.message_id);
           break;
         case 'ModeratorAdd':
           this.state.moderatorChanges.next({action: 'add', user: rawMessage.messageObject.eventData});
@@ -245,7 +247,9 @@ export class TwitchService {
       messageText: rawMessage.message_text,
       nlpClassification: rawMessage.nlp_classification,
       streamId: rawMessage.stream_id,
-      timestamp: rawMessage.timestamp
+      messageTimestamp: rawMessage.timestamp,
+      chatterUserId: rawMessage.chatter_user_id,
+      chatUserName: rawMessage.chatter_user_name,
     };
   }
 

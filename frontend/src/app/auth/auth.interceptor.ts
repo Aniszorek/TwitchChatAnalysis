@@ -20,7 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const newReq = req.clone({ headers: updatedHeaders });
 
-  console.log(newReq.url);
-  console.log(newReq.headers)
+  // console.log(newReq.url);
+  // console.log(newReq.headers)
   return next(newReq);
 };

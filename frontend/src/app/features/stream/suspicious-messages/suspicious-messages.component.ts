@@ -1,44 +1,59 @@
-import {AfterViewChecked, Component, DestroyRef, ElementRef, inject, OnInit, ViewChild} from '@angular/core';
-import {TwitchService} from '../../twitch/twitch.service';
+import {
+  AfterViewChecked,
+  Component, DoCheck,
+  ElementRef,
+  input,
+  InputSignal,
+  IterableDiffers,
+  output,
+  ViewChild
+} from '@angular/core';
 import {NgClass, NgForOf} from '@angular/common';
-import {negativeClasses, NlpChatMessage, SentimentLabel} from '../../twitch/message';
+import {NlpChatMessage, SentimentLabel} from '../../twitch/message';
+import {ChatMessageComponent} from '../chat/chat-message/chat-message.component';
+import {BanData} from '../../../shared/services/backend.service';
 
 @Component({
   selector: 'app-suspicious-messages',
   imports: [
     NgForOf,
-    NgClass
+    NgClass,
+    ChatMessageComponent
   ],
   templateUrl: './suspicious-messages.component.html',
   standalone: true,
   styleUrl: './suspicious-messages.component.css'
 })
-export class SuspiciousMessagesComponent implements OnInit, AfterViewChecked {
-  private readonly twitchService = inject(TwitchService);
-  private readonly destroyRef = inject(DestroyRef);
-
+export class SuspiciousMessagesComponent implements AfterViewChecked, DoCheck{
+  suspiciousMessages: InputSignal<NlpChatMessage[]> = input.required<NlpChatMessage[]>()
+  removed = output<string>()
+  addVip = output<string>()
+  addMod = output<string>()
+  ban = output<BanData>()
+  popoutOpen: boolean = false;
   @ViewChild('chatList') chatList!: ElementRef<HTMLUListElement>;
 
-  messages: NlpChatMessage[] = [];
-
-  ngOnInit() {
-    const sub = this.twitchService.nlpChatMessages$.subscribe((message) => {
-      if (message) {
-        console.log(message)
-        if (negativeClasses.includes(message.nlpClassification)) {
-          this.messages.push(message);
-        }
-      } else {
-        this.messages = [];
-      }
-    });
+  private iterableDiffer: any;
+  private isScrollToBottomRequested = false;
 
 
-    this.destroyRef.onDestroy(() => sub.unsubscribe());
+  constructor(private iterableDiffers: IterableDiffers) {
+    this.iterableDiffer = this.iterableDiffers.find([]).create();
   }
 
-  ngAfterViewChecked(): void {
-    this.scrollToBottom();
+  ngDoCheck() {
+    const changes = this.iterableDiffer.diff(this.suspiciousMessages());
+
+    if (changes) {
+      this.isScrollToBottomRequested = true;
+    }
+  }
+
+  ngAfterViewChecked() {
+    if (this.isScrollToBottomRequested) {
+      this.scrollToBottom();
+      this.isScrollToBottomRequested = false;
+    }
   }
 
   getMessageClass(sentiment: SentimentLabel): string {
@@ -58,5 +73,26 @@ export class SuspiciousMessagesComponent implements OnInit, AfterViewChecked {
     if (this.chatList) {
       this.chatList.nativeElement.scrollTop = this.chatList.nativeElement.scrollHeight;
     }
+  }
+
+  onDeleteMessage(id: string) {
+    this.removed.emit(id);
+  }
+
+  onAddVip(userId: string) {
+    this.addVip.emit(userId);
+  }
+
+  onAddMod(userId: string) {
+    this.addMod.emit(userId);
+  }
+
+  onBan({user_id, duration, reason}: BanData) {
+    this.ban.emit({user_id, duration, reason});
+  }
+
+  popoutActiveHandler(open: boolean) {
+    // console.log(open)
+    this.popoutOpen = open
   }
 }

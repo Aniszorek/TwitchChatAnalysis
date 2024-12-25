@@ -10,10 +10,23 @@
 
   <div class="right-column">
     <div class="chat-section">
-      <app-stream-chat></app-stream-chat>
+      <app-stream-chat
+        [messages] = messages
+        (removed)="removeMessage($event)"
+        (addVip)="addVip($event)"
+        (addMod)="addMod($event)"
+        (ban)="banUser($event)">
+      </app-stream-chat>
     </div>
+
     <div class="suspicious-messages">
-      <app-suspicious-messages></app-suspicious-messages>
+      <app-suspicious-messages
+        [suspiciousMessages] = nlpMessages
+        (removed)="removeMessage($event)"
+        (addVip)="addVip($event)"
+        (addMod)="addMod($event)"
+        (ban)="banUser($event)">
+      </app-suspicious-messages>
     </div>
   </div>
 </div>

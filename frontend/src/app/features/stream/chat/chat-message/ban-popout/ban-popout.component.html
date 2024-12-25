@@ -1,0 +1,15 @@
+<div class="popout-ban-menu"
+     [ngStyle]="{
+    top: position?.top + 'px',
+    left: position?.left + 'px',
+    position: 'fixed'
+  }"
+     *ngIf="isVisible">
+  <div class="arrow"></div>
+  <div class="form">
+    <textarea class="ban-reason" placeholder="Reason for ban" [(ngModel)]="reason"></textarea>
+    <input class="ban-duration" type="number" min="0" name="" id="" [(ngModel)]="minutes">
+    <button class="popout-btn" (click)="onBan()">{{ minutes > 0 ? "Timeout" : "Ban" }}</button>
+  </div>
+
+</div>

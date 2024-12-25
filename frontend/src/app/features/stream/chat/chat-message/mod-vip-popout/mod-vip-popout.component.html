@@ -1,0 +1,15 @@
+<div
+  class="popout-vip-menu"
+  *ngIf="isVisible"
+  [ngStyle]="{
+    top: position?.top + 'px',
+    left: position?.left + 'px',
+    position: 'fixed'
+  }">
+  <div class="arrow"></div>
+  <div class="form">
+    <button class="popout-btn" (click)="onVip()">VIP</button>
+    <button class="popout-btn" (click)="onMod()">MOD</button>
+  </div>
+
+</div>

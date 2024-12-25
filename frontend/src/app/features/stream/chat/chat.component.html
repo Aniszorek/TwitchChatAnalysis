@@ -8,10 +8,9 @@
   </div>
 
   <ul #chatList class="chat-list">
-    <li *ngFor="let message of messages" class="chat-message">
-      <span class="chat-timestamp">{{ message.messageTimestamp | date: 'H:mm:ss' }}</span>
-      <span class="chat-username">{{ message.chatUserName }}:</span>
-      <span class="chat-text">{{ message.messageText }}</span>
+    <li *ngFor="let message of messages()" class="chat-message">
+      <app-chat-message [message]="message" [showButtons]="!popoutOpen" (removed)="onDeleteMessage($event)" (addVip)="onAddVip($event)"
+                        (addMod)="onAddMod($event)" (ban)="onBan($event)" (popoutActive)="popoutActiveHandler($event)" class="message"/>
     </li>
   </ul>
 

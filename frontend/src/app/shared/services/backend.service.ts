@@ -156,6 +156,24 @@ export class BackendService {
     );
   }
 
+  giveModerator(broadcasterId: string, userId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/twitch/moderation/moderators`, null, {
+      params: {
+        broadcaster_id: broadcasterId,
+        user_id: userId
+      }
+    }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Moderator given successfully!');
+      }),
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error giving Moderator:', error);
+        return throwError(() => new Error('Unable to give Moderator. Please try again later.'));
+      })
+    );
+  }
+
   getVips(broadcasterId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/twitch/channels/vips`, {
       params: {
@@ -171,7 +189,7 @@ export class BackendService {
   }
 
   removeVip(broadcasterId: string, userId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/twitch/moderation/vips`, {
+    return this.http.get<any>(`${this.apiUrl}/twitch/channels/vips`, {
       params: {
         broadcaster_id: broadcasterId,
         user_id: userId
@@ -320,6 +338,39 @@ export class BackendService {
     );
   }
 
+  giveVip(broadcasterId: string, userId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/twitch/channels/vips`, null, {
+      params: {
+        broadcaster_id: broadcasterId,
+        user_id: userId
+      }
+    }).pipe(
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error giving VIP:', error);
+        return throwError(() => new Error('Unable to give VIP. Please try again later.'));
+      })
+    );
+  }
+
+  deleteMessage(broadcasterId: string, moderatorId: string, messageId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/twitch/moderation/chat`, {
+      params: {
+        broadcaster_id: broadcasterId,
+        moderator_id: moderatorId,
+        message_id: messageId
+      },
+    }).pipe(
+      tap(() => {
+        this.notificationService.sendSuccessMessage('Message deleted successfully!');
+      }),
+      catchError((error) => {
+        this.notificationService.sendMessage(error.error.error);
+        console.error('Error deleting message:', error);
+        return throwError(() => new Error('Unable to remove message'));
+      })
+    );
+  }
 
   sendTwitchMessage(broadcasterId: string, userId: string, message: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/twitch/chat/messages`, {
@@ -420,11 +471,10 @@ export class BackendService {
         })
       );
   }
-
 }
 
 export interface BanData {
-  user_id : String;
+  user_id : string;
   duration: number | null;
   reason: string;
 }

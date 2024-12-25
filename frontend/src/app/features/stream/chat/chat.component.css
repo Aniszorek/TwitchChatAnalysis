@@ -26,7 +26,9 @@
   color: var(--text-color);
   background-color: var(--card-color);
   padding: 0.5rem;
-  border-bottom: 2px solid #333333;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-top: 20px red;
 }
 
 .chat-title {
@@ -64,10 +66,11 @@
 
 
 .chat-message {
-  padding: 5px;
-  border-bottom: 2px solid #333333;
   display: flex;
-  flex-direction: column;
+}
+
+.message {
+  width: 100%;
 }
 
 .chat-message:nth-child(odd) {
@@ -76,22 +79,6 @@
 
 .chat-message:nth-child(even) {
   background-color: var(--second-list-element-color);
-}
-
-.chat-timestamp {
-  color: #aaaaaa;
-  font-size: 12px;
-  margin-right: 5px;
-}
-
-.chat-username {
-  font-weight: bold;
-  color: #1db954;
-}
-
-.chat-text {
-  color: #ffffff;
-  word-break: break-word;
 }
 
 .chat-input-container {

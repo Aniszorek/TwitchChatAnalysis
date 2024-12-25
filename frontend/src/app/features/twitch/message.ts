@@ -14,8 +14,10 @@ export interface NlpChatMessage {
   streamId: string;
   broadcasterUserLogin: string;
   chatUserLogin: string;
+  chatterUserId: string;
+  chatUserName: string;
   messageText: string;
-  timestamp: string;
+  messageTimestamp: string;
   nlpClassification: SentimentLabel;
   messageId: string;
 }

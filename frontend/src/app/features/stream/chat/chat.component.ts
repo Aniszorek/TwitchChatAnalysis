@@ -1,59 +1,77 @@
 import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  inject,
-  OnInit,
-  ViewChild,
   AfterViewChecked,
+  Component, DestroyRef,
+  DoCheck,
+  ElementRef, inject,
+  input,
+  InputSignal,
+  IterableDiffers, OnInit,
+  output,
+  ViewChild
 } from '@angular/core';
-import {DatePipe, NgForOf} from '@angular/common';
-import {TwitchService} from '../../twitch/twitch.service';
+import {NgForOf} from '@angular/common';
 import {Message} from '../../twitch/message';
 import {BackendService} from '../../../shared/services/backend.service';
+import {ChatMessageComponent} from './chat-message/chat-message.component';
+import {BanData} from '../../../shared/services/backend.service';
+import {TwitchService} from '../../twitch/twitch.service';
 
 @Component({
   selector: 'app-stream-chat',
   standalone: true,
-  imports: [NgForOf, DatePipe],
+  imports: [NgForOf, ChatMessageComponent],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
 })
-export class ChatComponent implements OnInit, AfterViewChecked {
+export class ChatComponent implements DoCheck, OnInit, AfterViewChecked {
+  messages: InputSignal<Message[]> = input.required<Message[]>()
+  removed = output<string>()
+  addVip = output<string>()
+  addMod = output<string>()
+  ban = output<BanData>()
+
   broadcasterUsername: string | null = null;
   broadcasterId: string | null = null;
   userId: string | null = null;
+  popoutOpen: boolean = false;
+  private messageInputValue: string = ""
+
+  private iterableDiffer: any;
+  private isScrollToBottomRequested = false;
 
   private readonly twitchService = inject(TwitchService);
   private readonly backendService = inject(BackendService);
   private readonly destroyRef = inject(DestroyRef);
-  private messageInputValue: string = ""
 
   @ViewChild('chatList') chatList!: ElementRef<HTMLUListElement>;
   @ViewChild('chatInput') chatInput!: ElementRef<HTMLTextAreaElement>;
 
-  messages: Message[] = [];
   readonly maxChars = 260;
   readonly maxInputHeight = 70;
 
-
   ngOnInit() {
-    const sub = this.twitchService.chatMessages$.subscribe((message) => {
-      if (message) {
-        this.messages.push(message);
-      } else {
-        this.messages = [];
-      }
-    });
-    this.destroyRef.onDestroy(() => sub.unsubscribe());
-
     this.broadcasterUsername = this.twitchService['state'].broadcasterUsername.getValue();
     this.broadcasterId = this.twitchService['state'].broadcasterId.getValue();
     this.userId = this.twitchService['state'].userId.getValue();
   }
 
-  ngAfterViewChecked(): void {
-    this.scrollToBottom();
+  constructor(private iterableDiffers: IterableDiffers) {
+    this.iterableDiffer = this.iterableDiffers.find([]).create();
+  }
+
+  ngDoCheck() {
+    const changes = this.iterableDiffer.diff(this.messages());
+
+    if (changes) {
+      this.isScrollToBottomRequested = true;
+    }
+  }
+
+  ngAfterViewChecked() {
+    if (this.isScrollToBottomRequested) {
+      this.scrollToBottom();
+      this.isScrollToBottomRequested = false;
+    }
   }
 
   private scrollToBottom(): void {
@@ -97,5 +115,26 @@ export class ChatComponent implements OnInit, AfterViewChecked {
     const paddingBottom = parseFloat(computedStyles.paddingBottom);
 
     return paddingTop + paddingBottom;
+  }
+
+  onDeleteMessage(id: string) {
+    this.removed.emit(id);
+  }
+
+  onAddVip(userId: string) {
+    this.addVip.emit(userId);
+  }
+
+  onAddMod(userId: string) {
+    this.addMod.emit(userId);
+  }
+
+  onBan({user_id, duration, reason}: BanData) {
+    this.ban.emit({user_id, duration, reason});
+  }
+
+  popoutActiveHandler(open: boolean) {
+    // console.log(open)
+    this.popoutOpen = open
   }
 }

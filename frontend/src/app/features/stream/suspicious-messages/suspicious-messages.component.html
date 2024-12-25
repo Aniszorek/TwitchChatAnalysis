@@ -14,11 +14,12 @@
 
   <ul #chatList class="chat-list">
     <li
-      *ngFor="let message of messages"
+      *ngFor="let message of suspiciousMessages()"
       class="chat-message"
       [ngClass]="getMessageClass(message.nlpClassification)">
-      <span class="chat-username">{{ message.chatUserLogin }}:</span>
-      <span class="chat-text">{{ message.messageText }}</span>
+      <app-chat-message [message]="message" [showButtons]="!popoutOpen" (removed)="onDeleteMessage($event)" (addVip)="onAddVip($event)"
+                        (addMod)="onAddMod($event)" (ban)="onBan($event)" (popoutActive)="popoutActiveHandler($event)">
+      </app-chat-message>
     </li>
   </ul>
 </div>
