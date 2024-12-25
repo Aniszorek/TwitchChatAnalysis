@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {BackendService, BanData} from '../../../../shared/services/backend.service';
 import {TwitchService} from '../../../twitch/twitch.service';
 import {NgForOf,} from '@angular/common';
@@ -18,7 +18,7 @@ import {Subscription} from 'rxjs';
   standalone: true,
   styleUrl: './suspended.component.css'
 })
-export class SuspendedComponent implements OnInit {
+export class SuspendedComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
   broadcasterUsername: string | null = null;
   broadcasterId: string | null = null;
@@ -42,6 +42,10 @@ export class SuspendedComponent implements OnInit {
     this.moderatorId = this.twitchService['state'].userId.getValue();
     this.loadSuspendedUsers(this.broadcasterId!);
     this.addSubscriptions();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   loadSuspendedUsers(broadcasterId: string): void {

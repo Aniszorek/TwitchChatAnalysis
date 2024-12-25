@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {BackendService} from '../../../../shared/services/backend.service';
 import {TwitchService} from '../../../twitch/twitch.service';
@@ -7,6 +7,7 @@ import {NgForOf, NgIf} from '@angular/common';
 import {Category} from './models/category';
 import {ChannelInfoRequest} from '../../../../shared/services/models/channel-info-request';
 import {FormsModule} from '@angular/forms';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-stream-settings',
@@ -20,13 +21,14 @@ import {FormsModule} from '@angular/forms';
   standalone: true,
   styleUrl: './stream-settings.component.css'
 })
-export class StreamSettingsComponent implements OnInit{
+export class StreamSettingsComponent implements OnInit, OnDestroy {
   broadcasterUserId: string | null = '';
   isEditingTitle: boolean = false;
   channelInfo: ChannelInfo | null = null;
   categories: Category[] = [];
   hasChanges: boolean = false;
   private currentTag: string = '';
+  private subscriptions: Subscription = new Subscription();
 
   @ViewChild('titleInput') titleInput!: ElementRef<HTMLTextAreaElement>;
 
@@ -34,9 +36,22 @@ export class StreamSettingsComponent implements OnInit{
               private readonly twitchService: TwitchService) {
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   ngOnInit(): void {
     this.broadcasterUserId = this.twitchService['state'].broadcasterId.getValue();
     this.fetchChannelInfo();
+
+    this.subscriptions.add(
+      this.twitchService.channelInfoChanges$.subscribe((change) => {
+        if (change.action === 'add' && change.channelInfo) {
+          this.updateInfo(change.channelInfo);
+          console.log(change.channelInfo);
+        }
+      }),
+    );
   }
 
   fetchChannelInfo() {
@@ -127,5 +142,13 @@ export class StreamSettingsComponent implements OnInit{
         this.hasChanges = true
       }
     });
+  }
+
+  private updateInfo(channelInfo: ChannelInfo) {
+    const tempTags = this.channelInfo!.tags;
+    this.channelInfo = channelInfo;
+    this.channelInfo.tags = tempTags;
+    this.hasChanges = false;
+    this.isEditingTitle = false;
   }
 }
