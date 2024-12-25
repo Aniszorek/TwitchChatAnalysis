@@ -1,10 +1,11 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {BackendService, BanData} from '../../../../shared/services/backend.service';
 import {TwitchService} from '../../../twitch/twitch.service';
 import {NgForOf,} from '@angular/common';
 import {MatTooltip} from '@angular/material/tooltip';
 import {SuspendedUsers, User} from './models/suspended.model';
 import {MatIcon} from '@angular/material/icon';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-suspended',
@@ -17,7 +18,8 @@ import {MatIcon} from '@angular/material/icon';
   standalone: true,
   styleUrl: './suspended.component.css'
 })
-export class SuspendedComponent implements OnInit {
+export class SuspendedComponent implements OnInit, OnDestroy {
+  private subscriptions: Subscription = new Subscription();
   broadcasterUsername: string | null = null;
   broadcasterId: string | null = null;
   moderatorId: string | null = null;
@@ -39,6 +41,11 @@ export class SuspendedComponent implements OnInit {
     this.broadcasterId = this.twitchService['state'].broadcasterId.getValue();
     this.moderatorId = this.twitchService['state'].userId.getValue();
     this.loadSuspendedUsers(this.broadcasterId!);
+    this.addSubscriptions();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   loadSuspendedUsers(broadcasterId: string): void {
@@ -88,5 +95,36 @@ export class SuspendedComponent implements OnInit {
       this.searchedUsers.banned_users = [];
       this.searchedUsers.timed_out_users = [];
     }
+  }
+
+  private addSubscriptions() {
+    this.subscriptions.add(
+      this.twitchService.bannedChanges$.subscribe((change) => {
+        console.log(change);
+        if (change.action === 'add' && change.user) {
+          this.addSuspendedUser(change.user);
+        } else if (change.action === 'remove' && change.user) {
+          this.removeSuspendedUser(change.user);
+        }
+      }),
+    );
+  }
+
+  private addSuspendedUser(user: User) {
+    if (!user.expires_at){
+      if (!this.suspendedUsers.banned_users.some((m) => m.user_id === user.user_id)) {
+        this.suspendedUsers.banned_users.push(user);
+      }
+    }
+    else {
+      if (!this.suspendedUsers.timed_out_users.some((m) => m.user_id === user.user_id)) {
+        this.suspendedUsers.timed_out_users.push(user);
+      }
+    }
+  }
+
+  private removeSuspendedUser(user: User) {
+    this.suspendedUsers.banned_users = this.suspendedUsers.banned_users.filter((m) => m.user_id !== user.user_id);
+    this.suspendedUsers.timed_out_users= this.suspendedUsers.timed_out_users.filter((m) => m.user_id !== user.user_id);
   }
 }

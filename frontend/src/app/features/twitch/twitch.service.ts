@@ -5,6 +5,8 @@ import { urls } from '../../app.config';
 import { AuthService } from '../../auth/auth.service';
 import { Message, NlpChatMessage } from './message';
 import {hasAccess, Tab, UserRole} from './permissions.config';
+import {User} from '../stream/managment/suspended/models/suspended.model';
+import {ChannelInfo} from '../stream/managment/stream-settings/models/channel.info';
 
 export interface SearchUserState {
   success: boolean;
@@ -35,12 +37,20 @@ export class TwitchService {
     loadingState: new BehaviorSubject<boolean>(false),
     chatMessages: new Subject<Message | null>(),
     nlpChatMessages: new Subject<NlpChatMessage | null>(),
+    moderatorChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
+    vipChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
+    bannedChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
+    channelInfoChanges: new Subject<{ action: 'add' | 'remove'; channelInfo?: ChannelInfo; }>()
   };
 
   chatMessages$ = this.state.chatMessages.asObservable();
   nlpChatMessages$ = this.state.nlpChatMessages.asObservable();
   searchUserState$ = this.state.searchUserState.asObservable();
   loadingState$ = this.state.loadingState.asObservable();
+  moderatorChanges$ = this.state.moderatorChanges.asObservable();
+  vipChanges$ = this.state.vipChanges.asObservable();
+  bannedChanges$ = this.state.bannedChanges.asObservable();
+  channelInfoChanges$ = this.state.channelInfoChanges.asObservable();
 
   private websocket: WebSocket | null = null;
 
@@ -99,7 +109,7 @@ export class TwitchService {
     this.websocket.onopen = () => {
       const idToken = this.authService.getIdToken();
       if (idToken) {
-        this.websocket?.send(JSON.stringify({ type: 'auth', cognitoIdToken: idToken }));
+        this.websocket?.send(JSON.stringify({type: 'auth', cognitoIdToken: idToken}));
       } else {
         console.error('No ID token available to authenticate WebSocket connection');
         this.disconnectWebSocket();
@@ -145,6 +155,33 @@ export class TwitchService {
         case 'MessageDeleted':
           //todo
           break;
+        case 'ModeratorAdd':
+          this.state.moderatorChanges.next({action: 'add', user: rawMessage.messageObject.eventData});
+          break;
+        case 'ModeratorRemove':
+          this.state.moderatorChanges.next({action: 'remove', user: rawMessage.messageObject.eventData});
+          break;
+        case 'ChannelBan':
+          this.state.bannedChanges.next({action: 'add', user: this.mapBannedUser(rawMessage.messageObject.eventData)});
+          break;
+        case 'ChannelUnban':
+          this.state.bannedChanges.next({
+            action: 'remove',
+            user: this.mapBannedUser(rawMessage.messageObject.eventData)
+          });
+          break;
+        case 'ChannelVipAdd':
+          this.state.vipChanges.next({action: 'add', user: rawMessage.messageObject.eventData});
+          break;
+        case 'ChannelVipRemove':
+          this.state.vipChanges.next({action: 'remove', user: rawMessage.messageObject.eventData});
+          break;
+        case 'ChannelUpdate':
+          this.state.channelInfoChanges.next({
+            action: 'add',
+            channelInfo: this.mapChannelInfo(rawMessage.messageObject.eventData)
+          });
+          break;
         default:
           console.warn('Unknown message type:', rawMessage.type);
       }
@@ -161,7 +198,7 @@ export class TwitchService {
   }
 
   private updateSearchState(success: boolean, message: string): void {
-    this.state.searchUserState.next({ success, message });
+    this.state.searchUserState.next({success, message});
   }
 
   private updateLoadingState(isLoading: boolean): void {
@@ -183,7 +220,7 @@ export class TwitchService {
   }
 
   private getHttpOptions(): { headers: HttpHeaders } {
-    return { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
+    return {headers: new HttpHeaders({'Content-Type': 'application/json'})};
   }
 
   private mapRawMessage(rawMessage: any): Message {
@@ -209,6 +246,31 @@ export class TwitchService {
       nlpClassification: rawMessage.nlp_classification,
       streamId: rawMessage.stream_id,
       timestamp: rawMessage.timestamp
+    };
+  }
+
+  private mapBannedUser(rawMessage: any): User {
+    return {
+      created_at: rawMessage.banned_at,
+      expires_at: rawMessage.ends_at || null,
+      user_id: rawMessage.user_id,
+      user_login: rawMessage.user_login,
+      user_name: rawMessage.user_name
+    };
+  }
+
+  private mapChannelInfo(rawMessage: any): ChannelInfo {
+    console.log(rawMessage);
+    return {
+      broadcaster_id: rawMessage.broadcaster_user_id,
+      broadcaster_language: rawMessage.language,
+      broadcaster_login: rawMessage.broadcaster_user_login,
+      broadcaster_name: rawMessage.broadcaster_user_name,
+      game_id: rawMessage.category_id,
+      game_name: rawMessage.category_name,
+      is_branded_content: false,
+      tags: rawMessage.tags,
+      title: rawMessage.title
     };
   }
 }
