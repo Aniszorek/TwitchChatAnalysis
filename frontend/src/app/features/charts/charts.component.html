@@ -12,14 +12,29 @@
 
         <ul>
           <li
-            *ngFor="let stream of streams"
+            *ngFor="let stream of streams; let i = index"
             (click)="selectStream(stream.stream_id)"
             [class.selected]="stream.stream_id === streamId">
-            <h3>{{ stream.stream_title }}</h3>
-            <p>Date: {{ stream.started_at | date: 'short' }}</p>
+            <div class="stream-item">
+              <h3>{{ stream.stream_title }}</h3>
+              <p>Date: {{ stream.started_at | date: 'short' }}</p>
+              <mat-icon
+                class="remove-icon"
+                svgIcon="unban"
+                (click)="confirmRemoveStream($event, stream.stream_id, i)">close</mat-icon>
+            </div>
           </li>
         </ul>
+
+        <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()"></div>
+        <div *ngIf="showModal" class="confirmation-modal">
+          <p>Are you sure you want to remove this stream and all of metadata?</p>
+          <button class="confirm" (click)="removeStream()">Yes</button>
+          <button class="cancel" (click)="closeModal()">No</button>
+        </div>
       </div>
+
+
 
       <div class="chart-area" *ngIf="selectedStream && getAppState() == AppState.ready">
         <h2>Chart for: {{ selectedStream.stream_title }}</h2>

@@ -8,6 +8,7 @@
   --text-color: #e5e5e5;
   --placeholder-text-color: #aaaaaa;
   --light-grey: #8F8E8E;
+  --disabled-color: #444;
   --list-element-color: #39393E;
   --second-list-element-color: #242424;
   --mdc-plain-tooltip-container-color: var(--background-color);
@@ -15,6 +16,9 @@
   --very-negative-message-color: #8B0000;
   --negative-message-color: #FF4500;
   --slightly-negative-message-color: #FFA500;
+  --positive-message-color: #4caf50;
+  --slightly-positive-message-color: #8bc34a;
+  --very-positive-message-color: #2e7d32;
   --border-radius: 8px;
   --font-family: 'Arial', sans-serif;
   --header-height: 5.5vh;

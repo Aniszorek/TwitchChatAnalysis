@@ -58,6 +58,8 @@
 }
 
 .tab-content {
+  min-height: var(--suspicious-chat-height);
+  max-height: var(--suspicious-chat-height);
   flex: 1;
   background-color: var(--background-color-input);
   border-radius: 4px;

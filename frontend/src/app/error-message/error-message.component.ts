@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import {NotificationService} from '../shared/services/notification.service';
 import {NgForOf} from '@angular/common';
 
+
+// todo przenieść do /shared/services/notification
 @Component({
   selector: 'app-error-message',
   templateUrl: './error-message.component.html',
@@ -9,7 +11,6 @@ import {NgForOf} from '@angular/common';
   imports: [
     NgForOf
   ],
-  styleUrls: ['./error-message.component.css']
 })
 export class ErrorMessageComponent implements OnInit {
   messages: string[] = [];
