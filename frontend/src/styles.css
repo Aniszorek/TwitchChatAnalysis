@@ -24,7 +24,7 @@
   --header-height: 5.5vh;
   --app-height: calc(100vh - var(--header-height));
   --chat-height: calc(var(--app-height) * 0.495);
-  --suspicious-chat-height: calc(var(--app-height) * 0.25);
+  --suspicious-chat-height: calc(var(--app-height) * 0.27);
   --header-z-index: 1000;
 }
 

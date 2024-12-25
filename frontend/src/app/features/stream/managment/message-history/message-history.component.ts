@@ -3,11 +3,10 @@ import {GetChatterInfoResponse} from '../../../../shared/services/models/chatter
 import {TwitchService} from '../../../twitch/twitch.service';
 import {BackendService} from '../../../../shared/services/backend.service';
 import {FormsModule} from '@angular/forms';
-import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {SentimentLabel} from '../../../twitch/message';
 import {NlpMessage} from './models/nlp-message';
 import {firstValueFrom} from 'rxjs';
-import {MatIcon} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
@@ -16,9 +15,7 @@ import {MatTooltip} from '@angular/material/tooltip';
     FormsModule,
     NgIf,
     NgForOf,
-    DatePipe,
     NgClass,
-    MatIcon,
     MatTooltip
   ],
   templateUrl: './message-history.component.html',
