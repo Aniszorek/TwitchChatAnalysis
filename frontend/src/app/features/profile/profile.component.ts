@@ -3,11 +3,13 @@ import {urls} from '../../app.config';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuthService} from '../../auth/auth.service';
 import {FormsModule} from '@angular/forms';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-profile',
   imports: [
-    FormsModule
+    FormsModule,
+    NgIf
   ],
   templateUrl: './profile.component.html',
   standalone: true,
@@ -48,7 +50,10 @@ export class ProfileComponent implements OnInit {
     if (this.token) {
       this.authService.saveOuathToken(this.token);
     }
+  }
 
+  redirectToStreamSearch() {
+    this.router.navigate(['/stream-search']);
   }
 
 }

@@ -47,7 +47,7 @@ export class AuthCallbackComponent implements OnInit {
   }, idToken: string, refreshToken: string, expireTime: string): void {
     if (response.message === 'verified') {
       this.authService.saveTokens(idToken, refreshToken, expireTime);
-      this.router.navigate(['/stream-search']);
+      this.router.navigate(['/profile']);
     } else {
       console.error("Invalid token");
       this.router.navigate(['/login']);

@@ -16,6 +16,7 @@ import {RaidPollComponent} from './features/stream/managment/raid-poll/raid-poll
 import {ManagementComponent} from './features/stream/managment/management.component';
 import {ProfileComponent} from './features/profile/profile.component';
 import {MessageHistoryComponent} from './features/stream/managment/message-history/message-history.component';
+import {streamSearchGuard} from './auth/stream-search.guard';
 
 export const routes: Routes = [
   {
@@ -29,12 +30,12 @@ export const routes: Routes = [
   {
     path: 'stream-search',
     component: SearchUserComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard, streamSearchGuard]
   },
   {
     path: 'stream',
     component: StreamComponent,
-    canActivate: [authGuard, authTwitchGuard],
+    canActivate: [authGuard, authTwitchGuard, streamSearchGuard],
     children: [
       {
         path: '',

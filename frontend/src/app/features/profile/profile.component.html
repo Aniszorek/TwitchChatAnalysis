@@ -6,5 +6,6 @@
   <div class="token-input-group">
     <input type="text" class="token-input" placeholder="Insert token" [(ngModel)]="token" />
     <button class="save-button" (click)="saveToken()">Save Token</button>
+    <button *ngIf="token" class="save-button"  (click)="redirectToStreamSearch()">Select streamer</button>
   </div>
 </div>
