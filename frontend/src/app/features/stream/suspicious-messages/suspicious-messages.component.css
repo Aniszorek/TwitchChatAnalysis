@@ -41,6 +41,10 @@
   position: relative;
 }
 
+.tooltip-icon:hover {
+  color: var(--primary-color);
+}
+
 .tooltip-text {
   display: none;
   position: absolute;

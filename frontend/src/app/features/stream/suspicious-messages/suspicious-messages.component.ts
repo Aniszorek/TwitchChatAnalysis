@@ -12,13 +12,15 @@ import {NgClass, NgForOf} from '@angular/common';
 import {NlpChatMessage, SentimentLabel} from '../../twitch/message';
 import {ChatMessageComponent} from '../chat/chat-message/chat-message.component';
 import {BanData} from '../../../shared/services/backend.service';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-suspicious-messages',
   imports: [
     NgForOf,
     NgClass,
-    ChatMessageComponent
+    ChatMessageComponent,
+    MatIcon
   ],
   templateUrl: './suspicious-messages.component.html',
   standalone: true,

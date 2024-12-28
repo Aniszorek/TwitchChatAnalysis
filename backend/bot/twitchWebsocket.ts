@@ -189,7 +189,6 @@ async function registerEventSubListeners(cognitoUserId: string, websocketSession
                 broadcaster_user_id: broadcasterId
             }, headers)
 
-            // TODO add channel:moderate scope to auth generate link
             await twitchEventsubController.postTwitchSubscription(cognitoUserId, websocketSessionID, EventSubSubscriptionType.CHANNEL_BAN, {
                 broadcaster_user_id: broadcasterId
             }, headers)

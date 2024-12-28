@@ -1,0 +1,84 @@
+<div class="settings-container" *ngIf="settingsVisible">
+  <div class="arrow"></div>
+  <div class="setting">
+    <div class="setting-header">
+      <label class="setting-label">Follower Mode:</label>
+      <label class="switch">
+        <input type="checkbox" [(ngModel)]="settings.follower_mode" (ngModelChange)="updateFollowerMode($event)" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <div *ngIf="settings.follower_mode" class="duration-setting">
+      <label class="setting-label">Duration (minutes):</label>
+      <div>
+        <input type="number" [(ngModel)]="settings.follower_mode_duration"
+               (ngModelChange)="updateFollowerDuration($event)" min="0" max="129600"/>
+        <button class="action-btn" (click)="saveSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="setting">
+    <div class="setting-header">
+      <label class="setting-label">Non-Moderator Chat:</label>
+      <label class="switch">
+        <input type="checkbox" [(ngModel)]="settings.non_moderator_chat_delay" (ngModelChange)="updateNonModeratorChatDelay($event)" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <div *ngIf="settings.non_moderator_chat_delay" class="duration-setting">
+      <label class="setting-label">Select Delay (in seconds):</label>
+      <select [(ngModel)]="settings.non_moderator_chat_delay_duration" (ngModelChange)="onDelayChange($event)">
+        <option *ngFor="let delay of delayOptions" [value]="delay">{{ delay }} seconds</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Slow Mode -->
+  <div class="setting">
+    <div class="setting-header">
+      <label class="setting-label">Slow Mode:</label>
+      <label class="switch">
+        <input type="checkbox" [(ngModel)]="settings.slow_mode" (ngModelChange)="updateSlowMode($event)" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <div *ngIf="settings.slow_mode" class="duration-setting">
+      <label>Wait Time (seconds):</label>
+      <div>
+      <input type="number"
+             [(ngModel)]="settings.slow_mode_wait_time"
+             min="3"
+             max="120"
+             (ngModelChange)="updateSlowTimeDuration($event)"/>
+        <button class="action-btn" (click)="saveSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscriber Mode -->
+  <div class="setting">
+    <div class="setting-header">
+      <label class="setting-label">Subscriber Mode:</label>
+      <label class="switch">
+        <input type="checkbox" [(ngModel)]="settings.subscriber_mode" (ngModelChange)="updateSubscriberMode($event)" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Unique Chat Mode -->
+  <div class="setting">
+    <div class="setting-header">
+      <label class="setting-label">Unique Chat Mode:</label>
+      <label class="switch">
+        <input type="checkbox" [(ngModel)]="settings.unique_chat_mode" (ngModelChange)="updateUniqueChatMode($event)" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<button class="settings-button" (click)="toggleSettings()">
+  <mat-icon class="button-icon" svgIcon="settings"></mat-icon>
+</button>

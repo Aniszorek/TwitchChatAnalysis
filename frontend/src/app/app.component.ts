@@ -5,7 +5,7 @@ import { LoadingService } from './shared/services/loading.service';
 import { Observable } from 'rxjs';
 import {HeaderComponent} from './header/header.component';
 import {AsyncPipe, NgIf} from '@angular/common';
-import {ErrorMessageComponent} from './error-message/error-message.component';
+import {ErrorMessageComponent} from './shared/services/notification/error-message/error-message.component';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {registerIcons} from './shared/icon-registry';

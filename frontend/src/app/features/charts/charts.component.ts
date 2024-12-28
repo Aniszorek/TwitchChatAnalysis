@@ -15,7 +15,6 @@ import {BackendService} from '../../shared/services/backend.service';
 import {MatIcon} from '@angular/material/icon';
 
 
-// todo TCA-106 dodałabym opcje usuwania danych z jakiegoś streama bo teraz mamy nasrane pustymi wykresami
 @Component({
   selector: 'app-charts',
   standalone: true,

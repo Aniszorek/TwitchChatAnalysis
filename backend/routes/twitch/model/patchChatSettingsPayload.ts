@@ -46,7 +46,7 @@ export const isPatchChatSettingsPayload = (obj: any): obj is PatchChatSettingsPa
             case "follower_mode_duration":
             case "non_moderator_chat_delay_duration":
             case "slow_mode_wait_time":
-                return typeof value === "number";
+                return typeof value === "number" || value === null;
             default:
                 return false;
         }

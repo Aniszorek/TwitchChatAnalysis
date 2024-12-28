@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {NotificationService} from '../shared/services/notification.service';
+import {NotificationService} from '../../notification.service';
 import {NgForOf} from '@angular/common';
 
 
-// todo przenieść do /shared/services/notification
 @Component({
   selector: 'app-error-message',
   templateUrl: './error-message.component.html',

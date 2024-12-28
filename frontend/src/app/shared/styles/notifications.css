@@ -4,6 +4,7 @@
   top: var(--header-height);
   right: 10px;
   z-index: 1000;
+  flex-direction: column;
 }
 
 .error-notification {

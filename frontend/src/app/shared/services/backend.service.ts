@@ -12,6 +12,18 @@ import {PostBlockedTermsResponse} from './models/blocked-terms-response';
 import {PostPollRequest} from './models/poll-request';
 import {GetChatterInfoResponse} from './models/chatter-info-response';
 
+export interface ChatSettings {
+  follower_mode: boolean,
+  slow_mode: boolean,
+  subscriber_mode: boolean,
+  emote_mode: boolean,
+  unique_chat_mode: boolean
+  non_moderator_chat_delay: boolean,
+  follower_mode_duration: number | null,
+  non_moderator_chat_delay_duration: number | null,
+  slow_mode_wait_time: number | null
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -468,6 +480,42 @@ export class BackendService {
           this.notificationService.sendMessage(error.error.error);
           console.error('Error getting twitch messages:', error);
           return throwError(() => new Error('Unable to get twitch messages. Please try again later.'));
+        })
+      );
+  }
+
+  getChatSettings(broadcasterUserId: string, userId: string) {
+    return this.http.get<any>(`${this.apiUrl}/twitch/chat/settings`, {
+      params: {
+        broadcaster_id: broadcasterUserId,
+        moderator_id: userId
+      }
+    })
+      .pipe(
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error getting chat settings:', error);
+          return throwError(() => new Error('Unable to get chat setting. Please try again later.'));
+        })
+      );
+  }
+
+  patchChatSettings(broadcasterUserId: string, userId: string, body: ChatSettings) {
+    console.log(body)
+    return this.http.patch<any>(`${this.apiUrl}/twitch/chat/settings`, body, {
+      params: {
+        broadcaster_id: broadcasterUserId,
+        moderator_id: userId
+      }
+    })
+      .pipe(
+        tap(() => {
+          this.notificationService.sendSuccessMessage('Chat settings updated successfully!');
+        }),
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error patching chat settings:', error);
+          return throwError(() => new Error('Unable to patch chat setting. Please try again later.'));
         })
       );
   }

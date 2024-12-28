@@ -15,11 +15,12 @@ import {BackendService} from '../../../shared/services/backend.service';
 import {ChatMessageComponent} from './chat-message/chat-message.component';
 import {BanData} from '../../../shared/services/backend.service';
 import {TwitchService} from '../../twitch/twitch.service';
+import {ChatSettingsComponent} from './chat-settings/chat-settings.component';
 
 @Component({
   selector: 'app-stream-chat',
   standalone: true,
-  imports: [NgForOf, ChatMessageComponent],
+  imports: [NgForOf, ChatMessageComponent, ChatSettingsComponent],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
 })
