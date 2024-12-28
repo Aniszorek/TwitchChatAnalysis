@@ -159,7 +159,7 @@ class TwitchChannelController {
             });
             res.json(result);
         } catch (error: any) {
-            logger.error(`Error in post /raids route: ${error.message}. ${error.response.data.message}`, LOG_PREFIX);
+            logger.error(`Error in post /raids route: ${error.message}. ${error.response?.data.message}`, LOG_PREFIX);
             res.status(error.response.status).json({
                 error: `Failed to create a raid: ${error.response.data.message}`,
             });

@@ -23,6 +23,27 @@ h3 {
   display: flex;
 }
 
+.justify-content {
+  justify-content: space-between;
+  flex: 0 0 auto;
+}
+.justify-content:last-child {
+  flex: 1;
+}
+
+.user-details {
+  flex: 1;
+}
+.user-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+
+
 p {
   background-color: var(--list-element-color);
   border-radius: 0.5rem;
@@ -59,7 +80,8 @@ p {
   border-radius: 15px;
   background-color: var(--primary-color);
   color: white;
-  padding: 0.1rem 1rem;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0.5rem;
   border: none;
   cursor: pointer;
   font-size: 0.8rem;
@@ -67,7 +89,7 @@ p {
 
 input {
   padding: 0.5rem;
-  margin: 0 0.5rem;
+  margin: 0.5rem 0.5rem;
   border: 1px solid #444;
   border-radius: 4px;
   background-color: #333;
@@ -85,7 +107,7 @@ input::placeholder {
 
 .message-history {
   padding: 0 0.8rem;
-  max-height: 200px;
+  max-height: 180px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #555555 #333333;
@@ -144,7 +166,7 @@ input::placeholder {
 }
 
 .neutral .classification-circle {
-  display: none;
+  background-color: var(--neutral-message-color);
 }
 
 .message-header {
@@ -194,4 +216,87 @@ input::placeholder {
   line-height: 1.4;
   white-space: normal;
   word-break: break-all;
+}
+
+.message-counters-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.message-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 0.1rem;
+  padding: 0 0.1rem;
+
+}
+
+.message-column h4 {
+  margin-bottom: 0;
+  border-bottom: 2px solid var(--card-color);
+  color: white;
+  text-align: center;
+}
+
+.message-counters {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.message-counters li {
+  background-color: var(--list-element-color);
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 0.65rem;
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  display: flex;
+  justify-content: flex-start;
+  margin: 0.5rem 0;
+  transition: all 0.3s;
+}
+
+.positive-column li.very-positive {
+
+}
+
+.positive-column li.positive  {
+
+}
+
+.positive-column li.slightly-positive {
+
+}
+
+.negative-column li.very-negative {
+
+}
+
+.negative-column li.negative {
+
+}
+
+.negative-column li.slightly-negative {
+}
+
+.neutral-column li.neutral {
+}
+
+.message-counters li.active {
+  background-color: #0e5e8b;
+}
+
+.message-counters li:hover {
+  background-color: #555;
+}
+
+.message-counters li.active:hover {
+  background-color: #58b4f6;
+}
+
+.actions {
+  margin-top: 0;
+  margin-bottom: 0;
 }

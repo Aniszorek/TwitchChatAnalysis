@@ -1,7 +1,8 @@
 <div class="message-history-container">
   <div class="column">
-    <h3>Search user</h3>
-    <div class="search-user-container">
+    <div class="search-user-container"
+    [ngClass]="{'justify-content': user.chatter_user_login}">
+      <span>
       <input
         [(ngModel)]="searchQuery"
         placeholder="Search user"
@@ -14,23 +15,88 @@
         (click)="onSearchUser()">
         Search
       </button>
+      </span>
+
+
+      <div class="user-details">
+        <span *ngIf="user.chatter_user_login">
+          <p class="user-status">
+          <strong>Status: </strong>
+          <span *ngIf="user.chatter_user_login === broadcasterUserLogin" class="badge streamer">Streamer</span>
+          <span *ngIf="user.is_mod" class="badge mod">Mod</span>
+          <span *ngIf="user.is_vip" class="badge vip">VIP</span>
+          <span *ngIf="user.is_banned" class="badge ban">BANNED</span>
+          <span *ngIf="user.is_timeouted" class="badge timeout">TIMEOUTED</span>
+          <span *ngIf="!user.is_mod && !user.is_vip && !(user.chatter_user_login === broadcasterUserLogin)">Regular user</span>
+        </p>
+        </span>
+      </div>
     </div>
 
-<!--    todo trzeba do użytkownika dodać przyciski do banowania, dawania vipa itd, to na bazie interaktywnego czatu od dawida-->
-    <div class="user-info-container" *ngIf="user.chatter_user_login">
+<!-- todo trzeba do użytkownika dodać przyciski do banowania, dawania vipa itd, to na bazie interaktywnego czatu od dawida-->
+    <p class="actions" *ngIf="user.chatter_user_login"><strong>Actions:</strong> </p>
+    <div class="user-info-container">
       <div class="user-info">
-        <div class="user-details">
-          <p><strong>Username:</strong> {{ user.chatter_user_login }}</p>
-          <p>
-            <strong>Status: </strong>
-            <span *ngIf="user.chatter_user_login === broadcasterUserLogin" class="badge streamer">Streamer</span>
-            <span *ngIf="user.is_mod" class="badge mod">Mod</span>
-            <span *ngIf="user.is_vip" class="badge vip">VIP</span>
-            <span *ngIf="user.is_banned" class="badge ban">BANNED</span>
-            <span *ngIf="user.is_timeouted" class="badge timeout">TIMEOUTED</span>
-            <span *ngIf="!user.is_mod && !user.is_vip && !(user.chatter_user_login === broadcasterUserLogin)">Regular user</span>
-          </p>
+        <div class="message-counters-container">
+          <div class="message-column positive-column">
+            <h4>Positive</h4>
+            <ul class="message-counters">
+              <li class="very-positive"
+                  [ngClass]="{'active': activeFilters[SentimentLabel.VERY_POSITIVE]}"
+                  (click)="applyMessageFilters(SentimentLabel.VERY_POSITIVE)" >
+                <span class="classification-circle"></span>
+                Very Positive: {{ messageCounters[SentimentLabel.VERY_POSITIVE] }}
+              </li>
+              <li class="positive"
+                  [ngClass]="{'active': activeFilters[SentimentLabel.POSITIVE]}"
+                  (click)="applyMessageFilters(SentimentLabel.POSITIVE)" >
+                <span class="classification-circle"></span>
+                Positive: {{ messageCounters[SentimentLabel.POSITIVE] }}
+              </li>
+              <li class="slightly-positive"
+                  [ngClass]="{'active': activeFilters[SentimentLabel.SLIGHTLY_POSITIVE]}"
+                  (click)="applyMessageFilters(SentimentLabel.SLIGHTLY_POSITIVE)" >
+                <span class="classification-circle"></span>
+                Slightly Positive: {{ messageCounters[SentimentLabel.SLIGHTLY_POSITIVE] }}
+              </li>
+            </ul>
+          </div>
+          <div class="message-column negative-column">
+            <h4>Negative</h4>
+            <ul class="message-counters">
+              <li class="very-negative"
+                  [ngClass]="{'active': activeFilters[SentimentLabel.VERY_NEGATIVE]}"
+                  (click)="applyMessageFilters(SentimentLabel.VERY_NEGATIVE)" >
+                <span class="classification-circle"></span>
+                Very Negative: {{ messageCounters[SentimentLabel.VERY_NEGATIVE] }}
+              </li>
+              <li class="negative"
+                  [ngClass]="{'active': activeFilters[SentimentLabel.NEGATIVE]}"
+                  (click)="applyMessageFilters(SentimentLabel.NEGATIVE)" >
+                <span class="classification-circle"></span>
+                Negative: {{ messageCounters[SentimentLabel.NEGATIVE] }}
+              </li>
+              <li class="slightly-negative"
+                  [ngClass]="{'active': activeFilters[SentimentLabel.SLIGHTLY_NEGATIVE]}"
+                  (click)="applyMessageFilters(SentimentLabel.SLIGHTLY_NEGATIVE)">
+                <span class="classification-circle"></span>
+                Slightly Negative: {{ messageCounters[SentimentLabel.SLIGHTLY_NEGATIVE] }}
+              </li>
+            </ul>
+          </div>
+          <div class="message-column neutral-column">
+            <h4>Neutral</h4>
+            <ul class="message-counters">
+              <li class="neutral"
+                  [ngClass]="{'active': activeFilters[SentimentLabel.NEUTRAL]}"
+                  (click)="applyMessageFilters(SentimentLabel.NEUTRAL)" >
+                <span class="classification-circle"></span>
+                Neutral: {{ messageCounters[SentimentLabel.NEUTRAL] }}
+              </li>
+            </ul>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -43,7 +109,7 @@
     <div class="message-history">
       <ul #chatList class="chat-list">
         <li
-          *ngFor="let message of messages"
+          *ngFor="let message of filteredMessages"
           class="chat-message"
           [ngClass]="getMessageClass(message.nlp_classification)">
           <div class="message-content">
