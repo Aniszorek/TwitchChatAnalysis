@@ -11,6 +11,7 @@ import {NgIf, NgStyle} from '@angular/common';
 export class ModVipPopoutComponent implements OnInit{
   @Input() isVisible: boolean = false;
   @Input() position: { top: number; left: number } | null = null;
+  @Input() above: boolean = false;
   @Output() vip: EventEmitter<boolean> = new EventEmitter();
   @Output() mod: EventEmitter<boolean> = new EventEmitter();
   @Output() visibilityChange: EventEmitter<boolean> = new EventEmitter();

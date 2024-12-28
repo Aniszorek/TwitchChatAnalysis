@@ -33,8 +33,15 @@
       </div>
     </div>
 
-<!-- todo trzeba do użytkownika dodać przyciski do banowania, dawania vipa itd, to na bazie interaktywnego czatu od dawida-->
-    <p class="actions" *ngIf="user.chatter_user_login"><strong>Actions:</strong> </p>
+    <p class="actions" *ngIf="user.chatter_user_login"><strong>Actions:</strong>
+      <app-mod-action-buttons
+        [showButtons]="true"
+        [showRemoveMessage]="false"
+        (addVip)="addVip()"
+        (addMod)="addMod()"
+        (ban)="banUser($event)"
+      ></app-mod-action-buttons>
+    </p>
     <div class="user-info-container">
       <div class="user-info">
         <div class="message-counters-container">

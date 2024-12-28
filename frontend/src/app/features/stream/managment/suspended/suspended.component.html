@@ -4,7 +4,7 @@
     <ul>
       <li
         *ngFor="let user of suspendedUsers?.timed_out_users"
-        class="user-item"
+        class="user-item-timeout"
       >
         <span>{{ user.user_login }}</span>
         <div class="actions">
@@ -14,9 +14,8 @@
           <button class="action-btn" matTooltip="Remove timeout" (click)="onRemoveTimeout(user)">
             <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
           </button>
-          <button class="action-btn" matTooltip="Ban user" (click)="onBanUser(user)">
-            <mat-icon class="action-icon" svgIcon="ban"></mat-icon>
-          </button>
+          <app-ban-wrapper [userData]="user" (ban)="banUser($event)">
+          </app-ban-wrapper>
         </div>
       </li>
     </ul>
@@ -25,7 +24,7 @@
   <div class="column">
     <h3>Ban</h3>
     <ul>
-      <li *ngFor="let user of suspendedUsers?.banned_users" class="user-item">
+      <li *ngFor="let user of suspendedUsers?.banned_users" class="user-item-ban">
         <span>{{ user.user_login }}</span>
         <div class="actions">
           <button class="action-btn" matTooltip="Unban user" (click)="onUnbanUser(user)">
@@ -45,7 +44,7 @@
       [(ngModel)]="searchQuery"
     />
     <ul>
-      <li *ngFor="let user of searchedUsers?.banned_users" class="user-item">
+      <li *ngFor="let user of searchedUsers?.banned_users" class="user-item-ban">
         <span>{{ user.user_login }}</span>
         <div class="actions">
           <button class="action-btn" matTooltip="Unban user" (click)="onUnbanUser(user)">
@@ -53,7 +52,7 @@
           </button>
         </div>
       </li>
-      <li *ngFor="let user of searchedUsers?.timed_out_users" class="user-item">
+      <li *ngFor="let user of searchedUsers?.timed_out_users" class="user-item-timeout">
         <span>{{ user.user_login }}</span>
         <div class="actions">
           <button class="action-btn info-btn" matTooltip="Until: {{ user.expires_at }}">
@@ -62,9 +61,8 @@
           <button class="action-btn" matTooltip="Remove timeout" (click)="onRemoveTimeout(user)">
             <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
           </button>
-          <button class="action-btn" matTooltip="Ban user" (click)="onBanUser(user)">
-            <mat-icon class="action-icon" svgIcon="ban"></mat-icon>
-          </button>
+          <app-ban-wrapper [userData]="user" (ban)="banUser($event)">
+          </app-ban-wrapper>
         </div>
       </li>
     </ul>

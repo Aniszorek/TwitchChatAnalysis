@@ -13,17 +13,27 @@
   width: max-content;
 }
 
-
 .arrow {
   position: absolute;
-  top: -6px;
   right: 10px;
   transform: translateX(50%);
   width: 0;
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
+}
+
+.arrow {
+  top: -6px;
   border-bottom: 6px solid #555;
+}
+
+.popout-ban-menu.above .arrow {
+  top: unset;
+  bottom: -6px;
+  transform: translateX(50%);
+  border-bottom: none;
+  border-top: 6px solid #555;
 }
 
 .form {

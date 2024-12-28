@@ -1,5 +1,5 @@
 <div class="message-buttons" *ngIf="showButtons">
-  <div class="button-container">
+  <div *ngIf="showVipMod"  class="button-container">
     <button class="vip-btn action-btn" matTooltip="Give VIP/Moderator" (click)="calculateVipMenuPosition($event)">
       <mat-icon class="action-icon" svgIcon="crown"></mat-icon>
     </button>
@@ -7,13 +7,14 @@
     <app-mod-vip-popout
       [isVisible]="showVipMenu"
       [position]="vipMenuPosition"
+      [above]="above"
       (mod)="onMod()"
       (vip)="onVip()"
       (visibilityChange)="handleVipVisibilityChange($event)">
     </app-mod-vip-popout>
   </div>
 
-  <button class="remove-btn action-btn" matTooltip="Delete message" (click)="removeMessage()">
+  <button *ngIf="showRemoveMessage" class="remove-btn action-btn" matTooltip="Delete message" (click)="removeMessage()">
     <mat-icon class="action-icon" svgIcon="trash"></mat-icon>
   </button>
 
@@ -25,6 +26,7 @@
     <app-ban-popout
       [isVisible]="showBanMenu"
       [position]="banMenuPosition"
+      [above] = "above"
       (ban)="onBanUser($event)"
       (visibilityChange)="handleBanVisibilityChange($event)">
     </app-ban-popout>

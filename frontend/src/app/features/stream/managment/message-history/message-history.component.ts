@@ -1,13 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {GetChatterInfoResponse} from '../../../../shared/services/models/chatter-info-response';
 import {TwitchService} from '../../../twitch/twitch.service';
-import {BackendService} from '../../../../shared/services/backend.service';
+import {BackendService, BanData} from '../../../../shared/services/backend.service';
 import {FormsModule} from '@angular/forms';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {SentimentLabel} from '../../../twitch/message';
 import {NlpMessage} from './models/nlp-message';
 import {firstValueFrom} from 'rxjs';
 import {MatTooltip} from '@angular/material/tooltip';
+import {ModActionButtonsComponent} from '../../chat/chat-message/mod-action-buttons/mod-action-buttons.component';
 import {MessageCounters} from './models/messageCounters';
 import {ActiveFilters} from './models/activeFilters';
 
@@ -18,7 +19,8 @@ import {ActiveFilters} from './models/activeFilters';
     NgIf,
     NgForOf,
     NgClass,
-    MatTooltip
+    MatTooltip,
+    ModActionButtonsComponent
   ],
   templateUrl: './message-history.component.html',
   standalone: true,
@@ -26,7 +28,8 @@ import {ActiveFilters} from './models/activeFilters';
 })
 export class MessageHistoryComponent implements OnInit {
   broadcasterUserId: string = '';
-  broadcasterUserLogin: string = '';
+  broadcasterUserLogin: string = ''
+  moderatorUserId: string | null = '';
   user: GetChatterInfoResponse = {
     chatter_user_id: "",
     chatter_user_login: "",
@@ -69,6 +72,7 @@ export class MessageHistoryComponent implements OnInit {
   ngOnInit() {
     this.broadcasterUserId = this.twitchService['state'].broadcasterId.getValue()!;
     this.broadcasterUserLogin = this.twitchService['state'].broadcasterUsername.getValue()!;
+    this.moderatorUserId = this.twitchService['state'].userId.getValue();
   }
 
   onInputChange() {
@@ -179,5 +183,17 @@ export class MessageHistoryComponent implements OnInit {
     }
   }
   protected readonly SentimentLabel = SentimentLabel;
+
+  addVip() {
+    this.backendService.giveVip(this.broadcasterUserId!, this.user.chatter_user_id).subscribe()
+  }
+
+  addMod() {
+    this.backendService.giveModerator(this.broadcasterUserId!, this.user.chatter_user_id).subscribe()
+  }
+
+  banUser({minutes, reason}: {minutes: number, reason: string}) {
+    this.backendService.banUser(this.broadcasterUserId!, this.moderatorUserId!, this.user.chatter_user_id!, {user_id: this.user.chatter_user_id, duration: minutes, reason}).subscribe();
+  }
 }
 

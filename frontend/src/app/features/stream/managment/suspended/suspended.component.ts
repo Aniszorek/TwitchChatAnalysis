@@ -6,6 +6,7 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {SuspendedUsers, User} from './models/suspended.model';
 import {MatIcon} from '@angular/material/icon';
 import {Subscription} from 'rxjs';
+import {BanWrapperComponent} from '../../chat/chat-message/mod-action-buttons/ban-wrapper/ban-wrapper.component';
 import {FormsModule} from '@angular/forms';
 
 @Component({
@@ -14,7 +15,8 @@ import {FormsModule} from '@angular/forms';
     NgForOf,
     MatTooltip,
     MatIcon,
-    FormsModule
+    FormsModule,
+    BanWrapperComponent
   ],
   templateUrl: './suspended.component.html',
   standalone: true,
@@ -25,11 +27,11 @@ export class SuspendedComponent implements OnInit, OnDestroy {
   broadcasterUsername: string | null = null;
   broadcasterId: string | null = null;
   moderatorId: string | null = null;
-  searchedUsers: SuspendedUsers =  {
+  searchedUsers: SuspendedUsers = {
     banned_users: [],
     timed_out_users: []
   }
-  suspendedUsers: SuspendedUsers =  {
+  suspendedUsers: SuspendedUsers = {
     banned_users: [],
     timed_out_users: []
   }
@@ -61,21 +63,6 @@ export class SuspendedComponent implements OnInit, OnDestroy {
     this.streamService.unbanUser(this.broadcasterId!, this.moderatorId!, user.user_id).subscribe(() => {
       this.suspendedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(u => u.user_id !== user.user_id);
       this.refreshSearchList(this.searchQuery)
-    });
-  }
-
-  onBanUser(user: User) {
-    const data: BanData = {
-      user_id: user.user_id,
-      duration: null,
-      // todo dorobić możliwość podania powodu może
-      reason: "",
-    }
-    this.streamService.banUser(this.broadcasterId!, this.moderatorId!, user.user_id, data).subscribe(() => {
-      this.suspendedUsers.banned_users.push(user);
-      this.suspendedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(u => u.user_id !== user.user_id);
-      this.refreshSearchList(this.searchQuery)
-
     });
   }
 
@@ -140,6 +127,22 @@ export class SuspendedComponent implements OnInit, OnDestroy {
     this.suspendedUsers.banned_users = this.suspendedUsers.banned_users.filter((m) => m.user_id !== user.user_id);
     this.suspendedUsers.timed_out_users= this.suspendedUsers.timed_out_users.filter((m) => m.user_id !== user.user_id);
     this.refreshSearchList(this.searchQuery)
+
+  }
+
+
+  banUser({minutes, reason, userData}: { minutes: number, reason: string, userData: User }) {
+    this.streamService.banUser(this.broadcasterId!, this.moderatorId!, userData.user_id!, {
+      user_id: userData.user_id,
+      duration: minutes,
+      reason
+    }).subscribe(() => {
+      if (minutes == 0) {
+        this.suspendedUsers.banned_users.push(userData);
+      }
+      this.suspendedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(u => u.user_id !== userData.user_id);
+      this.refreshSearchList(this.searchQuery)
+    });
 
   }
 

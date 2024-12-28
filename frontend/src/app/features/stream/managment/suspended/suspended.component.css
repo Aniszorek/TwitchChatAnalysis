@@ -28,15 +28,30 @@ input + ul {
   border-right: none;
 }
 
-.user-item {
+.user-item-timeout {
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.02rem 30px 0.02rem 0.5rem;
+  background-color: var(--list-element-color);
+  border-bottom: 1px solid #444;
+  position: relative;
+}
+
+.user-item-ban {
   font-weight: bold;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.02rem 0.5rem;
+  padding-right: 0px;
   background-color: var(--list-element-color);
   border-bottom: 1px solid #444;
+  position: relative;
 }
+
+app-ban-wrapper
 
 .user-item:nth-child(even) {
   background-color: var(--second-list-element-color);

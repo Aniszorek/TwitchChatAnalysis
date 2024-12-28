@@ -15,6 +15,7 @@ import {FormsModule} from '@angular/forms';
 })
 export class BanPopoutComponent implements OnInit{
   @Input() position: { top: number; left: number } | null = null;
+  @Input() above: boolean = false;
   @Input() isVisible: boolean = false;
   @Output() ban: EventEmitter<{ minutes: number, reason: string }> = new EventEmitter();
 

@@ -18,18 +18,21 @@ import {NgIf} from '@angular/common';
   styleUrl: './mod-action-buttons.component.css',
   standalone: true
 })
-export class ModActionButtonsComponent implements OnChanges{
+export class ModActionButtonsComponent implements OnChanges {
   @Input() showButtons: boolean = false;
+  @Input() showRemoveMessage: boolean = true;
+  @Input() showVipMod: boolean = true;
   showVipMenu: boolean = false;
   showBanMenu: boolean = false;
   vipMenuPosition: { top: number; left: number } = {top: 0, left: 0};
   banMenuPosition: { top: number; left: number } = {top: 0, left: 0};
+  above = false;
 
   @Output() removed = new EventEmitter();
   @Output() addVip = new EventEmitter();
   @Output() addMod = new EventEmitter();
   @Output() ban = new EventEmitter<{ minutes: number, reason: string }>();
-  @Output() popoutOpen= new EventEmitter<boolean>(false);
+  @Output() popoutOpen = new EventEmitter<boolean>(false);
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['showButtons']) { // closes popup menus after hiding buttons
@@ -48,11 +51,19 @@ export class ModActionButtonsComponent implements OnChanges{
 
   toggleBanMenu(event: MouseEvent): void {
     const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
+    const menuHeight = 166;
+    const viewportHeight = window.innerHeight;
+    const shouldRenderAbove = buttonRect.bottom + menuHeight > viewportHeight;
 
-    this.banMenuPosition = {
-      top: buttonRect.bottom + 6,
-      left: buttonRect.right,
-    };
+
+    if (shouldRenderAbove) {
+      this.banMenuPosition = {top: buttonRect.top - menuHeight - 6, left: buttonRect.right};
+      this.above = true;
+    } else {
+      this.banMenuPosition = {top: buttonRect.bottom + 6, left: buttonRect.right};
+      this.above = false;
+    }
+
 
     this.showBanMenu = !this.showBanMenu;
 
@@ -83,10 +94,23 @@ export class ModActionButtonsComponent implements OnChanges{
 
   protected calculateVipMenuPosition(event: MouseEvent): void {
     const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
-    this.vipMenuPosition = {
-      top: buttonRect.bottom + 6,
-      left: buttonRect.left + buttonRect.width / 2
-    };
+    const menuHeight = 89
+    const viewportHeight = window.innerHeight;
+
+    const shouldRenderAbove = buttonRect.bottom + menuHeight > viewportHeight;
+
+
+    if (shouldRenderAbove) {
+      this.vipMenuPosition = {top: buttonRect.top - menuHeight - 8, left: buttonRect.left + buttonRect.width / 2};
+      this.above = true;
+    } else {
+      this.vipMenuPosition = {
+        top: buttonRect.bottom + 6,
+        left: buttonRect.left + buttonRect.width / 2
+      };
+      this.above = false;
+    }
+
     this.toggleVipMenu();
   }
 
@@ -104,7 +128,7 @@ export class ModActionButtonsComponent implements OnChanges{
     this.emitPopoutOpenState()
   }
 
-  emitPopoutOpenState(){
+  emitPopoutOpenState() {
     this.popoutOpen.emit(this.showVipMenu || this.showBanMenu)
   }
 }
