@@ -6,13 +6,15 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {SuspendedUsers, User} from './models/suspended.model';
 import {MatIcon} from '@angular/material/icon';
 import {Subscription} from 'rxjs';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-suspended',
   imports: [
     NgForOf,
     MatTooltip,
-    MatIcon
+    MatIcon,
+    FormsModule
   ],
   templateUrl: './suspended.component.html',
   standalone: true,
@@ -31,6 +33,7 @@ export class SuspendedComponent implements OnInit, OnDestroy {
     banned_users: [],
     timed_out_users: []
   }
+  searchQuery: string = "";
 
   constructor(private readonly streamService: BackendService,
               private readonly twitchService: TwitchService) {
@@ -57,6 +60,7 @@ export class SuspendedComponent implements OnInit, OnDestroy {
   onRemoveTimeout(user: User) {
     this.streamService.unbanUser(this.broadcasterId!, this.moderatorId!, user.user_id).subscribe(() => {
       this.suspendedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(u => u.user_id !== user.user_id);
+      this.refreshSearchList(this.searchQuery)
     });
   }
 
@@ -70,31 +74,21 @@ export class SuspendedComponent implements OnInit, OnDestroy {
     this.streamService.banUser(this.broadcasterId!, this.moderatorId!, user.user_id, data).subscribe(() => {
       this.suspendedUsers.banned_users.push(user);
       this.suspendedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(u => u.user_id !== user.user_id);
+      this.refreshSearchList(this.searchQuery)
+
     });
   }
 
   onUnbanUser(user: User) {
     this.streamService.unbanUser(this.broadcasterId!, this.moderatorId!, user.user_id).subscribe(() => {
       this.suspendedUsers.banned_users = this.suspendedUsers.banned_users.filter(u => u.user_id !== user.user_id);
+      this.refreshSearchList(this.searchQuery)
     });
   }
 
   onSearch(event: Event) {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-
-    if (searchTerm.length > 0) {
-      this.searchedUsers.banned_users = this.suspendedUsers.banned_users.filter(user =>
-        user.user_login.toLowerCase().includes(searchTerm)
-      );
-
-      this.searchedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(user =>
-        user.user_login.toLowerCase().includes(searchTerm)
-      );
-    }
-    else {
-      this.searchedUsers.banned_users = [];
-      this.searchedUsers.timed_out_users = [];
-    }
+    this.refreshSearchList(searchTerm)
   }
 
   getFormattedDate(utcDate: string | null): string {
@@ -129,11 +123,15 @@ export class SuspendedComponent implements OnInit, OnDestroy {
     if (!user.expires_at){
       if (!this.suspendedUsers.banned_users.some((m) => m.user_id === user.user_id)) {
         this.suspendedUsers.banned_users.push(user);
+        this.refreshSearchList(this.searchQuery)
+
       }
     }
     else {
       if (!this.suspendedUsers.timed_out_users.some((m) => m.user_id === user.user_id)) {
         this.suspendedUsers.timed_out_users.push(user);
+        this.refreshSearchList(this.searchQuery)
+
       }
     }
   }
@@ -141,5 +139,26 @@ export class SuspendedComponent implements OnInit, OnDestroy {
   private removeSuspendedUser(user: User) {
     this.suspendedUsers.banned_users = this.suspendedUsers.banned_users.filter((m) => m.user_id !== user.user_id);
     this.suspendedUsers.timed_out_users= this.suspendedUsers.timed_out_users.filter((m) => m.user_id !== user.user_id);
+    this.refreshSearchList(this.searchQuery)
+
   }
+
+  private refreshSearchList(searchTerm: string)
+  {
+    if (searchTerm.length > 0) {
+      this.searchedUsers.banned_users = this.suspendedUsers.banned_users.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
+
+      this.searchedUsers.timed_out_users = this.suspendedUsers.timed_out_users.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
+    }
+    else {
+      this.searchedUsers.banned_users = [];
+      this.searchedUsers.timed_out_users = [];
+    }
+  }
+
+
 }

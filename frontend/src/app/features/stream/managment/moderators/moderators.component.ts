@@ -6,13 +6,15 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {MatIcon} from '@angular/material/icon';
 import {User} from '../suspended/models/suspended.model';
 import {Subscription} from 'rxjs';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-moderators',
   imports: [
     NgForOf,
     MatTooltip,
-    MatIcon
+    MatIcon,
+    FormsModule
   ],
   templateUrl: './moderators.component.html',
   standalone: true,
@@ -27,6 +29,7 @@ export class ModeratorsComponent implements OnInit, OnDestroy {
   searchedVips: User[] =  [];
   moderators: User[] = [];
   vips: User[] = [];
+  searchQuery: string = "";
 
   constructor(private readonly streamService: BackendService,
               private readonly twitchService: TwitchService) {
@@ -60,50 +63,44 @@ export class ModeratorsComponent implements OnInit, OnDestroy {
   onRemoveModerator(user: User) {
     this.streamService.removeModerator(this.broadcasterId!, user.user_id).subscribe(() => {
       this.moderators = this.moderators.filter(u => u.user_id !== user.user_id);
+      this.refreshSearchList(this.searchQuery)
     });
   }
 
   onRemoveVip(user: User) {
     this.streamService.removeVip(this.broadcasterId!, user.user_id).subscribe(() => {
       this.vips = this.vips.filter(u => u.user_id !== user.user_id);
+      this.refreshSearchList(this.searchQuery)
     });
   }
 
   onSearch(event: Event) {
     const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-    if (searchTerm.length > 0) {
-      this.searchedModerators = this.moderators.filter(user =>
-        user.user_login.toLowerCase().includes(searchTerm)
-      );
-
-      this.searchedVips = this.vips.filter(user =>
-        user.user_login.toLowerCase().includes(searchTerm)
-      );
-    }
-    else {
-      this.searchedModerators = [];
-      this.searchedVips = [];
-    }
+    this.refreshSearchList(searchTerm)
   }
 
   private addModerator(user: User): void {
     if (!this.moderators.some((m) => m.user_id === user.user_id)) {
       this.moderators.push(user);
+      this.refreshSearchList(this.searchQuery)
     }
   }
 
   private removeModerator(user: User): void {
     this.moderators = this.moderators.filter((m) => m.user_id !== user.user_id);
+    this.refreshSearchList(this.searchQuery)
   }
 
   private addVip(user: User): void {
     if (!this.vips.some((m) => m.user_id === user.user_id)) {
       this.vips.push(user);
+      this.refreshSearchList(this.searchQuery)
     }
   }
 
   private removeVip(user: User): void {
     this.vips = this.vips.filter((m) => m.user_id !== user.user_id);
+    this.refreshSearchList(this.searchQuery)
   }
 
   private addSubscriptions() {
@@ -126,5 +123,21 @@ export class ModeratorsComponent implements OnInit, OnDestroy {
         }
       })
     )
+  }
+
+  private refreshSearchList(searchTerm: string) {
+    if (searchTerm.length > 0) {
+      this.searchedModerators = this.moderators.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
+
+      this.searchedVips = this.vips.filter(user =>
+        user.user_login.toLowerCase().includes(searchTerm)
+      );
+    }
+    else {
+      this.searchedModerators = [];
+      this.searchedVips = [];
+    }
   }
 }

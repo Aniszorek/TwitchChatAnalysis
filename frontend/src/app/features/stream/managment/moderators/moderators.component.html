@@ -36,6 +36,7 @@
       type="text"
       placeholder="Type nickname..."
       (input)="onSearch($event)"
+      [(ngModel)]="searchQuery"
     />
     <ul>
       <li *ngFor="let user of searchedModerators" class="user-item">
