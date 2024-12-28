@@ -44,7 +44,6 @@ export class TwitchUsersController {
         requiredRole: COGNITO_ROLES.STREAMER,
         actionDescription: "Get Chatter info"
     })
-    // todo do zmiany postman kolekcja bo teraz wymagamy username zamiast id
     public async getChatterInfo(req: Request, res: Response, next: NextFunction, context: any) {
         const {queryParams, headers, validatedBody} = context;
         const twitch_username = queryParams.twitch_username;

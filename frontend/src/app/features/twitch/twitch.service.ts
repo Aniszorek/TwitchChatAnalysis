@@ -7,6 +7,7 @@ import { Message, NlpChatMessage } from './message';
 import {hasAccess, Tab, UserRole} from './permissions.config';
 import {User} from '../stream/managment/suspended/models/suspended.model';
 import {ChannelInfo} from '../stream/managment/stream-settings/models/channel.info';
+import {AutoModSettings} from '../../shared/services/models/auto-mod-settings-reqeuest';
 
 export interface SearchUserState {
   success: boolean;
@@ -41,7 +42,8 @@ export class TwitchService {
     moderatorChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
     vipChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
     bannedChanges: new Subject<{ action: 'add' | 'remove'; user?: User; }>(),
-    channelInfoChanges: new Subject<{ action: 'add' | 'remove'; channelInfo?: ChannelInfo; }>()
+    channelInfoChanges: new Subject<{ action: 'add' | 'remove'; channelInfo?: ChannelInfo; }>(),
+    autoModSettingsChanges: new Subject<{ action: 'add' | 'remove'; autoMod?: AutoModSettings; }>()
   };
 
   chatMessages$ = this.state.chatMessages.asObservable();
@@ -53,6 +55,7 @@ export class TwitchService {
   vipChanges$ = this.state.vipChanges.asObservable();
   bannedChanges$ = this.state.bannedChanges.asObservable();
   channelInfoChanges$ = this.state.channelInfoChanges.asObservable();
+  autoModSettingsChanges$ = this.state.autoModSettingsChanges.asObservable();
 
   private websocket: WebSocket | null = null;
 
@@ -183,6 +186,9 @@ export class TwitchService {
             action: 'add',
             channelInfo: this.mapChannelInfo(rawMessage.messageObject.eventData)
           });
+          break;
+        case 'AutomodSettingsUpdate':
+          this.state.autoModSettingsChanges.next({action: 'add', autoMod: rawMessage.messageObject.eventData});
           break;
         default:
           console.warn('Unknown message type:', rawMessage.type);

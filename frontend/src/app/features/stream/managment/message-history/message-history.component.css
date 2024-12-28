@@ -193,4 +193,5 @@ input::placeholder {
   color: #ffffff;
   line-height: 1.4;
   white-space: normal;
+  word-break: break-all;
 }

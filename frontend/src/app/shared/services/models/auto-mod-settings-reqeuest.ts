@@ -1,4 +1,4 @@
-export interface AutoModSettingsRequest {
+export interface AutoModSettings {
   aggression: number | null;
   bullying: number | null;
   disability: number | null;

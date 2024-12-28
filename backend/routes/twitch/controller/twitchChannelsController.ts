@@ -137,6 +137,7 @@ class TwitchChannelController {
         requiredRole: COGNITO_ROLES.STREAMER,
         actionDescription: "Start Raid"
     })
+    // todo do zmiany postman kolekcja bo teraz wymagamy username zamiast id
     public async startRaid(req: express.Request, res: express.Response, next: express.NextFunction, context: any) {
         const { queryParams, headers } = context;
         const twitch_username = queryParams.to_broadcaster_username;

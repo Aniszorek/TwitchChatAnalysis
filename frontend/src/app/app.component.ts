@@ -5,11 +5,10 @@ import { LoadingService } from './shared/services/loading.service';
 import { Observable } from 'rxjs';
 import {HeaderComponent} from './header/header.component';
 import {AsyncPipe, NgIf} from '@angular/common';
-import {ErrorMessageComponent} from './shared/services/notification/error-message/error-message.component';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
 import {registerIcons} from './shared/icon-registry';
-import {SuccessMessageComponent} from './shared/services/notification/success-message/success-message.component';
+import {NotificationsComponent} from './shared/notification/success-message/notifications.component';
 
 @Component({
   selector: 'app-root',
@@ -20,8 +19,7 @@ import {SuccessMessageComponent} from './shared/services/notification/success-me
     RouterOutlet,
     AsyncPipe,
     NgIf,
-    ErrorMessageComponent,
-    SuccessMessageComponent
+    NotificationsComponent
   ],
   styleUrls: ['./app.component.css']
 })

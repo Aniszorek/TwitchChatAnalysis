@@ -5,7 +5,8 @@ import { BackendService } from '../../../../shared/services/backend.service';
 import { TwitchService } from '../../../twitch/twitch.service';
 import {MatIcon} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
-import {AutoModSettingsRequest} from '../../../../shared/services/models/auto-mod-settings-reqeuest';
+import {AutoModSettings} from '../../../../shared/services/models/auto-mod-settings-reqeuest';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-auto-mod',
@@ -22,6 +23,7 @@ import {AutoModSettingsRequest} from '../../../../shared/services/models/auto-mo
   styleUrls: ['./auto-mod.component.css']
 })
 export class AutoModComponent implements OnInit {
+  private subscriptions: Subscription = new Subscription();
   broadcasterUserId: string | null = '';
   userId: string | null = '';
   levels = [0, 1, 2, 3, 4];
@@ -61,6 +63,14 @@ export class AutoModComponent implements OnInit {
     this.broadcasterUserId = this.twitchService['state'].broadcasterId.getValue();
     this.userId = this.twitchService['state'].userId.getValue();
     this.loadSettings(this.broadcasterUserId!, this.userId!);
+
+    this.subscriptions.add(
+      this.twitchService.autoModSettingsChanges$.subscribe((change) => {
+        if (change.autoMod) {
+          this.mapFromBackend(change.autoMod);
+        }
+      }),
+    );
   }
 
   loadSettings(broadcasterUserId: string, userId: string): void {
@@ -84,7 +94,7 @@ export class AutoModComponent implements OnInit {
 
   applyChanges(): void {
     this.changesApplied = false;
-    const backendSettings: Partial<AutoModSettingsRequest> = this.overallEnabled
+    const backendSettings: Partial<AutoModSettings> = this.overallEnabled
       ? { overall_level: this.selectedSettings['overall Level'] }
       : this.mapToBackend(this.selectedSettings);
 
@@ -100,7 +110,7 @@ export class AutoModComponent implements OnInit {
       });
   }
 
-  private mapFromBackend(backendSettings: AutoModSettingsRequest): void {
+  private mapFromBackend(backendSettings: AutoModSettings): void {
     this.selectedSettings = {
       'overall Level': backendSettings.overall_level,
       disability: backendSettings.disability,
@@ -116,7 +126,7 @@ export class AutoModComponent implements OnInit {
     this.overallEnabled = this.selectedSettings['overall Level'] !== null;
   }
 
-  private mapToBackend(frontendSettings: Record<string, number | null>): Partial<AutoModSettingsRequest> {
+  private mapToBackend(frontendSettings: Record<string, number | null>): Partial<AutoModSettings> {
     return {
       disability: frontendSettings['disability'],
       sexuality_sex_or_gender: frontendSettings['sexuality'],

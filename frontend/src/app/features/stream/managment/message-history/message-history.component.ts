@@ -76,28 +76,30 @@ export class MessageHistoryComponent implements OnInit {
     if (!this.searchQuery || this.searchQuery === this.lastSearchedQuery) {
       return;
     }
+    const username = this.searchQuery.toLowerCase();
 
-    this.lastSearchedQuery = this.searchQuery;
+    this.lastSearchedQuery = username;
     this.isSearchDisabled = true;
     this.isSearchInputDisabled = true;
 
     try {
       const userData = await firstValueFrom(
-        this.backendService.getUserInformation(this.broadcasterUserId, this.searchQuery)
+        this.backendService.getUserInformation(this.broadcasterUserId, username)
       );
       this.user = userData!;
 
       if (userData) {
-        await this.loadMessages();
+        await this.loadMessages(username);
       }
     } catch (error) {
+      this.isSearchInputDisabled = false;
       console.error('Error loading user data', error);
     }
   }
 
-  private async loadMessages() {
+  private async loadMessages(username: string) {
       const messageData = await firstValueFrom(
-        this.backendService.getTwitchMessages(this.broadcasterUserLogin, this.searchQuery)
+        this.backendService.getTwitchMessages(this.broadcasterUserLogin, username)
       );
       if (!messageData.messages) {
         this.messages = []

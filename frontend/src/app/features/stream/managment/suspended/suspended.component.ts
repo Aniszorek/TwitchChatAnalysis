@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {BackendService, BanData} from '../../../../shared/services/backend.service';
 import {TwitchService} from '../../../twitch/twitch.service';
-import {NgForOf,} from '@angular/common';
+import {formatDate, NgForOf,} from '@angular/common';
 import {MatTooltip} from '@angular/material/tooltip';
 import {SuspendedUsers, User} from './models/suspended.model';
 import {MatIcon} from '@angular/material/icon';
@@ -95,6 +95,21 @@ export class SuspendedComponent implements OnInit, OnDestroy {
       this.searchedUsers.banned_users = [];
       this.searchedUsers.timed_out_users = [];
     }
+  }
+
+  getFormattedDate(utcDate: string | null): string {
+    if (!utcDate) {
+      return 'No expiration date';
+    }
+    const localDate = new Date(utcDate);
+    return localDate.toLocaleString('default', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
   }
 
   private addSubscriptions() {

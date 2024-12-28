@@ -4,7 +4,7 @@ import {catchError, Observable, tap, throwError} from 'rxjs';
 import {NotificationService} from './notification.service';
 import {GetCategoriesResponse} from './models/categories-response';
 import {ChannelInfoRequest} from './models/channel-info-request';
-import {AutoModSettingsRequest} from './models/auto-mod-settings-reqeuest';
+import {AutoModSettings} from './models/auto-mod-settings-reqeuest';
 import {AutoModSettingsResponse} from './models/auto-mod-settings-response';
 import {PostBlockedTermRequest} from './models/blocked-terms-request';
 import {BlockedTerm} from './models/blocked-term';
@@ -280,7 +280,7 @@ export class BackendService {
     );
   }
 
-  putAutomodSettings(broadcasterId: string, moderatorId: string, body: Partial<AutoModSettingsRequest>) {
+  putAutomodSettings(broadcasterId: string, moderatorId: string, body: Partial<AutoModSettings>) {
     return this.http.put<AutoModSettingsResponse>(`${this.apiUrl}/twitch/moderation/automod/settings`, body,{
         params: {
           broadcaster_id: broadcasterId,

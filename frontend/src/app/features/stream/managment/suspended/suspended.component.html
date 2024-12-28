@@ -8,7 +8,7 @@
       >
         <span>{{ user.user_login }}</span>
         <div class="actions">
-          <button class="action-btn info-btn" matTooltip="Until: {{ user.expires_at }}">
+          <button class="action-btn info-btn" [matTooltip]="'Until: ' + getFormattedDate(user.expires_at)">
             <mat-icon class="action-icon" svgIcon="info"></mat-icon>
           </button>
           <button class="action-btn" matTooltip="Remove timeout" (click)="onRemoveTimeout(user)">
