@@ -87,6 +87,30 @@ export class TwitchUsersController {
     }
 
 
+    @TCASecured({
+        requiredHeaders: ["x-twitch-oauth-token"],
+        requiredRole: COGNITO_ROLES.VIEWER,
+        actionDescription: "Get Twitch User Info"
+    })
+    public async getTwitchUserInfo(req: Request, res: Response, next: NextFunction, context: any) {
+        const {headers} = context;
+        try {
+            const result = await fetchTwitchUserIdByNickname([], headers);
+            logger.info(
+                `Successfully retrieved Twitch User Info`,
+                LOG_PREFIX,
+                { color: LogColor.MAGENTA, style: LogStyle.DIM }
+            );
+            res.send(result.data);
+        } catch (error: any) {
+            logger.error(`Error in /twitch-user-info route: ${error.message}. ${error.response?.data.message}`, LOG_PREFIX);
+            res.status(error.response.status).json({
+                error: `Failed to fetch Twitch User Info: ${error.response.data.message || error.message}`
+            })
+        }
+    }
+
+
     // for internal use only
     public async fetchTwitchUserIdByNickname(nickname: string, twitchOauthToken: string):Promise<FetchTwitchUserIdResponse> {
         try {

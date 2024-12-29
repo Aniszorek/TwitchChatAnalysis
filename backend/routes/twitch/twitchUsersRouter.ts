@@ -6,3 +6,4 @@ export const twitchUsersRouter = express.Router();
 
 twitchUsersRouter.get('/suspended', createHandlerWithContext(twitchUsersController.getSuspended));
 twitchUsersRouter.get('/chatter-info', createHandlerWithContext(twitchUsersController.getChatterInfo));
+twitchUsersRouter.get('/twitch-user-info', createHandlerWithContext(twitchUsersController.getTwitchUserInfo));
