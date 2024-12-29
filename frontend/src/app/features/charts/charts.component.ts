@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 import {BaseChartDirective} from 'ng2-charts';
@@ -54,6 +54,10 @@ export class ChartsComponent implements OnInit {
 
   protected showAggregationInfo: boolean
 
+  categories: string[] = [];
+  activeCategory: string = "ALL";
+  isDropdownOpen: boolean = false;
+
   constructor(
     private readonly backendService: BackendService,
     private readonly authService: AuthService,
@@ -74,6 +78,7 @@ export class ChartsComponent implements OnInit {
     this.relatedKeysMap = this.keysService.getRelatedKeysMap()
     this.keyDisplayNames = this.keysService.getKeyDisplayNames()
     this.showAggregationInfo = false
+    this.activeCategory= "ALL"
   }
 
   ngOnInit(): void {
@@ -134,6 +139,8 @@ export class ChartsComponent implements OnInit {
     this.setAppState(AppState.metadataLoading);
     this.streamId = streamId;
     this.loadStreamData(streamId);
+    this.activeCategory= "ALL"
+
   }
 
   toggleDataKey(key: string) {
@@ -177,6 +184,7 @@ export class ChartsComponent implements OnInit {
         this.selectedDataKeys = this.keysService.getDefaultSelectedKeys(this.selectedDataKeys, this.availableDataKeys);
         this.setAppState(AppState.ready)
         this.updateChart();
+        this.loadCategories();
       });
   }
 
@@ -252,4 +260,61 @@ export class ChartsComponent implements OnInit {
     return aggregatedData;
   }
 
+  loadCategories() {
+    const categorySet = new Set<string>();
+    this.metadata.forEach((data: { metadata: { category: string } }) => {
+      categorySet.add(data.metadata.category);
+    });
+    this.categories = Array.from(categorySet);
+    this.categories.unshift('ALL');
+  }
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  closeDropdown() {
+    this.isDropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown')) {
+      this.closeDropdown();
+    }
+  }
+
+  setActiveCategory(category: string) {
+    this.activeCategory = category;
+    this.isDropdownOpen = false;
+  }
+
+  isActiveCategory(category: string): boolean {
+    return this.activeCategory === category;
+  }
+
+  getCategoryData(category: string) {
+    if (category === 'ALL') {
+      return this.metadata.reduce((acc: { [x: string]: any; }, data: { metadata: { [x: string]: any; }; }) => {
+        Object.keys(data.metadata).forEach((key) => {
+          if (typeof data.metadata[key] === 'number') {
+            acc[key] = (acc[key] || 0) + data.metadata[key];
+          }
+        });
+        return acc;
+      }, {});
+    } else {
+      return this.metadata
+        .filter((data: { metadata: { category: string; }; }) => data.metadata.category === category)
+        .reduce((acc: { [x: string]: any; }, data: { metadata: { [x: string]: any; }; }) => {
+          Object.keys(data.metadata).forEach((key) => {
+            if (typeof data.metadata[key] === 'number') {
+              acc[key] = (acc[key] || 0) + data.metadata[key];
+            }
+          });
+          return acc;
+        }, {});
+    }
+  }
 }

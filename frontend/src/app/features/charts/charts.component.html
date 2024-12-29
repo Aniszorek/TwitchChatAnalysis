@@ -1,4 +1,5 @@
-<div>
+
+<div xmlns="http://www.w3.org/1999/html">
   <div *ngIf="getAppState() === AppState.streamDataNotAvailable; else streamData" class="error-container">
     <div class="error-message">
       No streams available for user
@@ -39,20 +40,20 @@
       <div class="chart-area" *ngIf="selectedStream && getAppState() == AppState.ready">
         <h2>Chart for: {{ selectedStream.stream_title }}</h2>
 
-        <div class="data-keys">
-          <h3>Select data:</h3>
-          <div class="tag-container">
-          <span
-            *ngFor="let key of availableDataKeys"
-            class="tag"
-            [class.selected]="isKeySelected(key)"
-            (click)="toggleDataKey(key)"
-            [title]="keyDisplayNames[key].tooltip">
-            {{ keyDisplayNames[key].displayName || key }}
-          </span>
-          </div>
+          <div class="data-keys">
+            <div class="tag-container">
+              <h4>Select data:</h4>
+            <span
+              *ngFor="let key of availableDataKeys"
+              class="tag"
+              [class.selected]="isKeySelected(key)"
+              (click)="toggleDataKey(key)"
+              [title]="keyDisplayNames[key].tooltip">
+              {{ keyDisplayNames[key].displayName || key }}
+            </span>
+            </div>
 
-        </div>
+          </div>
 
         <div *ngIf="showAggregationInfo" class="aggregation-section">
           <div class="aggregation-description">
@@ -87,8 +88,96 @@
             [type]="'line'"
             [options]="chartOptions">
           </canvas>
-
         </div>
+
+        <h3>Summary:
+          <div class="tooltip-container">
+            <mat-icon class="tooltip-icon" svgIcon="info"></mat-icon>
+            <span class="tooltip-text">
+              Check summed up statistics during streaming selected category. Select <strong>ALL</strong> to see data from the whole stream
+            </span>
+          </div>
+        </h3>
+
+        <div class="stats-area">
+
+          <div class="column dropdown-container">
+
+            <div class="dropdown">
+              <div class="dropdown-toggle" (click)="toggleDropdown()">
+                Category: {{ activeCategory || 'Select a Category' }}
+              </div>
+              <div class="dropdown-menu" *ngIf="isDropdownOpen">
+                <div
+                  class="dropdown-item"
+                  *ngFor="let category of categories"
+                  (click)="setActiveCategory(category)"
+                  [class.active]="isActiveCategory(category)">
+                  {{ category }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="column stats-column">
+                      <span>
+                <span class="stat-text">Viewer Count:</span>
+                <span class="stat-value">{{ getCategoryData(activeCategory).viewer_count }}</span>
+              </span>
+              <span>
+                <span class="stat-text">Follower Count:</span>
+                <span class="stat-value">{{ getCategoryData(activeCategory).follower_count }}</span>
+              </span>
+              <span>
+                <span class="stat-text">Subscriber Count:</span>
+                <span class="stat-value">{{ getCategoryData(activeCategory).subscriber_count }}</span>
+              </span>
+          </div>
+
+          <div class="column stats-column">
+                        <span>
+              <span class="stat-text">Message Count:</span>
+              <span class="stat-value">{{ getCategoryData(activeCategory).message_count }}</span>
+            </span>
+                        <span>
+              <span class="stat-text">Neutral messages:</span>
+              <span class="stat-value">{{ getCategoryData(activeCategory).neutral_message_count }}</span>
+            </span>
+          </div>
+
+          <div class="column stats-column">
+              <span>
+                <span class="stat-text">Slightly Positive Messages:</span>
+                <span class="stat-value">{{ getCategoryData(activeCategory).slightly_positive_message_count }}</span>
+              </span>
+                      <span>
+                <span class="stat-text">Positive Messages:</span>
+                <span class="stat-value">{{ getCategoryData(activeCategory).positive_message_count }}</span>
+              </span>
+                      <span>
+                <span class="stat-text">Very Positive Messages:</span>
+                <span class="stat-value">{{ getCategoryData(activeCategory).very_positive_message_count }}</span>
+              </span>
+          </div>
+
+          <div class="column stats-column">
+                  <span>
+                    <span class="stat-text">Slightly Negative Messages:</span>
+                    <span class="stat-value">{{ getCategoryData(activeCategory).slightly_negative_message_count }}</span>
+                  </span>
+                          <span>
+                    <span class="stat-text">Negative Messages:</span>
+                    <span class="stat-value">{{ getCategoryData(activeCategory).negative_message_count }}</span>
+                  </span>
+                          <span>
+                    <span class="stat-text">Very Negative Messages:</span>
+                    <span class="stat-value">{{ getCategoryData(activeCategory).very_negative_message_count }}</span>
+                  </span>
+          </div>
+        </div>
+
+
+
       </div>
 
       <div class="metadata-loading-container" *ngIf="getAppState() == AppState.metadataLoading">
