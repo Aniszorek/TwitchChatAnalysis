@@ -295,17 +295,19 @@ export class ChartsComponent implements OnInit {
   }
 
   getCategoryData(category: string) {
+    let reduce: any
     if (category === 'ALL') {
-      return this.metadata.reduce((acc: { [x: string]: any; }, data: { metadata: { [x: string]: any; }; }) => {
+        reduce = this.metadata.reduce((acc: { [x: string]: any; }, data: { metadata: { [x: string]: any; }; }) => {
         Object.keys(data.metadata).forEach((key) => {
           if (typeof data.metadata[key] === 'number') {
             acc[key] = (acc[key] || 0) + data.metadata[key];
           }
         });
+        acc["quantity"] = (acc["quantity"] || 0) + 1;
         return acc;
       }, {});
     } else {
-      return this.metadata
+      reduce = this.metadata
         .filter((data: { metadata: { category: string; }; }) => data.metadata.category === category)
         .reduce((acc: { [x: string]: any; }, data: { metadata: { [x: string]: any; }; }) => {
           Object.keys(data.metadata).forEach((key) => {
@@ -313,8 +315,14 @@ export class ChartsComponent implements OnInit {
               acc[key] = (acc[key] || 0) + data.metadata[key];
             }
           });
+          acc["quantity"] = (acc["quantity"] || 0) + 1;
           return acc;
         }, {});
     }
+
+     reduce["viewer_count"] = Math.ceil(reduce["viewer_count"] / reduce["quantity"]);
+
+    return reduce
+
   }
 }
