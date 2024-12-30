@@ -1,11 +1,42 @@
-<div class="container">
-  <button class="twitch-button" (click)="generateToken()">
-    Connect with Twitch
-  </button>
-  <div class="text">or</div>
-  <div class="token-input-group">
-    <input type="text" class="token-input" placeholder="Insert token" [(ngModel)]="token" />
-    <button class="save-button" (click)="saveToken()">Save Token</button>
-    <button *ngIf="token" class="save-button"  (click)="redirectToStreamSearch()">Select streamer</button>
+<div class="app-wrapper">
+  <div class="card-container">
+    <div class="back-container" *ngIf="showTwitchAccountDetails">
+      <a class="back-link" [routerLink]="['/stream-search']">
+        <span class="arrow">←</span>
+        <span class="text">Search streamer</span>
+      </a>
+    </div>
+    <h2 class="card-title">Profile</h2>
+    <div class="content">
+      <div class="nested-card-container">
+        <h2>Twitch</h2>
+        <div class="twitch">
+          <div class="twitch-profile-card" *ngIf="showTwitchAccountDetails">
+            <img class="large-icon" src="{{ twitchProfileImageURL }}" alt="Profile image">
+            <div class="twitch-data">
+              <span>Username: {{ twitchUsername }}</span>
+              <span>User ID: {{twitchUserId }}</span>
+            </div>
+          </div>
+          <div class="twitch-connect">
+            <button class="twitch-button" [disabled]="savingToken" (click)="generateToken()">
+              Connect with Twitch
+            </button>
+            <div class="text">or</div>
+            <div class="token-input-group">
+              <input type="text" class="token-input" [disabled]="savingToken" placeholder="Insert token" [(ngModel)]="token"/>
+              <button class="save-button" [disabled]="savingToken" (click)="saveToken()">Save Token</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cognito nested-card-container">
+        <h2>Cognito</h2>
+        <div class="cognito-data">
+          <span>Email: {{ cognitoEmail }}</span>
+          <span>Username: {{cognitoUsername}}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

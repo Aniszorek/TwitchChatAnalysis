@@ -89,7 +89,7 @@ export class TwitchUsersController {
 
     @TCASecured({
         requiredHeaders: ["x-twitch-oauth-token"],
-        requiredRole: COGNITO_ROLES.VIEWER,
+        skipAuthorization: true,
         actionDescription: "Get Twitch User Info"
     })
     public async getTwitchUserInfo(req: Request, res: Response, next: NextFunction, context: any) {

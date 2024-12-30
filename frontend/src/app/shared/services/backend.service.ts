@@ -519,6 +519,17 @@ export class BackendService {
         })
       );
   }
+
+  getTwitchUserInfo() {
+    return this.http.get<any>(`${this.apiUrl}/twitch/users/twitch-user-info`)
+      .pipe(
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error('Error getting twitch user info for following token:', error);
+          return throwError(() => new Error('Something went wrong, please verify if provided Twitch Oauth token is correct.'));
+        })
+      );
+  }
 }
 
 export interface BanData {

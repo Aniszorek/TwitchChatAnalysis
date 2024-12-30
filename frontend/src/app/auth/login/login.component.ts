@@ -18,7 +18,11 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/profile']);
+      if (this.authService.getOauthToken()){
+        this.router.navigate(['/stream-search']);
+      } else{
+        this.router.navigate(['/profile']);
+      }
     }
   }
 
