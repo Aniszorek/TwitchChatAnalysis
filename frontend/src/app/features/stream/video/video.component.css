@@ -14,7 +14,7 @@
 
 .stream-iframe {
   width: 100%;
-  max-width: 900px;
+  max-width: 70%;
   aspect-ratio: 16 / 9;
   border: none;
 }
