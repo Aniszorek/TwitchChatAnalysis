@@ -4,6 +4,7 @@ import {TwitchService} from '../twitch/twitch.service';
 import {NgIf} from '@angular/common';
 import {Router} from '@angular/router';
 import {Tab} from '../twitch/permissions.config';
+import {BackendService} from '../../shared/services/backend.service';
 
 @Component({
   selector: 'app-search-user',
@@ -17,17 +18,32 @@ import {Tab} from '../twitch/permissions.config';
 })
 export class SearchUserComponent implements OnInit {
   twitchService = inject(TwitchService);
+  streamService = inject(BackendService)
   router = inject(Router);
   previousUsername = '';
-  username = 'bartes2002';
+  username = '';
   successMessage: string | null = null;
   errorMessage: string | null = null;
   loading = false;
+  loadingUsername = false;
   @Output() userSelected = new EventEmitter<string>();
 
   ngOnInit(): void {
     this.twitchService.resetLoadingAndState();
     this.errorMessage = null;
+
+    this.loadingUsername = true;
+
+    this.streamService.getTwitchUserInfo().subscribe({
+        next: response => {
+          this.username = response.data[0]['display_name'];
+          this.loadingUsername = false;
+        },
+        error: error => {
+          this.loadingUsername = false;
+        }
+      }
+    );
 
     this.twitchService.searchUserState$.subscribe((state) => {
       if (state) {
@@ -70,6 +86,6 @@ export class SearchUserComponent implements OnInit {
   }
 
   get isDisabled(): boolean {
-    return this.loading || this.username.trim() === this.previousUsername.trim() || this.username.trim().length === 0;
+    return this.loading || this.username.trim() === this.previousUsername.trim() || this.username.trim().length === 0 || this.loadingUsername;
   }
 }

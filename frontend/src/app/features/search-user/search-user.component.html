@@ -17,20 +17,13 @@
     </div>
 
     <button
-      *ngIf="loading; else connectButton"
+      [disabled]="isDisabled"
       (click)="searchUser()"
-      [disabled]="true"
       class="button">
-      <div class="spinner"></div>
-      Connecting...
+      <div *ngIf="loading; else connectText" class="spinner"></div>
+      <ng-template #connectText>Connect</ng-template>
+      <span *ngIf="loading">Connecting...</span>
     </button>
-    <ng-template #connectButton>
-      <button
-        [disabled]="isDisabled"
-        (click)="searchUser()"
-        class="button">
-        Connect
-      </button>
-    </ng-template>
+
   </div>
 </div>
