@@ -3,6 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {TwitchService} from '../twitch/twitch.service';
 import {NgIf} from '@angular/common';
 import {Router} from '@angular/router';
+import {Tab} from '../twitch/permissions.config';
 
 @Component({
   selector: 'app-search-user',
@@ -35,7 +36,18 @@ export class SearchUserComponent implements OnInit {
           this.successMessage = state.message ?? 'Operation successful.';
           this.twitchService['state'].broadcasterUsername.next(this.username.toLowerCase());
           console.log('Redirecting');
-          this.router.navigate(['/stream']);
+          let role;
+          if (this.twitchService.canAccess(Tab.SUSPENDED)) {
+            console.log("streamer")
+            this.router.navigate(['/stream/suspended']);
+          } else if (this.twitchService.canAccess(Tab.AUTOMOD)) {
+            console.log("mod")
+            this.router.navigate(['/stream/auto-mod']);
+          } else {
+            console.log("viewer")
+            this.router.navigate(['/stream']);
+          }
+
         } else {
           console.log("stan", state)
           this.errorMessage = state.message ?? 'Unknown error occurred';

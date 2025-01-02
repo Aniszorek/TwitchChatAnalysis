@@ -127,14 +127,14 @@ export class TwitchService {
   }
 
   private handleSearchSuccess(username: string, response: SearchResponse): void {
-    this.updateSearchState(true, `Connected to ${username}'s chat`);
-    this.connectToWebSocket();
-
     this.updateState({
       broadcasterId: response.broadcaster_id,
       userId: response.user_id,
       userRole: response.twitch_role,
     });
+
+    this.updateSearchState(true, `Connected to ${username}'s chat`);
+    this.connectToWebSocket();
   }
 
   private handleError(message: any, error?: any): void {

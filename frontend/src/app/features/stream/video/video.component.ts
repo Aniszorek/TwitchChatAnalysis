@@ -1,19 +1,23 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {NgIf} from '@angular/common';
+import {Component, inject, Input, OnInit} from '@angular/core';
+import {NgClass, NgIf} from '@angular/common';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {TwitchService} from '../../twitch/twitch.service';
+import {Tab} from '../../twitch/permissions.config';
 
 @Component({
   selector: 'app-stream-video',
   standalone: true,
   templateUrl: './video.component.html',
   imports: [
-    NgIf
+    NgIf,
+    NgClass
   ],
   styleUrls: ['./video.component.css']
 })
 export class VideoComponent implements OnInit {
   @Input() channelName: string | null = null;
   safeUrl: SafeResourceUrl | null = null;
+  twitchService = inject(TwitchService);
 
   constructor(private readonly sanitizer: DomSanitizer) {}
 
@@ -25,4 +29,6 @@ export class VideoComponent implements OnInit {
       console.log('Safe URL set:', this.safeUrl);
     }
   }
+
+  protected readonly Tab = Tab;
 }

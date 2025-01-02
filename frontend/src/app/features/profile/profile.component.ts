@@ -14,7 +14,6 @@ import {jwtDecode} from 'jwt-decode';
   imports: [
     FormsModule,
     NgIf,
-    MatIcon,
     RouterLink
   ],
   templateUrl: './profile.component.html',

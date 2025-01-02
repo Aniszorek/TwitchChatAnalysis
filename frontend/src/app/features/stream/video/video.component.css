@@ -24,3 +24,7 @@
   color: red;
   font-size: 1.2em;
 }
+
+.stream-iframe-viewer {
+  max-width: 100%;
+}

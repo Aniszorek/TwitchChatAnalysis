@@ -3,6 +3,7 @@
     [src]="safeUrl"
     title="Twitch Stream Player"
     class="stream-iframe"
+    [ngClass]="{'stream-iframe-viewer': !twitchService.canAccess(Tab.MANAGEMENT)}"
     allowfullscreen>
   </iframe>
 </div>

@@ -1,12 +1,12 @@
 <div class="management-container">
-  <nav class="tabs">
-    <a routerLink="suspended" routerLinkActive="active">Suspended</a>
-    <a routerLink="moderators" routerLinkActive="active">Moderators & VIPs</a>
-    <a routerLink="auto-mod" routerLinkActive="active">Auto-Mod</a>
-    <a routerLink="blocked-terms" routerLinkActive="active">Blocked Terms</a>
-    <a routerLink="stream-settings" routerLinkActive="active">Stream Settings</a>
-    <a routerLink="raid-poll" routerLinkActive="active">Raid & Poll</a>
-    <a routerLink="message-history" routerLinkActive="active">Message History</a>
+  <nav class="tabs" >
+    <a *ngIf="twitchService.canAccess(Tab.SUSPENDED)" routerLink="suspended" routerLinkActive="active">Suspended</a>
+    <a *ngIf="twitchService.canAccess(Tab.MOD_VIP)" routerLink="moderators" routerLinkActive="active">Moderators & VIPs</a>
+    <a *ngIf="twitchService.canAccess(Tab.AUTOMOD)" routerLink="auto-mod" routerLinkActive="active">Auto-Mod</a>
+    <a *ngIf="twitchService.canAccess(Tab.BLOCKEDTERMS)" routerLink="blocked-terms" routerLinkActive="active">Blocked Terms</a>
+    <a *ngIf="twitchService.canAccess(Tab.STREAMSETTINGS)" routerLink="stream-settings" routerLinkActive="active">Stream Settings</a>
+    <a *ngIf="twitchService.canAccess(Tab.RAIDPOLL)" routerLink="raid-poll" routerLinkActive="active">Raid & Poll</a>
+    <a *ngIf="twitchService.canAccess(Tab.MESSAGEHISTORY)" routerLink="message-history" routerLinkActive="active">Message History</a>
   </nav>
 
   <div class="tab-content">

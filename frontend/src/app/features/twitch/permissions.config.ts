@@ -1,6 +1,14 @@
 export enum Tab {
   DASHBOARD,
-  CHARTS
+  CHARTS,
+  SUSPENDED,
+  MOD_VIP,
+  AUTOMOD,
+  BLOCKEDTERMS,
+  STREAMSETTINGS,
+  RAIDPOLL,
+  MESSAGEHISTORY,
+  MANAGEMENT
 }
 
 export enum UserRole {
@@ -11,8 +19,8 @@ export enum UserRole {
 
 export const ROLE_PERMISSIONS: Record<UserRole, Tab[]> = {
   [UserRole.VIEWER]: [Tab.DASHBOARD],
-  [UserRole.STREAMER]: [Tab.DASHBOARD, Tab.CHARTS],
-  [UserRole.MODERATOR]: [Tab.DASHBOARD, Tab.CHARTS],
+  [UserRole.STREAMER]: [Tab.DASHBOARD, Tab.CHARTS, Tab.SUSPENDED, Tab.MOD_VIP, Tab.AUTOMOD, Tab.BLOCKEDTERMS, Tab.STREAMSETTINGS, Tab.RAIDPOLL, Tab.MESSAGEHISTORY, Tab.MANAGEMENT],
+  [UserRole.MODERATOR]: [Tab.DASHBOARD, Tab.CHARTS, Tab.AUTOMOD, Tab.BLOCKEDTERMS, Tab.MESSAGEHISTORY, Tab.MANAGEMENT],
 };
 
 export function hasAccess(userRole: UserRole | null, section: Tab): boolean {

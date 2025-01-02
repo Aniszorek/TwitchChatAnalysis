@@ -4,10 +4,10 @@ import {VideoComponent} from './video/video.component';
 import {TwitchService} from '../twitch/twitch.service';
 import {SuspiciousMessagesComponent} from './suspicious-messages/suspicious-messages.component';
 import {RouterOutlet} from '@angular/router';
-import {ManagementComponent} from './managment/management.component';
 import {Message, negativeClasses, NlpChatMessage} from '../twitch/message';
-import {User} from './managment/suspended/models/suspended.model';
 import {BackendService, BanData} from '../../shared/services/backend.service';
+import {Tab} from '../twitch/permissions.config';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-stream',
@@ -16,7 +16,8 @@ import {BackendService, BanData} from '../../shared/services/backend.service';
     ChatComponent,
     VideoComponent,
     SuspiciousMessagesComponent,
-    RouterOutlet
+    RouterOutlet,
+    NgIf
   ],
   templateUrl: './stream.component.html',
   styleUrl: './stream.component.css'
@@ -90,4 +91,6 @@ export class StreamComponent implements OnInit{
   banUser({user_id, duration, reason}: BanData) {
     this.streamService.banUser(this.broadcasterId!, this.moderatorId!, user_id!, {user_id, duration, reason}).subscribe();
   }
+
+  protected readonly Tab = Tab;
 }

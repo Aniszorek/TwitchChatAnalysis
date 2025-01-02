@@ -48,7 +48,6 @@ export const routes: Routes = [
           {path: 'blocked-terms', component: BlockedTermsComponent},
           {path: 'raid-poll', component: RaidPollComponent},
           {path: 'message-history', component: MessageHistoryComponent},
-          {path: '', redirectTo: 'suspended', pathMatch: 'full'}
         ]
       }
     ]
