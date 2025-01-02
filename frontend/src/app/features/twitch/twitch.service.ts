@@ -19,6 +19,7 @@ interface SearchResponse {
   user_id: string;
   twitch_role: string;
   message: string;
+  broadcaster_display_name: string;
 }
 
 @Injectable({
@@ -31,6 +32,7 @@ export class TwitchService {
 
   private readonly state = {
     broadcasterUsername: new BehaviorSubject<string | null>(null),
+    broadcasterDisplayName: new BehaviorSubject<string | null>(null),
     broadcasterId: new BehaviorSubject<string | null>(null),
     userRole: new BehaviorSubject<UserRole | null>(null),
     userId: new BehaviorSubject<string | null>(null),
@@ -131,6 +133,7 @@ export class TwitchService {
       broadcasterId: response.broadcaster_id,
       userId: response.user_id,
       userRole: response.twitch_role,
+      broadcasterDisplayName: response.broadcaster_display_name
     });
 
     this.updateSearchState(true, `Connected to ${username}'s chat`);

@@ -34,7 +34,7 @@ class TwitchAuthController {
         const broadcasterId = fetchResponse.userId!;
 
         const streamStatus: FetchTwitchStreamData = await twitchStreamsController.fetchTwitchStreamMetadata(broadcasterId, twitchOauthToken);
-        return {success: true, message: "Twitch username validated and authorized", streamStatus, userId: broadcasterId};
+        return {success: true, message: "Twitch username validated and authorized", streamStatus, userId: broadcasterId, displayName: fetchResponse.displayName!};
     }
 }
 

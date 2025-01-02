@@ -16,7 +16,7 @@
 
   <div *ngIf="authService.isLoggedIn() && twitchService['state'].broadcasterUsername.getValue() != null" class="center-button">
     <button [routerLink]="['/stream-search']" class="stream-search-button" (click)="changeViewToStream()">
-      Watching: <span class="username">{{ twitchService['state'].broadcasterUsername.getValue() }}</span>
+      Watching: <span class="username">{{ twitchService['state'].broadcasterDisplayName.getValue() }}</span>
     </button>
   </div>
 

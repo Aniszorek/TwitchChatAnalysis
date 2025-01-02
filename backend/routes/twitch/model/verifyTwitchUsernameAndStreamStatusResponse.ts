@@ -5,4 +5,5 @@ export interface VerifyTwitchUsernameAndStreamStatusResponse {
     message: string;
     streamStatus?: FetchTwitchStreamData;
     userId?: string
+    displayName?: string
 }

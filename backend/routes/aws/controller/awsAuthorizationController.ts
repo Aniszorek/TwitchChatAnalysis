@@ -145,6 +145,7 @@ class AwsAuthorizationController {
 
             const streamId = result.streamStatus!.stream_id!;
             const twitchBroadcasterUserId = result.userId!;
+            const twitchBroadcasterDisplayName = result.displayName;
             const streamTitle = result.streamStatus?.title!;
             const streamCategory = result.streamStatus?.category!;
             const streamStartedAt = result.streamStatus?.started_at!;
@@ -171,7 +172,8 @@ class AwsAuthorizationController {
                 message: "Streamer found and WebSocket connections can now be initialized",
                 broadcaster_id: twitchBroadcasterUserId,
                 user_id: user_id,
-                twitch_role: twitchRole
+                twitch_role: twitchRole,
+                broadcaster_display_name: twitchBroadcasterDisplayName
             }
 
             res.send(response);

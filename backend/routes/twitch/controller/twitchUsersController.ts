@@ -123,15 +123,16 @@ export class TwitchUsersController {
             }
             const response = await fetchTwitchUserIdByNickname(queryParams, headers)
             const userId = response.data.data[0]?.id;
+            const displayName = response.data.data[0]?.display_name;
             if (!userId) {
-                return {found: false, userId: null};
+                return {found: false, userId: null, displayName: null};
             }
 
-            return  {found: true, userId};
+            return  {found: true, userId, displayName};
 
         } catch (error: any) {
             logger.error(`Error while fetching Twitch user ID ${error.message}`, LOG_PREFIX);
-            return {found: false, userId: null};
+            return {found: false, userId: null, displayName: null};
         }
     }
 
