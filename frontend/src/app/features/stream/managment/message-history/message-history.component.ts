@@ -1,12 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {GetChatterInfoResponse} from '../../../../shared/services/models/chatter-info-response';
 import {TwitchService} from '../../../twitch/twitch.service';
-import {BackendService, BanData} from '../../../../shared/services/backend.service';
+import {BackendService} from '../../../../shared/services/backend.service';
 import {FormsModule} from '@angular/forms';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {SentimentLabel} from '../../../twitch/message';
 import {NlpMessage} from './models/nlp-message';
-import {firstValueFrom} from 'rxjs';
+import {firstValueFrom, Subscription} from 'rxjs';
 import {MatTooltip} from '@angular/material/tooltip';
 import {ModActionButtonsComponent} from '../../chat/chat-message/mod-action-buttons/mod-action-buttons.component';
 import {MessageCounters} from './models/messageCounters';
@@ -27,6 +27,7 @@ import {ActiveFilters} from './models/activeFilters';
   styleUrl: './message-history.component.css'
 })
 export class MessageHistoryComponent implements OnInit {
+  subscriptions: Subscription = new Subscription();
   broadcasterUserId: string = '';
   broadcasterUserLogin: string = ''
   moderatorUserId: string | null = '';
@@ -73,6 +74,8 @@ export class MessageHistoryComponent implements OnInit {
     this.broadcasterUserId = this.twitchService['state'].broadcasterId.getValue()!;
     this.broadcasterUserLogin = this.twitchService['state'].broadcasterUsername.getValue()!;
     this.moderatorUserId = this.twitchService['state'].userId.getValue();
+
+    this.addSubscriptions();
   }
 
   onInputChange() {
@@ -130,18 +133,17 @@ export class MessageHistoryComponent implements OnInit {
     this.messages = []
 
     const messageData = await firstValueFrom(
-        this.backendService.getTwitchMessages(this.broadcasterUserLogin, username)
-      );
-      if (!messageData.messages) {
-        this.messages = []
-      }
-      else {
-        this.messages = messageData.messages;
-      }
+      this.backendService.getTwitchMessages(this.broadcasterUserLogin, username)
+    );
+    if (!messageData.messages) {
+      this.messages = []
+    } else {
+      this.messages = messageData.messages;
+    }
     this.applyMessageFilters(undefined)
     this.setMessageClasses();
 
-      this.isSearchInputDisabled = false;
+    this.isSearchInputDisabled = false;
   }
 
   private setMessageClasses() {
@@ -152,7 +154,7 @@ export class MessageHistoryComponent implements OnInit {
   }
 
   applyMessageFilters(filter: SentimentLabel | undefined) {
-    if(filter)
+    if (filter)
       this.activeFilters[filter] = !this.activeFilters[filter]
 
     this.filteredMessages = this.messages.filter((message) => {
@@ -182,6 +184,7 @@ export class MessageHistoryComponent implements OnInit {
       [SentimentLabel.NEUTRAL]: false
     }
   }
+
   protected readonly SentimentLabel = SentimentLabel;
 
   addVip() {
@@ -192,8 +195,108 @@ export class MessageHistoryComponent implements OnInit {
     this.backendService.giveModerator(this.broadcasterUserId!, this.user.chatter_user_id).subscribe()
   }
 
-  banUser({minutes, reason}: {minutes: number, reason: string}) {
-    this.backendService.banUser(this.broadcasterUserId!, this.moderatorUserId!, this.user.chatter_user_id!, {user_id: this.user.chatter_user_id, duration: minutes, reason}).subscribe();
+  banUser({minutes, reason}: { minutes: number, reason: string }) {
+    this.backendService.banUser(this.broadcasterUserId!, this.moderatorUserId!, this.user.chatter_user_id!, {
+      user_id: this.user.chatter_user_id,
+      duration: minutes,
+      reason
+    }).subscribe();
+  }
+
+
+  private addSubscriptions() {
+    this.subscriptions.add(
+      this.twitchService.moderatorChanges$.subscribe((change) => {
+        if (change.action === 'add' && change.user?.user_login == this.lastSearchedQuery) {
+          this.addModerator();
+        } else if (change.action === 'remove' && change.user?.user_login == this.lastSearchedQuery) {
+          this.removeModerator();
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.twitchService.vipChanges$.subscribe((change) => {
+        if (change.action === 'add' && change.user?.user_login == this.lastSearchedQuery) {
+          this.setVip();
+        } else if (change.action === 'remove' && change.user?.user_login == this.lastSearchedQuery) {
+          this.removeVip();
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.twitchService.bannedChanges$.subscribe((change) => {
+        if (change.action === 'add' && change.user?.user_login === this.lastSearchedQuery) {
+          if (change.user.expires_at) {
+            this.addTimeout(change.user.expires_at);
+          } else {
+            this.addSuspendedUser();
+          }
+        } else if (change.action === 'remove' && change.user?.user_login === this.lastSearchedQuery) {
+          if (change.user.expires_at) {
+            this.removeTimeout();
+          } else {
+            this.removeSuspendedUser();
+          }
+        }
+      })
+    );
+  }
+
+  private addModerator() {
+    this.user.is_mod = true;
+    this.user.is_banned = false;
+    this.user.is_timeouted = false;
+  }
+
+  private removeModerator() {
+    this.user.is_mod = false;
+  }
+
+  private setVip() {
+    this.user.is_vip = true;
+  }
+
+  private removeVip() {
+    this.user.is_vip = false;
+  }
+
+  private addSuspendedUser() {
+    this.user.is_banned = true;
+    this.user.is_mod = false;
+    this.user.is_vip = false;
+    this.user.is_timeouted = false;
+  }
+
+  private removeSuspendedUser() {
+    this.user.is_banned = false;
+    this.user.is_mod = false;
+    this.user.is_vip = false;
+  }
+
+  private addTimeout(expiresAt: string) {
+    this.user.is_timeouted = true;
+
+    const expirationTime = new Date(expiresAt).getTime() - Date.now();
+
+    setTimeout(() => {
+      this.checkTimeoutState();
+    }, expirationTime);
+  }
+
+  private removeTimeout() {
+    this.user.is_timeouted = false;
+  }
+
+  private checkTimeoutState() {
+    this.backendService
+      .getUserInformation(this.broadcasterUserId, this.lastSearchedQuery)
+      .subscribe((userData) => {
+        if (userData.is_timeouted !== this.user.is_timeouted) {
+          this.user.is_timeouted = userData.is_timeouted;
+        }
+      });
   }
 }
 
