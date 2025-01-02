@@ -1,14 +1,17 @@
-import {Component, Input, input, InputSignal, output} from '@angular/core';
-import {DatePipe} from '@angular/common';
+import {Component, inject, Input, input, InputSignal, output} from '@angular/core';
+import {DatePipe, NgIf} from '@angular/common';
 import {Message, NlpChatMessage} from '../../../twitch/message';
 import {BanData} from '../../../../shared/services/backend.service';
 import {ModActionButtonsComponent} from './mod-action-buttons/mod-action-buttons.component';
+import {Tab} from '../../../twitch/permissions.config';
+import {TwitchService} from '../../../twitch/twitch.service';
 
 @Component({
   selector: 'app-chat-message',
   imports: [
     DatePipe,
     ModActionButtonsComponent,
+    NgIf,
 
   ],
   templateUrl: './chat-message.component.html',
@@ -23,6 +26,7 @@ export class ChatMessageComponent {
   addMod = output<string>();
   ban = output<BanData>();
   popoutActive = output<boolean>();
+  twitchService = inject(TwitchService);
 
   showButtons = false;
   popoutsOpen = false;
@@ -51,4 +55,6 @@ export class ChatMessageComponent {
     this.popoutsOpen = open;
     this.popoutActive.emit(open)
   }
+
+  protected readonly Tab = Tab;
 }

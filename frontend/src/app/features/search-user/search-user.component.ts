@@ -51,8 +51,7 @@ export class SearchUserComponent implements OnInit {
           this.errorMessage = null;
           this.successMessage = state.message ?? 'Operation successful.';
           this.twitchService['state'].broadcasterUsername.next(this.username.toLowerCase());
-          console.log('Redirecting');
-          let role;
+
           if (this.twitchService.canAccess(Tab.SUSPENDED)) {
             console.log("streamer")
             this.router.navigate(['/stream/suspended']);
@@ -65,7 +64,6 @@ export class SearchUserComponent implements OnInit {
           }
 
         } else {
-          console.log("stan", state)
           this.errorMessage = state.message ?? 'Unknown error occurred';
           this.successMessage = null;
         }

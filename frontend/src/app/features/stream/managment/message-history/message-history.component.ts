@@ -11,6 +11,7 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {ModActionButtonsComponent} from '../../chat/chat-message/mod-action-buttons/mod-action-buttons.component';
 import {MessageCounters} from './models/messageCounters';
 import {ActiveFilters} from './models/activeFilters';
+import {Tab} from '../../../twitch/permissions.config';
 
 @Component({
   selector: 'app-message-history',
@@ -112,18 +113,23 @@ export class MessageHistoryComponent implements OnInit {
     this.isSearchDisabled = true;
     this.isSearchInputDisabled = true;
 
-    try {
-      const userData = await firstValueFrom(
-        this.backendService.getUserInformation(this.broadcasterUserId, username)
-      );
-      this.user = userData!;
 
-      if (userData) {
-        await this.loadMessages(username);
+    if (this.twitchService.canAccess(Tab.SUSPENDED)) {
+      try {
+        const userData = await firstValueFrom(
+          this.backendService.getUserInformation(this.broadcasterUserId, username)
+        );
+        this.user = userData!;
+
+        if (userData) {
+          await this.loadMessages(username);
+        }
+      } catch (error) {
+        this.isSearchInputDisabled = false;
+        console.error('Error loading user data', error);
       }
-    } catch (error) {
-      this.isSearchInputDisabled = false;
-      console.error('Error loading user data', error);
+    } else if (this.twitchService.canAccess(Tab.AUTOMOD)) {
+      await this.loadMessages(username);
     }
   }
 

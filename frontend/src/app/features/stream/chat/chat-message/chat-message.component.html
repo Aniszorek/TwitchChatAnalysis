@@ -6,6 +6,7 @@
   </div>
 
   <app-mod-action-buttons
+    *ngIf="twitchService.canAccess(Tab.AUTOMOD)"
     [showButtons]="((showButtons && showButtonsPossible()) || popoutsOpen)"
     (removed)="removeMessage()"
     (addVip)="onVip()"
