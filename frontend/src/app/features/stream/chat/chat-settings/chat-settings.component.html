@@ -77,6 +77,16 @@
       </label>
     </div>
   </div>
+
+  <div class="setting">
+    <div class="setting-header">
+      <label class="setting-label">Emote Mode:</label>
+      <label class="switch">
+        <input type="checkbox" [(ngModel)]="settings.emote_mode" (ngModelChange)="saveSettings()" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </div>
 </div>
 
 <button class="settings-button" (click)="toggleSettings()">

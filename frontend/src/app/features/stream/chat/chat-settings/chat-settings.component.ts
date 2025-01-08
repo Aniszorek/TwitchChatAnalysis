@@ -37,7 +37,7 @@ export class ChatSettingsComponent implements OnInit {
 
   constructor(private readonly twitchService: TwitchService,
               private readonly backendService: BackendService,
-              private el: ElementRef) {
+              private readonly el: ElementRef) {
   }
 
   toggleSettings() {
