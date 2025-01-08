@@ -8,6 +8,7 @@ import {TCASecured} from "../../../utilities/TCASecuredDecorator";
 import {COGNITO_ROLES} from "../../../utilities/CognitoRoleEnum";
 import {isPatchChatSettingsPayload} from "../model/patchChatSettingsPayload";
 import {isSendChatMessagePayload} from "../model/postSendChatMessagePayload";
+import {getChatterColor} from "../../../twitch_calls/twitchChat/getChatterColor";
 
 const LOG_PREFIX = "TWITCH_CHAT_CONTROLLER";
 
@@ -33,6 +34,30 @@ export class TwitchChatController {
             logger.error(`Error in get /settings route: ${error.message}. ${error.response.data.message}`, LOG_PREFIX);
             res.status(error.response.status).json({
                 error: `Failed to fetch chat settings: ${error.response.data.message}`,
+            });
+        }
+    }
+
+    @TCASecured({
+        requiredQueryParams: ['user_id'],
+        requiredRole: COGNITO_ROLES.VIEWER,
+        requiredHeaders: ["x-twitch-oauth-token"],
+        actionDescription: "Get Chat Color settings"
+    })
+    public async getChatColorSettings(req: Request, res: Response, next: NextFunction, context: any) {
+        const {queryParams, headers} = context;
+        try {
+            const result = await getChatterColor(queryParams, headers);
+            logger.info(
+                `Successfully fetched user chat color: ${IS_DEBUG_ENABLED ? JSON.stringify(result, null, 2) : ""}`,
+                LOG_PREFIX,
+                { color: LogColor.MAGENTA, style: LogStyle.DIM }
+            );
+            res.json(result);
+        } catch (error: any) {
+            logger.error(`Error in get /color route: ${error.message}. ${error.response.data.message}`, LOG_PREFIX);
+            res.status(error.response.status).json({
+                error: `Failed to fetch user chat color: ${error.response.data.message}`,
             });
         }
     }

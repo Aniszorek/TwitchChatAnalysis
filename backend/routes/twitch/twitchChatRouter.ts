@@ -7,3 +7,4 @@ export const twitchChatRouter = express.Router();
 twitchChatRouter.post('/messages', createHandlerWithContext(twitchChatController.sendChatMessage));
 twitchChatRouter.get('/settings', createHandlerWithContext(twitchChatController.getChatSettings));
 twitchChatRouter.patch('/settings', createHandlerWithContext(twitchChatController.patchChatSettings));
+twitchChatRouter.get('/color', createHandlerWithContext(twitchChatController.getChatColorSettings));
