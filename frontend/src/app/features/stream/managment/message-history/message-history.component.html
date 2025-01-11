@@ -27,7 +27,7 @@
           <span *ngIf="user.is_vip" class="badge vip">VIP</span>
           <span *ngIf="user.is_banned" class="badge ban">BANNED</span>
           <span *ngIf="user.is_timeouted" class="badge timeout">TIMEOUTED</span>
-          <span *ngIf="!user.is_mod && !user.is_vip && !(user.chatter_user_login === broadcasterUserLogin)">Regular user</span>
+          <span *ngIf="!user.is_mod && !user.is_vip && !(user.chatter_user_login === broadcasterUserLogin) && !user.is_timeouted && !user.is_banned" class="badge regular">Regular user</span>
         </p>
         </span>
       </div>

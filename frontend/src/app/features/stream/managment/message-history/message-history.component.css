@@ -43,7 +43,6 @@ h3 {
 }
 
 
-
 .actions {
   position: relative;
 }
@@ -71,7 +70,7 @@ p {
 }
 
 .badge.streamer {
-  background-color: #ff1e52;
+  background-color: #0f7a00;
 }
 
 .badge.mod {
@@ -80,6 +79,14 @@ p {
 
 .badge.vip {
   background-color: #ff69b4;
+}
+
+.badge.ban, .badge.timeout{
+  background-color: #ff0000;
+}
+
+.badge.regular {
+  background-color: #616161;
 }
 
 .action-btn:disabled {
