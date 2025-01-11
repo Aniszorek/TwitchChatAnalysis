@@ -530,7 +530,23 @@ export class BackendService {
         })
       );
   }
+
+  getTwitchUserChatColor(user_id: string) {
+    return this.http.get<any>(`${this.apiUrl}/twitch/chat/color`, {
+      params: {
+        user_id: user_id
+      }
+    })
+      .pipe(
+        catchError((error) => {
+          this.notificationService.sendMessage(error.error.error);
+          console.error("Error getting user's chat color:", error);
+          return throwError(() => new Error('Something went wrong, please verify if provided Twitch Oauth token is correct.'));
+        })
+      );
+  }
 }
+
 
 export interface BanData {
   user_id : string;

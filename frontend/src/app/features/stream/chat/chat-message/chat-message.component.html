@@ -1,7 +1,12 @@
 <div class="message" (mouseover)="showButtons = true" (mouseleave)="showButtons = false">
   <div class="message-data">
     <span class="chat-timestamp">{{ messageData().messageTimestamp | date: 'H:mm:ss' }}</span>
-    <span class="chat-username">{{ messageData().chatUserName }}: </span>
+    <span
+      class="chat-username"
+      [ngStyle]="{ color: messageData().color || '#1db954' }">
+      {{ messageData().chatUserName }}:
+    </span>
+
     <span class="chat-text">{{ messageData().messageText }}</span>
   </div>
 

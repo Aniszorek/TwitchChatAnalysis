@@ -8,6 +8,7 @@ export interface Message {
   messageId: string;
   messageText: string;
   messageTimestamp: string;
+  color?: string;
 }
 
 export interface NlpChatMessage {
@@ -20,6 +21,7 @@ export interface NlpChatMessage {
   messageTimestamp: string;
   nlpClassification: SentimentLabel;
   messageId: string;
+  color?: string;
 }
 
 export enum SentimentLabel {

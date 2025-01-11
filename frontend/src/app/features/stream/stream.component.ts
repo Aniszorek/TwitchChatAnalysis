@@ -8,6 +8,7 @@ import {Message, negativeClasses, NlpChatMessage} from '../twitch/message';
 import {BackendService, BanData} from '../../shared/services/backend.service';
 import {Tab} from '../twitch/permissions.config';
 import {NgIf} from '@angular/common';
+import {firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'app-stream',
@@ -22,7 +23,7 @@ import {NgIf} from '@angular/common';
   templateUrl: './stream.component.html',
   styleUrl: './stream.component.css'
 })
-export class StreamComponent implements OnInit{
+export class StreamComponent implements OnInit {
   twitchService = inject(TwitchService)
   destroyRef = inject(DestroyRef)
   streamService = inject(BackendService)
@@ -31,11 +32,27 @@ export class StreamComponent implements OnInit{
   nlpMessages: NlpChatMessage[] = []
   broadcasterId: string | null = null;
   moderatorId: string | null = null;
+  chatters: Map<string, string> = new Map<string, string>();
 
 
-  ngOnInit() {
-    const subMessages = this.twitchService.chatMessages$.subscribe((message) => {
+  async ngOnInit() {
+    const subMessages = this.twitchService.chatMessages$.subscribe(async (message) => {
       if (message) {
+        let color = ''
+        if (!this.isChatterExists(message.chatterUserId)) {
+          try {
+            const response = await firstValueFrom(this.streamService.getTwitchUserChatColor(message.chatterUserId));
+            this.addOrUpdateChatter(message.chatterUserId, response.data[0].color);
+            color = response.data[0].color
+            console.log(this.chatters)
+          } catch (error) {
+            this.addOrUpdateChatter(message.chatterUserId, '');
+          }
+          message.color = color
+        } else {
+          message.color = this.getChatterColor(message.chatterUserId)
+        }
+
         this.messages.push(message);
       } else {
         this.messages = [];
@@ -45,6 +62,7 @@ export class StreamComponent implements OnInit{
     const subNlp = this.twitchService.nlpChatMessages$.subscribe((message) => {
       if (message) {
         if (negativeClasses.includes(message.nlpClassification)) {
+          message.color = this.getChatterColor(message.chatterUserId);
           this.nlpMessages.push(message);
         }
       } else {
@@ -89,8 +107,28 @@ export class StreamComponent implements OnInit{
   }
 
   banUser({user_id, duration, reason}: BanData) {
-    this.streamService.banUser(this.broadcasterId!, this.moderatorId!, user_id!, {user_id, duration, reason}).subscribe();
+    this.streamService.banUser(this.broadcasterId!, this.moderatorId!, user_id!, {
+      user_id,
+      duration,
+      reason
+    }).subscribe();
   }
+
+  isChatterExists(username: string): boolean {
+    return this.chatters.has(username);
+  }
+
+  addOrUpdateChatter(username: string, color: string): void {
+    const updatedMap = new Map(this.chatters);
+    updatedMap.set(username, color);
+    this.chatters = updatedMap;
+
+  }
+
+  getChatterColor(username: string): string | undefined {
+    return this.chatters.get(username);
+  }
+
 
   protected readonly Tab = Tab;
 }

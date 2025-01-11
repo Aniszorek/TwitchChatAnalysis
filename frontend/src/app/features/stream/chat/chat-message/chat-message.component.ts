@@ -1,5 +1,5 @@
-import {Component, inject, Input, input, InputSignal, output} from '@angular/core';
-import {DatePipe, NgIf} from '@angular/common';
+import {Component, inject, Input, input, InputSignal, OnInit, output} from '@angular/core';
+import {DatePipe, NgIf, NgStyle} from '@angular/common';
 import {Message, NlpChatMessage} from '../../../twitch/message';
 import {BanData} from '../../../../shared/services/backend.service';
 import {ModActionButtonsComponent} from './mod-action-buttons/mod-action-buttons.component';
@@ -12,6 +12,7 @@ import {TwitchService} from '../../../twitch/twitch.service';
     DatePipe,
     ModActionButtonsComponent,
     NgIf,
+    NgStyle,
 
   ],
   templateUrl: './chat-message.component.html',
