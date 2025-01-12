@@ -38,7 +38,7 @@
       (input)="onSearch($event)"
       [(ngModel)]="searchQuery"
     />
-    <ul>
+    <ul class="search-list">
       <li *ngFor="let user of searchedModerators" class="user-item">
         <span>{{ user.user_login }}</span>
         <div class="actions">

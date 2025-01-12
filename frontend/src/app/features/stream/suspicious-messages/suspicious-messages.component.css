@@ -120,6 +120,7 @@
   font-size: 0.8rem;
   padding: 2px;
   display: block;
+  background-color: var(--list-element-color);
   border-bottom: 3px solid var(--card-color);
 }
 
@@ -139,15 +140,24 @@
   white-space: pre-wrap;
 }
 
-.very-negative {
-  background-color: var(--very-negative-message-color);
+.message-content {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
-.negative {
-  background-color: var(--negative-message-color);
+.chat-message:nth-child(even) {
+  background-color: var(--second-list-element-color);
+}
+
+.very-negative {
+  border-left: 5px solid var(--very-negative-message-color);
+}
+
+.negative{
+  border-left: 5px solid var(--negative-message-color);
 }
 
 .slightly-negative {
-  background-color: var(--slightly-negative-message-color);
+  border-left: 5px solid var(--slightly-negative-message-color);
 }
-

@@ -4,7 +4,7 @@ import {VideoComponent} from './video/video.component';
 import {TwitchService} from '../twitch/twitch.service';
 import {SuspiciousMessagesComponent} from './suspicious-messages/suspicious-messages.component';
 import {RouterOutlet} from '@angular/router';
-import {Message, negativeClasses, NlpChatMessage} from '../twitch/message';
+import {Message, negativeClasses, NlpChatMessage, SentimentLabel} from '../twitch/message';
 import {BackendService, BanData} from '../../shared/services/backend.service';
 import {Tab} from '../twitch/permissions.config';
 import {NgIf} from '@angular/common';
@@ -29,7 +29,7 @@ export class StreamComponent implements OnInit {
   streamService = inject(BackendService)
   selectedUser: string | null = null;
   messages: Message[] = []
-  nlpMessages: NlpChatMessage[] = []
+  nlpMessages: NlpChatMessage[] = [];
   broadcasterId: string | null = null;
   moderatorId: string | null = null;
   chatters: Map<string, string> = new Map<string, string>();

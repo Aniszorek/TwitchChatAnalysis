@@ -159,32 +159,32 @@ input::placeholder {
   scrollbar-color: #555555 #333333;
 }
 
-.positive .classification-circle {
-  background-color: var(--positive-message-color);
+.positive  {
+  border-left: 5px solid var(--positive-message-color);
 }
 
-.slightly-positive .classification-circle {
-  background-color: var(--slightly-positive-message-color);
+.slightly-positive  {
+  border-left: 5px solid var(--slightly-positive-message-color);
 }
 
-.very-positive .classification-circle {
-  background-color: var(--very-positive-message-color);
+.very-positive  {
+  border-left: 5px solid  var(--very-positive-message-color);
 }
 
-.very-negative .classification-circle {
-  background-color: var(--very-negative-message-color);
+.very-negative  {
+  border-left: 5px solid  var(--very-negative-message-color);
 }
 
-.negative .classification-circle {
-  background-color: var(--negative-message-color);
+.negative  {
+  border-left: 5px solid var(--negative-message-color);
 }
 
-.slightly-negative .classification-circle {
-  background-color: var(--slightly-negative-message-color);
+.slightly-negative  {
+  border-left: 5px solid  var(--slightly-negative-message-color);
 }
 
-.neutral .classification-circle {
-  background-color: var(--neutral-message-color);
+.neutral  {
+  border-left: 5px solid  var(--neutral-message-color);
 }
 
 .message-header {
@@ -212,13 +212,13 @@ input::placeholder {
   flex-wrap: wrap;
 }
 
-.classification-circle {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  margin-right: 5px;
-  flex-shrink: 0;
-}
+/*.classification-circle {*/
+/*  width: 15px;*/
+/*  height: 15px;*/
+/*  border-radius: 50%;*/
+/*  margin-right: 5px;*/
+/*  flex-shrink: 0;*/
+/*}*/
 
 .chat-username {
   font-size: 1rem;
@@ -261,6 +261,7 @@ input::placeholder {
   list-style: none;
   padding: 0;
   margin: 0;
+  border-width: 10px;
 }
 
 .message-counters li {
@@ -274,6 +275,8 @@ input::placeholder {
   justify-content: flex-start;
   margin: 0.5rem 0;
   transition: all 0.3s;
+  cursor: pointer;
+  border-width: 10px;
 }
 
 .positive-column li.very-positive {

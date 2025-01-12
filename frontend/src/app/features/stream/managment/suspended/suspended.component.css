@@ -9,6 +9,29 @@
   color: white;
 }
 
+.column ul {
+  max-height: 170px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.column ul::-webkit-scrollbar {
+  width: 8px;
+}
+
+.column ul::-webkit-scrollbar-thumb {
+  background: var(--light-grey);
+  border-radius: 4px;
+}
+
+.column ul::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+.column ul.search-list {
+  max-height: 130px;
+}
+
 h3 {
   padding-left: 1rem;
   margin-bottom: 0.75rem;
@@ -51,9 +74,11 @@ input + ul {
   position: relative;
 }
 
-app-ban-wrapper
+.user-item-ban:nth-child(even) {
+  background-color: var(--second-list-element-color);
+}
 
-.user-item:nth-child(even) {
+.user-item-timeout:nth-child(even) {
   background-color: var(--second-list-element-color);
 }
 

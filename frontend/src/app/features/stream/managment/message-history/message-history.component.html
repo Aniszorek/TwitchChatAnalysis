@@ -44,7 +44,7 @@
     </p>
     <div class="user-info-container">
       <div class="user-info">
-        <div class="message-counters-container">
+        <div *ngIf="messages.length != 0" class="message-counters-container">
           <div class="message-column positive-column">
             <h4>Positive</h4>
             <ul class="message-counters">
@@ -103,14 +103,13 @@
             </ul>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 
 
   <div class="column">
-    <h3 matTooltip="Message colors indicate sentiment: Red (Very Negative), Orange (Negative), Yellow (Slightly Negative), Light Green (Slightly Positive), Green (Positive), Dark Green (Very Positive). No color means the message is Neutral.">
+    <h3 matTooltip="Message colors indicate sentiment: Red (Very Negative), Orange (Negative), Yellow (Slightly Negative), Light Green (Slightly Positive), Green (Positive), Dark Green (Very Positive), Grey (Neutral).">
       Message History
     </h3>
     <div class="message-history">
@@ -129,9 +128,9 @@
       <div *ngIf="messages.length === 0">
         No messages
       </div>
+      <div *ngIf="messages.length != 0 && filteredMessages.length === 0">
+        No messages for the selected type.
+      </div>
     </div>
-
-
   </div>
-
 </div>

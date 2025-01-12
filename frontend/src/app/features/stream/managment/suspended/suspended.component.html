@@ -43,7 +43,7 @@
       (input)="onSearch($event)"
       [(ngModel)]="searchQuery"
     />
-    <ul>
+    <ul class="search-list">
       <li *ngFor="let user of searchedUsers?.banned_users" class="user-item-ban">
         <span>{{ user.user_login }}</span>
         <div class="actions">
