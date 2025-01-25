@@ -17,6 +17,10 @@
   padding: 0;
 }
 
+.action-btn:hover {
+  color: var(--primary-color);
+}
+
 .button-container {
   position: relative;
 }

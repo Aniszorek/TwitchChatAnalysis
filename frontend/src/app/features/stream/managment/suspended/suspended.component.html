@@ -14,7 +14,7 @@
           <button class="action-btn" matTooltip="Remove timeout" (click)="onRemoveTimeout(user)">
             <mat-icon class="action-icon" svgIcon="unban"></mat-icon>
           </button>
-          <app-ban-wrapper [userData]="user" (ban)="banUser($event)">
+          <app-ban-wrapper class="action-btn" [userData]="user" (ban)="banUser($event)">
           </app-ban-wrapper>
         </div>
       </li>
@@ -55,7 +55,7 @@
       <li *ngFor="let user of searchedUsers?.timed_out_users" class="user-item-timeout">
         <span>{{ user.user_login }}</span>
         <div class="actions">
-          <button class="action-btn info-btn" matTooltip="Until: {{ user.expires_at }}">
+          <button class="action-btn info-btn" [matTooltip]="'Until: ' + getFormattedDate(user.expires_at)">
             <mat-icon class="action-icon" svgIcon="info"></mat-icon>
           </button>
           <button class="action-btn" matTooltip="Remove timeout" (click)="onRemoveTimeout(user)">

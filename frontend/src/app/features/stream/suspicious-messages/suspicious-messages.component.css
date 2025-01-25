@@ -29,6 +29,12 @@
   border-bottom: 2px solid #333333;
 }
 
+@media (max-width: 1300px) {
+  .chat-header {
+    font-size: 1.4rem;
+  }
+}
+
 .tooltip-container {
   position: relative;
   display: inline-block;

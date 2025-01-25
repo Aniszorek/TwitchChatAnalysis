@@ -179,7 +179,7 @@ export class ChartsComponent implements OnInit {
           return
         }
 
-        this.metadata = data;
+        this.metadata = data.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         this.availableDataKeys = this.keysService.getAvailableKeys(this.metadata);
         this.selectedDataKeys = this.keysService.getDefaultSelectedKeys(this.selectedDataKeys, this.availableDataKeys);
         this.setAppState(AppState.ready)

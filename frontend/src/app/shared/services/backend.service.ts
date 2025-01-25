@@ -201,7 +201,7 @@ export class BackendService {
   }
 
   removeVip(broadcasterId: string, userId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/twitch/channels/vips`, {
+    return this.http.delete<any>(`${this.apiUrl}/twitch/channels/vips`, {
       params: {
         broadcaster_id: broadcasterId,
         user_id: userId

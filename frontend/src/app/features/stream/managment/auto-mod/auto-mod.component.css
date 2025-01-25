@@ -29,6 +29,11 @@ h3 {
 .action-icon {
   margin-bottom: 4px;
   height: 1.25rem;
+  cursor: pointer;
+}
+
+.action-icon:hover {
+  color: var(--primary-color)
 }
 
 .switch {

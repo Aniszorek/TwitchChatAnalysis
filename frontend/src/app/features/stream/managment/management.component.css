@@ -16,7 +16,7 @@
   border-bottom: 1px solid #444;
 }
 
-@media (max-width: 1215px) {
+@media (max-width: 1300px) {
   .tabs {
     font-size: 1rem;
   }
@@ -64,4 +64,6 @@
   background-color: var(--background-color-input);
   border-radius: 4px;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #555555 #333333;
 }
