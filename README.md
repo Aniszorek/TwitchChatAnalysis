@@ -37,7 +37,7 @@ Web application to detect and classify negative content in Twitch.
    1. Create a .env file and set there env variable as follows:
       ```bash
       TWITCH_APP_CLIENT_ID="YOUR_APP_CLIENT_ID"
-`     ```
+`     
    2. Copy that file to root folder of the backend project
       - set `TWITCH_APP_CLIENT_ID` to the client id of your application
       - Encrypt again after making changes
